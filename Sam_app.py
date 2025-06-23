@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
---- Functie om data op te halen ---
+#--- Functie om data op te halen ---
 
 def fetch_data(ticker):
 df = yf.download(ticker, period="6mo", interval="1d")
@@ -12,7 +12,7 @@ df = df[["Open", "High", "Low", "Close"]]
 df.dropna(inplace=True)
 return df
 
---- SAM Indicatorberekeningen ---
+#--- SAM Indicatorberekeningen ---
 
 def calculate_sam(df):
 df = df.copy()
@@ -69,7 +69,7 @@ df["SAM"] = df[["SAMK", "SAMG", "SAMT", "SAMD", "SAMM", "SAMX"]].sum(axis=1)
 
 return df
 
---- Advies en rendementen ---
+#--- Advies en rendementen ---
 
 def determine_advice(df, threshold):
 df = df.copy()
@@ -100,19 +100,19 @@ df["MarktRendement"] = rendementen
 df["SAMRendement"] = sam_rendementen  
 return df
 
---- Streamlit UI ---
+#--- Streamlit UI ---
 
 st.title("📊 SAM Trading Indicator")
 ticker = st.selectbox("Selecteer een aandeel", ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA"])
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
-Berekening
+#Berekening
 
 df = fetch_data(ticker)
 df = calculate_sam(df)
 df = determine_advice(df, threshold=thresh)
 
-Grafieken
+#Grafieken
 
 st.subheader(f"SAM-indicator en trend voor {ticker}")
 fig, ax1 = plt.subplots(figsize=(10, 4))
@@ -124,11 +124,11 @@ ax2.set_ylabel("Trend")
 fig.tight_layout()
 st.pyplot(fig)
 
-Tabel met advies
+#Tabel met advies
 
 st.subheader("Laatste signalen en rendement")
 kolommen = ["Close", "Advies", "SAM", "Trend", "MarktRendement", "SAMRendement"]
 st.dataframe(df[kolommen].dropna().tail(20).round(3))
 
-Deze wil ik even bewaren, ik ga nu jouw code proberen... momentje
+
 
