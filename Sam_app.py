@@ -162,7 +162,11 @@ c13 = wma(close.shift(1), 6)
 c19 = wma(close, 80) 
 samt = np.select( [c12 > c13 & c12 > c19, c12 > c13 & c12 <= c19, c12 <= c13 & c12 <= c19, c12 <= c13 & c12 > c19], [0.5, 0.25, -0.75, -0.5], default=0.0 )
 
-macd_fast = close.ewm(span=12, adjust=False).mean() macd_slow = close.ewm(span=26, adjust=False).mean() macd_line = macd_fast - macd_slow macd_signal = macd_line.ewm(span=9, adjust=False).mean() samm = np.select( [macd_line > macd_signal, macd_line < macd_signal], [0.5, -0.5], default=0.0 )
+macd_fast = close.ewm(span=12, adjust=False).mean() 
+macd_slow = close.ewm(span=26, adjust=False).mean() 
+macd_line = macd_fast - macd_slow 
+macd_signal = macd_line.ewm(span=9, adjust=False).mean() 
+samm = np.select( [macd_line > macd_signal, macd_line < macd_signal], [0.5, -0.5], default=0.0 )
 
 sams = samk + samg + samm + samt 
 sam_df = pd.DataFrame({ 'SAM': sams, 'Trend SAM': wma(pd.Series(sams), 12), 'Close': close })
