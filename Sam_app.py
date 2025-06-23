@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
 
-REM Simuleer koersdata
+Simuleer koersdata
 
 np.random.seed(0) days = 120 price = np.cumsum(np.random.normal(0, 1, days)) + 100 close = pd.Series(price) open_ = close.shift(1).fillna(method="bfill")
 
