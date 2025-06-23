@@ -4,18 +4,18 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# --- Ophalen van marktdata ---
+# --- Functie om data op te halen ---
 def fetch_data(ticker):
     df = yf.download(ticker, period="6mo", interval="1d")
     df = df[["Open", "High", "Low", "Close"]]
     df.dropna(inplace=True)
     return df
 
-# --- Berekening van SAM-indicatoren ---
+# --- SAM Indicatorberekeningen ---
 def calculate_sam(df):
     df = df.copy()
 
-    # Signaalvoorwaarden
+    # Basiskolommen
     df["c1"] = df["Close"] > df["Open"]
     df["c2"] = df["Close"].shift(1) > df["Open"].shift(1)
     df["c3"] = df["Close"].shift(2) > df["Open"].shift(2)
@@ -61,76 +61,70 @@ def calculate_sam(df):
     df.loc[df["Momentum"] > 0, "SAMX"] = 1
     df.loc[df["Momentum"] < 0, "SAMX"] = -1
 
-    # Totaal SAM-signaal
+    # Totaal SAM
     df["SAM"] = df[["SAMK", "SAMG", "SAMT", "SAMD", "SAMM", "SAMX"]].sum(axis=1)
 
     return df
 
-# --- Advies + rendement berekening ---
+# --- Signalen en rendementen genereren ---
 def generate_signals_with_returns(df, sensitivity):
     df = df.copy()
-    df["Signaal"] = ""
+    df["Advies"] = ""
     df["Slotkoers"] = df["Close"]
     df["SAM rendement"] = ""
     df["Marktrendement"] = ""
 
-    trend = df["SAM"].rolling(window=sensitivity).mean()
-    df["Trend"] = trend
+    prev_trend = 0
+    start_index = 0
+    signal = ""
 
-    prev_signal = None
-    start_index = None
-    start_koers = None
+    for idx in range(1, len(df)):
+        huidige_trend = df["SAM"].iloc[idx]
+        vorige_trend = df["SAM"].iloc[idx - 1]
 
-    for idx in range(sensitivity, len(df)):
-        curr_trend = trend.iloc[idx]
-        prev_trend = trend.iloc[idx - 1]
+        if abs(huidige_trend - vorige_trend) >= sensitivity:
+            signal = "Kopen" if huidige_trend > vorige_trend else "Verkopen"
+            df.at[df.index[idx], "Advies"] = signal
 
-        if curr_trend > prev_trend:
-            signal = "Kopen"
-        elif curr_trend < prev_trend:
-            signal = "Verkopen"
-        else:
-            signal = prev_signal
+            # Bereken rendement
+            eind_koers = float(df["Close"].iloc[idx])
+            start_koers = float(df["Close"].iloc[start_index])
 
-        df.at[df.index[idx], "Signaal"] = signal
-
-        if signal != prev_signal and prev_signal is not None and start_index is not None:
-            eind_koers = df["Close"].iloc[idx]
-            if start_koers is not None and not pd.isna(start_koers) and float(start_koers) != 0.0:
+            if start_koers != 0.0:
                 sam_rend = (eind_koers - start_koers) / start_koers
                 markt_rend = (eind_koers - df["Close"].iloc[start_index]) / df["Close"].iloc[start_index]
-                df.at[df.index[idx - 1], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
-                df.at[df.index[idx - 1], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
 
-        if signal != prev_signal:
+                df.at[df.index[idx], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
+                df.at[df.index[idx], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
+
             start_index = idx
-            start_koers = df["Close"].iloc[idx]
 
-        prev_signal = signal
+        else:
+            df.at[df.index[idx], "Advies"] = signal  # Vorige advies blijft geldig
 
     return df
 
-# --- Streamlit interface ---
-st.set_page_config(page_title="SAM Indicator", layout="centered")
-st.title("📈 SAM Trading Indicator")
+# --- Streamlit UI ---
+st.set_page_config(page_title="SAM Beleggingsindicator", layout="wide")
+st.title("📊 SAM Trading Indicator")
 
-ticker = st.selectbox("Kies een aandeel", ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA"])
-sensitivity = st.slider("Gevoeligheid (trendlengte)", min_value=2, max_value=15, value=5)
+# Tickerkeuze en gevoeligheid
+ticker = st.selectbox("Selecteer een aandeel", ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA"])
+sensitivity = st.slider("Gevoeligheid trendverandering", 1, 5, 2)
 
+# Data ophalen en berekenen
 df = fetch_data(ticker)
 df = calculate_sam(df)
 df = generate_signals_with_returns(df, sensitivity)
 
-# --- Grafiek ---
-st.subheader("SAM Indicator Grafiek")
+# Grafiek SAM + trendlijn
+st.subheader(f"SAM-indicator & trendlijn voor {ticker}")
 fig, ax = plt.subplots(figsize=(10, 4))
-ax.bar(df.index, df["SAM"], label="SAM", alpha=0.6)
-ax.plot(df.index, df["Trend"], color="red", label="Trend")
-ax.set_title(f"{ticker} - SAM Histogram + Trendlijn")
+df["SAM"].plot(kind="bar", ax=ax, color="skyblue", label="SAM", width=1)
+df["SAM"].rolling(window=5).mean().plot(ax=ax, color="red", label="Trend")
 ax.legend()
 st.pyplot(fig)
 
-# --- Laatste signalen ---
-st.subheader("📋 Laatste Signalen en Rendement")
-columns_to_show = ["Close", "Slotkoers", "Signaal", "SAM", "Trend", "SAM rendement", "Marktrendement"]
-st.dataframe(df[columns_to_show].tail(15))
+# Laatste adviezen en rendementen tonen
+st.subheader("Laatste signalen & rendementen")
+st.dataframe(df[["Slotkoers", "SAM", "Advies", "SAM rendement", "Marktrendement"]].tail(15))
