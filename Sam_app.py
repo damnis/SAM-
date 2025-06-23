@@ -73,7 +73,6 @@ def calculate_sam(df):
 
 # --- Advies en rendementen ---
 def determine_advice(df, threshold):
-    huidig_advies = df["Advies"].dropna().iloc[-1]
     df = df.copy()
     df["Trend"] = df["SAM"].rolling(window=3).mean()
     df["TrendChange"] = df["Trend"] - df["Trend"].shift(1)
