@@ -168,7 +168,7 @@ html = """
     }
     th {
         background-color: #004080;
-        color: black;
+        color: white;
         padding: 6px;
         text-align: center;
     }
@@ -176,6 +176,7 @@ html = """
         border: 1px solid #ddd;
         padding: 6px;
         text-align: right;
+        text-color: black;
         background-color: #f9f9f9;
     }
     tr:nth-child(even) td {
