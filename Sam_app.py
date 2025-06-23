@@ -5,12 +5,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # --- Functie om data op te halen ---
-def fetch_data(ticker):
-    df = yf.download(ticker, period="12mo", interval="1d")
+def fetch_data(ticker, interval):
+    # Bepaal de periode op basis van het gekozen interval
+    period = f"{360}{'d' if interval == '1d' else 'wk'}"  # "360d" of "360wk"
+    
+    # Download koersdata met de juiste interval en periode
+    df = yf.download(ticker, period=period, interval=interval)
     df = df[["Open", "High", "Low", "Close"]]
     df.dropna(inplace=True)
     return df
-
+    
 # --- SAM Indicatorberekeningen ---
 def calculate_sam(df):
     df = df.copy()
@@ -121,10 +125,12 @@ all_tickers = [
 ]
 
 ticker = st.selectbox("Selecteer een aandeel (AEX, Dow, Nasdaq)", all_tickers)
+interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
+interval = "1d" if interval_optie == "Dagelijks" else "1wk"
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
 # Berekening
-df = fetch_data(ticker)
+df = fetch_data(ticker, interval)
 df = calculate_sam(df)
 df = determine_advice(df, threshold=thresh)
 
