@@ -1,133 +1,115 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
-# --- Functie om data op te halen ---
-def fetch_data(ticker):
-    df = yf.download(ticker, period="6mo", interval="1d")
-    df = df[["Open", "High", "Low", "Close"]]
-    df.dropna(inplace=True)
+st.title("SAM Indicator - Koop/Verkoop Advies")
+
+# Sidebar instellingen
+st.sidebar.header("Instellingen")
+ticker = st.sidebar.text_input("Ticker (bv. AAPL):", value="AAPL")
+start_date = st.sidebar.date_input("Startdatum:", value=pd.to_datetime("2023-01-01"))
+end_date = st.sidebar.date_input("Einddatum:", value=pd.to_datetime("today"))
+sensitivity = st.sidebar.slider("Gevoeligheid (hogere waarde = trager signaal)", min_value=1, max_value=20, value=5)
+
+@st.cache_data
+def download_data(ticker, start_date, end_date):
+    df = yf.download(ticker, start=start_date, end=end_date)
+    df = df[['Open', 'High', 'Low', 'Close']]
     return df
 
-# --- SAM Indicatorberekeningen ---
 def calculate_sam(df):
     df = df.copy()
 
-    # Basiskolommen
+    # Componenten van SAM
     df["c1"] = df["Close"] > df["Open"]
     df["c2"] = df["Close"].shift(1) > df["Open"].shift(1)
-    df["c3"] = df["Close"].shift(2) > df["Open"].shift(2)
-    df["c4"] = df["Close"].shift(3) > df["Open"].shift(3)
-    df["c6"] = df["Close"].shift(1) < df["Open"].shift(1)
-    df["c7"] = df["Close"].shift(2) < df["Open"].shift(2)
+    df["c3"] = df["Close"] > df["Close"].shift(1)
+    df["c4"] = df["Open"] > df["Open"].shift(1)
+    df["c5"] = df["High"] > df["High"].shift(1)
+    df["c6"] = df["Low"] > df["Low"].shift(1)
 
     # SAMK
-    df["SAMK"] = 0
-    df.loc[(df["c1"] & df["c2"] & df["c3"] & df["c4"]).fillna(False), "SAMK"] = 1.25
-    df.loc[(df["c1"] & df["c6"] & df["c7"]).fillna(False), "SAMK"] = -1
+    df["SAMK"] = 0.0
+    df.loc[(df["c1"] & df["c2"] & df["c3"] & df["c4"] & df["c5"] & df["c6"]).fillna(False), "SAMK"] = 1.25
 
-    # SAMG
-    df["Change"] = df["Close"].pct_change()
-    df["SAMG"] = 0
-    df.loc[df["Change"] > 0.03, "SAMG"] = 1
-    df.loc[df["Change"] < -0.03, "SAMG"] = -1
+    # SAMG - groei
+    df["SAMG"] = ((df["Close"] - df["Close"].shift(1)) / df["Close"].shift(1)).rolling(window=3).mean()
 
-    # SAMT
-    df["SMA5"] = df["Close"].rolling(window=5).mean()
-    df["SMA20"] = df["Close"].rolling(window=20).mean()
-    df["SAMT"] = 0
-    df.loc[df["SMA5"] > df["SMA20"], "SAMT"] = 1
-    df.loc[df["SMA5"] < df["SMA20"], "SAMT"] = -1
+    # SAMT - trend
+    df["SAMT"] = df["Close"].rolling(window=5).mean().diff()
 
-    # SAMD
-    df["daily_range"] = df["High"] - df["Low"]
-    avg_range = df["daily_range"].rolling(window=14).mean()
-    df["SAMD"] = 0
-    df.loc[df["daily_range"] > avg_range, "SAMD"] = 1
-    df.loc[df["daily_range"] < avg_range, "SAMD"] = -1
+    # SAMD - verschil tussen high en low
+    df["SAMD"] = (df["High"] - df["Low"]).rolling(window=3).mean()
 
-    # SAMM
-    df["SMA10"] = df["Close"].rolling(window=10).mean()
-    df["SMA50"] = df["Close"].rolling(window=50).mean()
-    df["SAMM"] = 0
-    df.loc[df["SMA10"] > df["SMA50"], "SAMM"] = 1
-    df.loc[df["SMA10"] < df["SMA50"], "SAMM"] = -1
+    # SAMM - momentum
+    df["SAMM"] = df["Close"] - df["Close"].rolling(window=10).mean()
 
-    # SAMX
-    df["Momentum"] = df["Close"] - df["Close"].shift(3)
-    df["SAMX"] = 0
-    df.loc[df["Momentum"] > 0, "SAMX"] = 1
-    df.loc[df["Momentum"] < 0, "SAMX"] = -1
+    # SAMX - extreme bewegingen
+    df["SAMX"] = df["Close"].pct_change().abs().rolling(window=5).mean()
 
-    # Totaal SAM
-    df["SAM"] = df[["SAMK", "SAMG", "SAMT", "SAMD", "SAMM", "SAMX"]].sum(axis=1)
+    # SAM score (gestandaardiseerd)
+    df["SAM"] = (df["SAMK"] + df["SAMG"] + df["SAMT"] + df["SAMD"] + df["SAMM"] + df["SAMX"]) / 6
+    df["SAM"] = df["SAM"].fillna(0)
 
     return df
 
-# --- Signalen en rendementen genereren ---
 def generate_signals_with_returns(df, sensitivity):
     df = df.copy()
     df["Advies"] = ""
-    df["Slotkoers"] = df["Close"]
-    df["SAM rendement"] = ""
+    df["Rendement"] = ""
     df["Marktrendement"] = ""
+    df["Slotkoers"] = df["Close"]
 
-    prev_trend = 0
-    start_index = 0
-    signal = ""
+    previous_signal = ""
+    start_koers = None
+    start_index = None
 
     for idx in range(1, len(df)):
-        huidige_trend = df["SAM"].iloc[idx]
-        vorige_trend = df["SAM"].iloc[idx - 1]
+        change = df.iloc[idx]["SAM"] - df.iloc[idx - 1]["SAM"]
+        signal = previous_signal
 
-        if abs(huidige_trend - vorige_trend) >= sensitivity:
-            signal = "Kopen" if huidige_trend > vorige_trend else "Verkopen"
-            df.at[df.index[idx], "Advies"] = signal
+        if change > 1 / sensitivity:
+            signal = "Kopen"
+        elif change < -1 / sensitivity:
+            signal = "Verkopen"
 
-            try:
-                eind_koers = float(df["Close"].iloc[idx])
-                start_koers = float(df["Close"].iloc[start_index])
+        df.at[df.index[idx], "Advies"] = signal
 
-                if start_koers != 0.0:
-                    sam_rend = (eind_koers - start_koers) / start_koers
-                    markt_rend = (eind_koers - df["Close"].iloc[start_index]) / df["Close"].iloc[start_index]
-
-                    df.at[df.index[idx], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
-                    df.at[df.index[idx], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
-            except Exception as e:
-                df.at[df.index[idx], "SAM rendement"] = "n.v.t."
-                df.at[df.index[idx], "Marktrendement"] = "n.v.t."
-
+        if signal != previous_signal and previous_signal != "":
+            if start_index is not None:
+                eind_koers = df.iloc[idx - 1]["Close"]
+                if start_koers and eind_koers:
+                    sam_rend = (eind_koers - start_koers) / start_koers * (1 if previous_signal == "Kopen" else -1)
+                    markt_rend = (eind_koers - start_koers) / start_koers
+                    df.at[df.index[idx - 1], "Rendement"] = f"{sam_rend * 100:.2f}%"
+                    df.at[df.index[idx - 1], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
+            start_koers = df.iloc[idx]["Close"]
             start_index = idx
 
-        else:
-            df.at[df.index[idx], "Advies"] = signal
+        elif previous_signal == "":
+            start_koers = df.iloc[idx]["Close"]
+            start_index = idx
+
+        previous_signal = signal
 
     return df
-    
-# --- Streamlit UI ---
-st.set_page_config(page_title="SAM Beleggingsindicator", layout="wide")
-st.title("📊 SAM Trading Indicator")
 
-# Tickerkeuze en gevoeligheid
-ticker = st.selectbox("Selecteer een aandeel", ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA"])
-sensitivity = st.slider("Gevoeligheid trendverandering", 1, 5, 2)
-
-# Data ophalen en berekenen
-df = fetch_data(ticker)
+# Ophalen en berekenen
+df = download_data(ticker, start_date, end_date)
 df = calculate_sam(df)
 df = generate_signals_with_returns(df, sensitivity)
 
-# Grafiek SAM + trendlijn
-st.subheader(f"SAM-indicator & trendlijn voor {ticker}")
+# Plot
+st.subheader("SAM Histogram")
 fig, ax = plt.subplots(figsize=(10, 4))
-df["SAM"].plot(kind="bar", ax=ax, color="skyblue", label="SAM", width=1)
-df["SAM"].rolling(window=5).mean().plot(ax=ax, color="red", label="Trend")
-ax.legend()
+df["SAM"].plot(kind="bar", ax=ax, color="skyblue", width=1)
+plt.xticks([], [])
+plt.xlabel("Tijd")
+plt.ylabel("SAM Waarde")
+plt.tight_layout()
 st.pyplot(fig)
 
-# Laatste adviezen en rendementen tonen
-st.subheader("Laatste signalen & rendementen")
-st.dataframe(df[["Slotkoers", "SAM", "Advies", "SAM rendement", "Marktrendement"]].tail(15))
+# Tabel
+st.subheader("Adviezen en Resultaten")
+st.dataframe(df[["Close", "Advies", "Rendement", "Marktrendement"]].dropna(how="all"))
