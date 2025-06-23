@@ -8,7 +8,7 @@ st.title("SAM Indicator - Koop/Verkoop Advies")
 # Sidebar instellingen
 st.sidebar.header("Instellingen")
 ticker = st.sidebar.text_input("Ticker (bv. AAPL):", value="AAPL")
-start_date = st.sidebar.date_input("Startdatum:", value=pd.to_datetime("2023-01-01"))
+start_date = st.sidebar.date_input("Startdatum:", value=pd.to_datetime("2013-01-01"))
 end_date = st.sidebar.date_input("Einddatum:", value=pd.to_datetime("today"))
 sensitivity = st.sidebar.slider("Gevoeligheid (hogere waarde = trager signaal)", min_value=1, max_value=20, value=5)
 
