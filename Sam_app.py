@@ -147,8 +147,16 @@ wma = lambda s, period: s.rolling(period).apply(lambda x: np.average(x, weights=
 
 c9 = wma(close, 18) 
 c11 = wma(close.shift(1), 18) 
-samg = np.select( [c9 > c11 * 1.0015, c9 < c11 * 1.0015 & (c9 > c11), c9 > c11 / 1.0015 & (c9 <= c11), c9 < c11 / 1.0015 & (c9 <= c11)], [0.5, -0.5, 0.5, -0.5], default=0.0 )
-
+samg = np.select(
+    [
+        (c9 > c11 * 1.0015),
+        (c9 < c11 * 1.0015) & (c9 > c11),
+        (c9 > c11 / 1.0015) & (c9 <= c11),
+        (c9 < c11 / 1.0015) & (c9 <= c11)
+    ],
+    [0.5, -0.5, 0.5, -0.5],
+    default=0.0
+)
 c12 = wma(close, 6) 
 c13 = wma(close.shift(1), 6) 
 c19 = wma(close, 80) 
