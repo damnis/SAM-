@@ -1,38 +1,43 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
 
-st.title("SAM Indicator App")
+st.set_page_config(layout="wide")
 
-# --- Dropdown voor ticker selectie ---
-ticker = st.selectbox("Kies een aandeel of index:", ["AAPL", "MSFT", "GOOGL", "^GSPC", "^NDX", "AMZN", "TSLA"])
+st.title("📈 SAM Indicator App")
+st.markdown("Een eenvoudige trading indicator gebaseerd op candles, prijs, momentum, trend en dynamiek.")
 
-# --- Data ophalen via yfinance ---
+# --- Ticker selectie ---
+ticker = st.selectbox("Selecteer een ticker:", ["AAPL", "MSFT", "GOOG", "AMZN", "TSLA"], index=0)
+
+# --- Data ophalen ---
 data = yf.download(ticker, period="180d", interval="1d")
+
 if data.empty:
-    st.error(f"Geen data gevonden voor ticker: {ticker}")
+    st.error(f"❌ Geen data gevonden voor ticker: {ticker}")
     st.stop()
 
-close = data["Close"]
+required_cols = ["Open", "High", "Low", "Close"]
+missing_cols = [col for col in required_cols if col not in data.columns]
+if missing_cols:
+    st.error(f"❌ Ontbrekende kolommen in koersdata: {', '.join(missing_cols)}")
+    st.stop()
+
+# --- Variabelen toewijzen ---
 open_ = data["Open"]
 high = data["High"]
 low = data["Low"]
+close = data["Close"]
 dates = data.index
 
-# --- DataFrame maken ---
-print("Close:", close.shape)
-print("Open:", open_.shape)
-print("High:", high.shape)
-print("Low:", low.shape)
-print("Dates:", dates.shape)
+# --- DataFrame opbouwen ---
 df = pd.DataFrame({
-    "Close": close,
     "Open": open_,
     "High": high,
-    "Low": low
-}, index=dates)
+    "Low": low,
+    "Close": close
+})
 
 # --- SAMK ---
 df["c1"] = df["Close"] > df["Open"]
@@ -44,45 +49,61 @@ df["c6"] = df["Close"].shift(1) < df["Open"].shift(1)
 df["c7"] = df["Close"] < df["Close"].shift(1)
 df["c8"] = df["Close"].shift(1) < df["Close"].shift(2)
 
-SAMK = pd.Series(0.0, index=df.index)
-SAMK.loc[(df["c1"] & df["c2"] & df["c3"] & df["c4"]).fillna(False)] = 1.25
-SAMK.loc[((df["c1"] & df["c3"] & df["c4"]) & ~df["c2"]).fillna(False)] = 1.0
-SAMK.loc[((df["c1"] & df["c3"]) & ~(df["c2"] | df["c4"])).fillna(False)] = 0.5
-SAMK.loc[((df["c1"] | df["c3"]) & ~(df["c1"] & df["c3"])).fillna(False)] = 0.25
-SAMK.loc[(df["c5"] & df["c6"] & df["c7"] & df["c8"]).fillna(False)] = -1.25
-SAMK.loc[((df["c5"] & df["c7"] & df["c8"]) & ~df["c6"]).fillna(False)] = -1.0
-SAMK.loc[((df["c5"] & df["c7"]) & ~(df["c6"] | df["c8"])).fillna(False)] = -0.5
-SAMK.loc[((df["c5"] | df["c7"]) & ~(df["c5"] & df["c7"])).fillna(False)] = -0.25
+df["SAMK"] = 0.0
+df.loc[(df["c1"] & df["c2"] & df["c3"] & df["c4"]).fillna(False), "SAMK"] = 1.25
+df.loc[((df["c1"] & df["c3"] & df["c4"]) & ~df["c2"]).fillna(False), "SAMK"] = 1.0
+df.loc[((df["c1"] & df["c3"]) & ~(df["c2"] | df["c4"])).fillna(False), "SAMK"] = 0.5
+df.loc[((df["c1"] | df["c3"]) & ~(df["c1"] & df["c3"])).fillna(False), "SAMK"] = 0.25
+df.loc[(df["c5"] & df["c6"] & df["c7"] & df["c8"]).fillna(False), "SAMK"] = -1.25
+df.loc[((df["c5"] & df["c7"] & df["c8"]) & ~df["c6"]).fillna(False), "SAMK"] = -1.0
+df.loc[((df["c5"] & df["c7"]) & ~(df["c6"] | df["c8"])).fillna(False), "SAMK"] = -0.5
+df.loc[((df["c5"] | df["c7"]) & ~(df["c5"] & df["c7"])).fillna(False), "SAMK"] = -0.25
 
-df["SAMK"] = SAMK
+# --- SAMX ---
+df["price_change"] = df["Close"] - df["Close"].shift(1)
+df["SAMX"] = 0.0
+df.loc[(df["price_change"] > 1.5).fillna(False), "SAMX"] = 1.25
+df.loc[((df["price_change"] > 1.0) & (df["price_change"] <= 1.5)).fillna(False), "SAMX"] = 1.0
+df.loc[((df["price_change"] > 0.5) & (df["price_change"] <= 1.0)).fillna(False), "SAMX"] = 0.5
+df.loc[((df["price_change"] < -1.5)).fillna(False), "SAMX"] = -1.25
+df.loc[((df["price_change"] < -1.0) & (df["price_change"] >= -1.5)).fillna(False), "SAMX"] = -1.0
+df.loc[((df["price_change"] < -0.5) & (df["price_change"] >= -1.0)).fillna(False), "SAMX"] = -0.5
 
-# --- SAMX (volatiliteit) ---
-range_ = df["High"] - df["Low"]
-threshold = range_.rolling(20).mean()
-df["SAMX"] = np.where(range_ > threshold, 1, 0)
+# --- SAMM ---
+df["momentum"] = df["Close"] - df["Close"].shift(3)
+df["SAMM"] = 0.0
+df.loc[(df["momentum"] > 2.0).fillna(False), "SAMM"] = 1.25
+df.loc[((df["momentum"] > 1.0) & (df["momentum"] <= 2.0)).fillna(False), "SAMM"] = 1.0
+df.loc[((df["momentum"] > 0.5) & (df["momentum"] <= 1.0)).fillna(False), "SAMM"] = 0.5
+df.loc[((df["momentum"] < -2.0)).fillna(False), "SAMM"] = -1.25
+df.loc[((df["momentum"] < -1.0) & (df["momentum"] >= -2.0)).fillna(False), "SAMM"] = -1.0
+df.loc[((df["momentum"] < -0.5) & (df["momentum"] >= -1.0)).fillna(False), "SAMM"] = -0.5
 
-# --- SAMA (afstand tot MA20) ---
-ma20 = df["Close"].rolling(20).mean()
-afstand = df["Close"] - ma20
-norm = df["Close"].rolling(20).std()
-df["SAMA"] = afstand / norm
+# --- SAMT ---
+df["trend"] = df["Close"].rolling(window=5).mean() - df["Close"].rolling(window=20).mean()
+df["SAMT"] = 0.0
+df.loc[(df["trend"] > 1.0).fillna(False), "SAMT"] = 1
+df.loc[(df["trend"] < -1.0).fillna(False), "SAMT"] = -1
 
-# --- SAM totaal ---
-df["SAM"] = df[["SAMK", "SAMX", "SAMA"]].sum(axis=1)
+# --- SAMD ---
+df["volatility"] = df["Close"].rolling(window=5).std()
+df["SAMD"] = 0.0
+df.loc[(df["volatility"] > 2.0).fillna(False), "SAMD"] = 1
+df.loc[(df["volatility"] < 1.0).fillna(False), "SAMD"] = -1
 
-# --- SAMM, SAMT, SAMD ---
-df["SAMM"] = df["SAM"].rolling(5).mean()
-df["SAMT"] = df["SAMM"].diff()
-df["SAMD"] = df["SAMT"].diff()
+# --- SAM = som van alle componenten ---
+df["SAM"] = df[["SAMK", "SAMX", "SAMM", "SAMT", "SAMD"]].sum(axis=1)
+df["TrendSAM"] = df["SAM"].rolling(window=5).mean()
 
 # --- Plotten ---
-fig, ax = plt.subplots(figsize=(10, 4))
-ax.bar(df.index, df["SAM"], color="black", label="SAM")
-ax.plot(df["SAMM"], color="blue", linewidth=2.5, label="SAMM (Trend)")
-ax.axhline(0, color="gray", linewidth=1, linestyle="--")
-ax.legend()
-ax.set_title(f"SAM-indicator voor {ticker}")
-st.pyplot(fig)
+fig, ax = plt.subplots(figsize=(12, 6))
 
-# --- Toon data ---
-st.dataframe(df[["Close", "SAM", "SAMM", "SAMT", "SAMD"]].tail(30))
+ax.bar(df.index, df["SAM"], color="black", label="SAM Histogram")
+ax.plot(df.index, df["TrendSAM"], color="blue", linewidth=2.5, label="TrendSAM")
+
+ax.set_title(f"SAM Indicator voor {ticker}")
+ax.set_ylabel("Waarde")
+ax.legend()
+ax.grid(True)
+
+st.pyplot(fig)
