@@ -99,10 +99,28 @@ def determine_advice(df, threshold):
 
 # --- Streamlit UI ---
 st.title("📊 SAM Trading Indicator")
-ticker = st.selectbox("Selecteer een aandeel", ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA",'MMM', 'AXP', 'AMGN', 'AAPL', 'BA', 'CAT', 'CVX', 'CSCO', 'KO',
- 'DIS', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JPM', 'JNJ', 'MCD',
- 'MRK', 'MSFT', 'NKE', 'PG', 'CRM', 'TRV', 'UNH', 'VZ', 'V',
- 'WMT', 'DOW', 'RTX', 'WBA'])
+all_tickers = [
+    # AEX
+    'ABN', 'ADYEN', 'AEGN', 'AD', 'AKZA', 'MT', 'ASM', 'ASML',
+    'ASRNL', 'BESI', 'DSFIR', 'GALAP', 'HEIA', 'IMCD', 'INGA',
+    'JUST', 'KPN', 'NN', 'PHIA', 'PRX', 'RAND', 'REN', 'SHELL',
+    'UNA', 'WKL',
+    # Dow Jones
+    'MMM', 'AXP', 'AMGN', 'AAPL', 'BA', 'CAT', 'CVX', 'CSCO', 'KO',
+    'DIS', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JPM', 'JNJ', 'MCD',
+    'MRK', 'MSFT', 'NKE', 'PG', 'CRM', 'TRV', 'UNH', 'VZ', 'V',
+    'WMT', 'DOW', 'RTX', 'WBA',
+    # Nasdaq‑100 (voorbeeldsubset – uitbreiden naar ~100)
+    'MSFT', 'NVDA', 'AAPL', 'AMZN', 'META', 'NFLX', 'GOOG', 'GOOGL',
+    'TSLA', 'CSCO', 'INTC', 'ADBE', 'CMCSA', 'PEP', 'COST', 'AVGO',
+    'QCOM', 'TMUS', 'TXN', 'AMAT', 'AMD', 'CHTR', 'SBUX', 'MDLZ',
+    'PYPL', 'INTU', 'BKNG', 'ISRG', 'ADP', 'GILD', 'CSX', 'MU',
+    'LRCX', 'MELI', 'MRVL', 'PANW', 'MCHP', 'NXPI', 'ORLY', 'VRTX',
+    'ROST', 'MAR', 'DOCU', 'SNPS', 'ZM', 'WDAY', 'KHC', 'REGN'
+    # vul verder aan tot ~150 tickers
+]
+
+ticker = st.selectbox("Selecteer een aandeel (AEX, Dow, Nasdaq)", all_tickers)
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
 # Berekening
