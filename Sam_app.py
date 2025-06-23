@@ -215,15 +215,26 @@ for i in range(len(sam_df)):
 sam_df["Signaal"] = sam_signal
 
 #Plot
+fig, ax = plt.subplots()
 
-fig, ax = plt.subplots(figsize=(10, 5)) 
-ax.plot(sam_df['SAM'], 
-        label='SAM', color='blue') 
-ax.plot(sam_df['Trend SAM'], 
-        label='Trend SAM', color='orange') 
-ax.set_title('SAM en Trend') 
-ax.legend() 
+# SAM als zwart histogram (staafdiagram)
+ax.bar(sam_df.index, sam_df["SAM"], color="black", label="SAM")
+
+# TrendSAM als dikkere blauwe lijn
+ax.plot(sam_df["TrendSAM"], color="blue", linewidth=2.5, label="TrendSAM")
+
+ax.set_title("SAM Indicator")
+ax.legend()
 st.pyplot(fig)
+
+#fig, ax = plt.subplots(figsize=(10, 5)) 
+#ax.plot(sam_df['SAM'], 
+#        label='SAM', color='black) 
+#ax.plot(sam_df['Trend SAM'], 
+#        label='Trend SAM', color='blue) 
+#ax.set_title('SAM en Trend') 
+#ax.legend() 
+#st.pyplot(fig)
 
 #Laat signalen zien
 
