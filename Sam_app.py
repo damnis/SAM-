@@ -213,7 +213,8 @@ ax.plot(sam_df['SAM'],
 ax.plot(sam_df['Trend SAM'], 
         label='Trend SAM', color='orange') 
 ax.set_title('SAM en Trend') 
-ax.legend() st.pyplot(fig)
+ax.legend() 
+st.pyplot(fig)
 
 #Laat signalen zien
 
