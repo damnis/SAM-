@@ -148,7 +148,7 @@ st.pyplot(fig)
 # Tabel met advies
 st.subheader("Laatste signalen en rendement")
 # --- Laatste rijen en formattering ---
-kolommen = ["Close", "Advies", "SAM", "Trend", "MarktRendement", "SAMRendement"]
+kolommen = ["Close", "Advies", "SAM", "Trend", "Markt-%", "SAM-%"]
 tabel = df[kolommen].dropna().tail(20).round(3).copy()
 
 # Voeg datum toe vanuit index (in formaat dd-mm-jjjj)
