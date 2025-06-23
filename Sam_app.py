@@ -65,6 +65,9 @@ def calculate_sam(df):
     # Totaal SAM-signaal
     df["SAM"] = df[["SAMK", "SAMG", "SAMT", "SAMD", "SAMM", "SAMX"]].sum(axis=1)
 
+    # Trendlijn (eenvoudig voortschrijdend gemiddelde van SAM)
+    df["SAM_trend"] = df["SAM"].rolling(window=5).mean()
+
     return df
 
 # --- Streamlit UI ---
@@ -75,10 +78,19 @@ ticker = st.selectbox("Selecteer een aandeel", ["AAPL", "GOOGL", "MSFT", "TSLA",
 df = fetch_data(ticker)
 df = calculate_sam(df)
 
-# Plotten
-st.subheader(f"SAM-indicator voor {ticker}")
-st.line_chart(df["SAM"])
+# Grafiek
+st.subheader(f"SAM-signalen en trend voor {ticker}")
 
-# Laatste signalen tonen
-st.subheader("Laatste signalen")
-st.dataframe(df[["Close", "SAMK", "SAMG", "SAMT", "SAMD", "SAMM", "SAMX", "SAM"]].tail(10))
+fig, ax = plt.subplots(figsize=(10, 4))
+df_tail = df.tail(60)  # toon laatste 60 dagen
+ax.bar(df_tail.index, df_tail["SAM"], color="lightblue", label="SAM-signaal")
+ax.plot(df_tail.index, df_tail["SAM_trend"], color="red", linewidth=2, label="SAM-trend (SMA5)")
+ax.axhline(0, color="gray", linestyle="--", linewidth=1)
+ax.set_title("Histogram van SAM met trendlijn")
+ax.set_ylabel("SAM waarde")
+ax.legend()
+st.pyplot(fig)
+
+# Laatste signalen
+st.subheader("Laatste SAM-signalen")
+st.dataframe(df[["Close", "SAM", "SAM_trend"]].tail(10))
