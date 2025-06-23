@@ -38,14 +38,14 @@ c7 = close < close.shift(1)
 c8 = close.shift(1) < close.shift(2)
 
 SAMK = pd.Series(0.0, index=close.index)
-SAMK[c1 & c2 & c3 & c4] = 1.25
-SAMK[c1 & c3 & c4] = 1.0
-SAMK[c1 & c3] = 0.5
-SAMK[c1 | c3] = 0.25
-SAMK[c5 & c6 & c7 & c8] = -1.25
-SAMK[c5 & c7 & c8] = -1.0
-SAMK[c5 & c7] = -0.5
-SAMK[c5 | c7] = -0.25
+SAMK[(c1 & c2 & c3 & c4)] = 1.25
+SAMK[(c1 & c3 & c4) & ~c2] = 1.0
+SAMK[(c1 & c3) & ~(c2 | c4)] = 0.5
+SAMK[(c1 | c3) & ~(c1 & c3)] = 0.25
+SAMK[(c5 & c6 & c7 & c8)] = -1.25
+SAMK[(c5 & c7 & c8) & ~c6] = -1.0
+SAMK[(c5 & c7) & ~(c6 | c8)] = -0.5
+SAMK[(c5 | c7) & ~(c5 & c7)] = -0.25
 
 # SAMG (WMA18 toestand)
 wma = lambda s, p: s.rolling(p).apply(lambda x: np.average(x, weights=range(1, p+1)), raw=True)
