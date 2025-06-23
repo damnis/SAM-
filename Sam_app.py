@@ -173,11 +173,15 @@ sam_df = pd.DataFrame({ 'SAM': sams, 'Trend SAM': wma(pd.Series(sams), 12), 'Clo
 
 #Signaalgevoeligheid
 
-st.title("SAM Beleggingssignalen") st.sidebar.header("Instellingen") signal_sensitivity = st.sidebar.slider("Aantal opeenvolgende signalen voor melding", 1, 5, 1)
+st.title("SAM Beleggingssignalen") 
+st.sidebar.header("Instellingen") 
+signal_sensitivity = st.sidebar.slider("Aantal opeenvolgende signalen voor melding", 1, 5, 1)
 
 #Signaallogica
 
-sam_signal = [] last_signal = None counter = 0 for i in range(len(sam_df)): if i < signal_sensitivity: sam_signal.append("") continue recent = sam_df["SAM"].iloc[i-signal_sensitivity+1:i+1] avg = recent.mean() if avg > 0.5: signal = "KOOP" elif avg < -0.5: signal = "VERKOOP" else: signal = "" if signal != last_signal and signal != "": sam_signal.append(signal) last_signal = signal else: sam_signal.append("")
+sam_signal = [] 
+last_signal = None 
+counter = 0 for i in range(len(sam_df)): if i < signal_sensitivity: sam_signal.append("") continue recent = sam_df["SAM"].iloc[i-signal_sensitivity+1:i+1] avg = recent.mean() if avg > 0.5: signal = "KOOP" elif avg < -0.5: signal = "VERKOOP" else: signal = "" if signal != last_signal and signal != "": sam_signal.append(signal) last_signal = signal else: sam_signal.append("")
 
 sam_df["Signaal"] = sam_signal
 
