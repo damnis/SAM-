@@ -175,9 +175,9 @@ html = """
     td {
         border: 1px solid #ddd;
         padding: 6px;
-        text-align: right;
-        color: #222222;
+        text-align: right; color: #222222;
         background-color: #f9f9f9;
+        color: #222222;
     }
     tr:nth-child(even) td {
         background-color: #eef2f7;
