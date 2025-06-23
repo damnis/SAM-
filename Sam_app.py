@@ -5,11 +5,11 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
 
-Simuleer koersdata
+#Simuleer koersdata
 
 np.random.seed(0) days = 120 price = np.cumsum(np.random.normal(0, 1, days)) + 100 close = pd.Series(price) open_ = close.shift(1).fillna(method="bfill")
 
-SAM Kernberekening
+#SAM Kernberekening
 
 c1 = close > open_ c2 = close.shift(1) > open_.shift(1) c3 = close > close.shift(1) c4 = close.shift(1) > close.shift(2) c5 = close < open_ c6 = close.shift(1) < open_.shift(1) c7 = close < close.shift(1) c8 = close.shift(1) < close.shift(2)
 
@@ -25,21 +25,21 @@ macd_fast = close.ewm(span=12, adjust=False).mean() macd_slow = close.ewm(span=2
 
 sams = samk + samg + samm + samt sam_df = pd.DataFrame({ 'SAM': sams, 'Trend SAM': wma(pd.Series(sams), 12), 'Close': close })
 
-Signaalgevoeligheid
+#Signaalgevoeligheid
 
 st.title("SAM Beleggingssignalen") st.sidebar.header("Instellingen") signal_sensitivity = st.sidebar.slider("Aantal opeenvolgende signalen voor melding", 1, 5, 1)
 
-Signaallogica
+#Signaallogica
 
 sam_signal = [] last_signal = None counter = 0 for i in range(len(sam_df)): if i < signal_sensitivity: sam_signal.append("") continue recent = sam_df["SAM"].iloc[i-signal_sensitivity+1:i+1] avg = recent.mean() if avg > 0.5: signal = "KOOP" elif avg < -0.5: signal = "VERKOOP" else: signal = "" if signal != last_signal and signal != "": sam_signal.append(signal) last_signal = signal else: sam_signal.append("")
 
 sam_df["Signaal"] = sam_signal
 
-Plot
+#Plot
 
 fig, ax = plt.subplots(figsize=(10, 5)) ax.plot(sam_df['SAM'], label='SAM', color='blue') ax.plot(sam_df['Trend SAM'], label='Trend SAM', color='orange') ax.set_title('SAM en Trend') ax.legend() st.pyplot(fig)
 
-Laat signalen zien
+#Laat signalen zien
 
 st.subheader("Laatste signalen") st.dataframe(sam_df[["SAM", "Trend SAM", "Signaal"]].tail(20))
 
