@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # --- Functie om data op te halen ---
 def fetch_data(ticker):
-    df = yf.download(ticker, period="6mo", interval="1d")
+    df = yf.download(ticker, period="60mo", interval="1d")
     df = df[["Open", "High", "Low", "Close"]]
     df.dropna(inplace=True)
     return df
@@ -99,7 +99,10 @@ def determine_advice(df, threshold):
 
 # --- Streamlit UI ---
 st.title("📊 SAM Trading Indicator")
-ticker = st.selectbox("Selecteer een aandeel", ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA"])
+ticker = st.selectbox("Selecteer een aandeel", ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA",'MMM', 'AXP', 'AMGN', 'AAPL', 'BA', 'CAT', 'CVX', 'CSCO', 'KO',
+ 'DIS', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JPM', 'JNJ', 'MCD',
+ 'MRK', 'MSFT', 'NKE', 'PG', 'CRM', 'TRV', 'UNH', 'VZ', 'V',
+ 'WMT', 'DOW', 'RTX', 'WBA'])
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
 # Berekening
