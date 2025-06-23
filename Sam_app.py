@@ -86,7 +86,6 @@ def determine_advice(df, threshold):
     df["AdviesGroep"] = (df["Advies"] != df["Advies"].shift()).cumsum()
     rendementen = []
     sam_rendementen = []
-    #huidig_advies = df["Advies"].dropna().iloc[-1]
     
     for _, groep in df.groupby("AdviesGroep"):
         start = groep["Close"].iloc[0]
