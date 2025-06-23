@@ -207,9 +207,16 @@ sam_df["Signaal"] = sam_signal
 
 #Plot
 
-fig, ax = plt.subplots(figsize=(10, 5)) ax.plot(sam_df['SAM'], label='SAM', color='blue') ax.plot(sam_df['Trend SAM'], label='Trend SAM', color='orange') ax.set_title('SAM en Trend') ax.legend() st.pyplot(fig)
+fig, ax = plt.subplots(figsize=(10, 5)) 
+ax.plot(sam_df['SAM'], 
+        label='SAM', color='blue') 
+ax.plot(sam_df['Trend SAM'], 
+        label='Trend SAM', color='orange') 
+ax.set_title('SAM en Trend') 
+ax.legend() st.pyplot(fig)
 
 #Laat signalen zien
 
-st.subheader("Laatste signalen") st.dataframe(sam_df[["SAM", "Trend SAM", "Signaal"]].tail(20))
+st.subheader("Laatste signalen") 
+st.dataframe(sam_df[["SAM", "Trend SAM", "Signaal"]].tail(20))
 
