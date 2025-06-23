@@ -7,11 +7,6 @@ import matplotlib.pyplot as plt
 
 #Simuleer koersdata
 
-import streamlit as st
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
 # Simulate price data (replace later with live data)
 np.random.seed(0)
 days = 120
