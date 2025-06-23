@@ -13,7 +13,8 @@ ticker = st.selectbox("Selecteer een ticker:", ["AAPL", "MSFT", "GOOG", "AMZN", 
 
 # --- Data ophalen ---
 data = yf.download(ticker, period="180d", interval="1d")
-
+st.write("Data columns:", data.columns.tolist())
+st.write("Data preview:", data.head())
 if data.empty:
     st.error(f"❌ Geen data gevonden voor ticker: {ticker}")
     st.stop()
