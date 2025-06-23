@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 
 #Simuleer koersdata
 
-np.random.seed(0) days = 120 price = nimport streamlit as st
+np.random.seed(0) days = 120 
+price = nimport streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
