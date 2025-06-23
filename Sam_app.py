@@ -85,7 +85,7 @@ def determine_advice(df, threshold):
     df["AdviesGroep"] = (df["Advies"] != df["Advies"].shift()).cumsum()
     rendementen = []
     sam_rendementen = []
-    
+
     for _, groep in df.groupby("AdviesGroep"):
         start = groep["Close"].iloc[0]
         eind = groep["Close"].iloc[-1]
@@ -99,8 +99,15 @@ def determine_advice(df, threshold):
 
     df["Markt-%"] = rendementen
     df["SAM-%"] = sam_rendementen
-    return df
 
+    # Huidig advies bepalen
+    if "Advies" in df.columns and df["Advies"].notna().any():
+        huidig_advies = df["Advies"].dropna().iloc[-1]
+    else:
+        huidig_advies = "Niet beschikbaar"
+
+    return df, huidig_advies
+    
 # --- Streamlit UI ---
 st.title("📊 SAM Trading Indicator")
 all_tickers = [
@@ -132,7 +139,8 @@ thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.0
 # Berekening
 df = fetch_data(ticker, interval)
 df = calculate_sam(df)
-df = determine_advice(df, threshold=thresh)
+# df = determine_advice(df, threshold=thresh)
+df, huidig_advies = determine_advice(df, threshold=thresh)
 
 # Grafieken
 #st.subheader(f"SAM-indicator en trend voor {ticker}")
