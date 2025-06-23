@@ -89,12 +89,12 @@ def generate_signals_with_returns(df, sensitivity):
         # Als signaal verandert: bereken rendement vanaf vorige adviesmoment
         if nieuw_signaal != vorige_signaal and vorige_signaal is not None:
             eind_koers = df["Close"].iloc[idx]
+            if start_koers and start_koers != 0:
             sam_rend = (eind_koers - start_koers) / start_koers
             markt_rend = (eind_koers - df["Close"].iloc[start_index]) / df["Close"].iloc[start_index]
-
-            df.at[df.index[idx - 1], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
-            df.at[df.index[idx - 1], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
-
+    
+    df.at[df.index[idx - 1], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
+    df.at[df.index[idx - 1], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
         if nieuw_signaal != vorige_signaal:
             start_koers = df["Close"].iloc[idx]
             start_index = idx
