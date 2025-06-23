@@ -86,24 +86,27 @@ def generate_signals_with_returns(df, sensitivity):
             signal = "Kopen" if huidige_trend > vorige_trend else "Verkopen"
             df.at[df.index[idx], "Advies"] = signal
 
-            # Bereken rendement
-            eind_koers = float(df["Close"].iloc[idx])
-            start_koers = float(df["Close"].iloc[start_index])
+            try:
+                eind_koers = float(df["Close"].iloc[idx])
+                start_koers = float(df["Close"].iloc[start_index])
 
-            if start_koers != 0.0:
-                sam_rend = (eind_koers - start_koers) / start_koers
-                markt_rend = (eind_koers - df["Close"].iloc[start_index]) / df["Close"].iloc[start_index]
+                if start_koers != 0.0:
+                    sam_rend = (eind_koers - start_koers) / start_koers
+                    markt_rend = (eind_koers - df["Close"].iloc[start_index]) / df["Close"].iloc[start_index]
 
-                df.at[df.index[idx], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
-                df.at[df.index[idx], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
+                    df.at[df.index[idx], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
+                    df.at[df.index[idx], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
+            except Exception as e:
+                df.at[df.index[idx], "SAM rendement"] = "n.v.t."
+                df.at[df.index[idx], "Marktrendement"] = "n.v.t."
 
             start_index = idx
 
         else:
-            df.at[df.index[idx], "Advies"] = signal  # Vorige advies blijft geldig
+            df.at[df.index[idx], "Advies"] = signal
 
     return df
-
+    
 # --- Streamlit UI ---
 st.set_page_config(page_title="SAM Beleggingsindicator", layout="wide")
 st.title("📊 SAM Trading Indicator")
