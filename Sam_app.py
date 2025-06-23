@@ -56,7 +56,7 @@ def calculate_sam(df):
     df.loc[df["SMA10"] > df["SMA50"], "SAMM"] = 1
     df.loc[df["SMA10"] < df["SMA50"], "SAMM"] = -1
 
-    # SAMX (momentum op 3 dagen)
+    # SAMX
     df["Momentum"] = df["Close"] - df["Close"].shift(3)
     df["SAMX"] = 0
     df.loc[df["Momentum"] > 0, "SAMX"] = 1
@@ -64,33 +64,50 @@ def calculate_sam(df):
 
     # Totaal SAM-signaal
     df["SAM"] = df[["SAMK", "SAMG", "SAMT", "SAMD", "SAMM", "SAMX"]].sum(axis=1)
-
-    # Trendlijn (eenvoudig voortschrijdend gemiddelde van SAM)
-    df["SAM_trend"] = df["SAM"].rolling(window=5).mean()
+    df["SAM_trend"] = df["SAM"].rolling(window=3).mean()
 
     return df
+
+# --- Advies op basis van trendwijziging ---
+def generate_advice(df, sensitivity):
+    if len(df) < 2:
+        return "Onvoldoende data voor advies."
+
+    prev_trend = df["SAM_trend"].iloc[-2]
+    curr_trend = df["SAM_trend"].iloc[-1]
+
+    delta = curr_trend - prev_trend
+
+    if delta > sensitivity:
+        return "📈 Advies: KOOP-signaal"
+    elif delta < -sensitivity:
+        return "📉 Advies: VERKOOP-signaal"
+    else:
+        return "➖ Advies: AFWACHTEN"
 
 # --- Streamlit UI ---
 st.title("📊 SAM Trading Indicator")
 
-# Dropdown
 ticker = st.selectbox("Selecteer een aandeel", ["AAPL", "GOOGL", "MSFT", "TSLA", "NVDA"])
+sensitivity = st.slider("Gevoeligheid voor trendwijziging", min_value=0.1, max_value=2.0, value=0.5, step=0.1)
+
 df = fetch_data(ticker)
 df = calculate_sam(df)
 
-# Grafiek
-st.subheader(f"SAM-signalen en trend voor {ticker}")
-
+# --- Visualisatie met histogram en trendlijn ---
+st.subheader(f"SAM en Trendlijn voor {ticker}")
 fig, ax = plt.subplots(figsize=(10, 4))
-df_tail = df.tail(60)  # toon laatste 60 dagen
-ax.bar(df_tail.index, df_tail["SAM"], color="lightblue", label="SAM-signaal")
-ax.plot(df_tail.index, df_tail["SAM_trend"], color="red", linewidth=2, label="SAM-trend (SMA5)")
-ax.axhline(0, color="gray", linestyle="--", linewidth=1)
-ax.set_title("Histogram van SAM met trendlijn")
-ax.set_ylabel("SAM waarde")
+ax.bar(df.index, df["SAM"], color="lightblue", label="SAM")
+ax.plot(df.index, df["SAM_trend"], color="orange", linewidth=2, label="Trendlijn")
+ax.set_ylabel("Waarde")
 ax.legend()
 st.pyplot(fig)
 
-# Laatste signalen
-st.subheader("Laatste SAM-signalen")
-st.dataframe(df[["Close", "SAM", "SAM_trend"]].tail(10))
+# --- Laatste waarden tonen ---
+st.subheader("Laatste waarden")
+st.dataframe(df[["SAM", "SAM_trend"]].tail(10))
+
+# --- Advies tonen ---
+st.subheader("Tradingadvies")
+advies = generate_advice(df, sensitivity)
+st.info(advies)
