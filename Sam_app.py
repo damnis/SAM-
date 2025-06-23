@@ -7,7 +7,133 @@ import matplotlib.pyplot as plt
 
 #Simuleer koersdata
 
-np.random.seed(0) days = 120 price = np.cumsum(np.random.normal(0, 1, days)) + 100 close = pd.Series(price) open_ = close.shift(1).fillna(method="bfill")
+np.random.seed(0) days = 120 price = nimport streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Simulate price data (replace later with live data)
+np.random.seed(0)
+days = 120
+price = np.cumsum(np.random.normal(0, 1, days)) + 100
+close = pd.Series(price)
+open_ = close.shift(1).fillna(method="bfill")
+
+# --- SAMK calculation ---
+c1 = close > open_
+c2 = close.shift(1) > open_.shift(1)
+c3 = close > close.shift(1)
+c4 = close.shift(1) > close.shift(2)
+c5 = close < open_
+c6 = close.shift(1) < open_.shift(1)
+c7 = close < close.shift(1)
+c8 = close.shift(1) < close.shift(2)
+
+SAMK = pd.Series(0.0, index=close.index)
+SAMK[(c1 & c2 & c3 & c4)] = 1.25
+SAMK[(c1 & c3 & c4) & ~c2] = 1.0
+SAMK[(c1 & c3) & ~(c2 | c4)] = 0.5
+SAMK[(c1 | c3) & ~(c1 & c3)] = 0.25
+SAMK[(c5 & c6 & c7 & c8)] = -1.25
+SAMK[(c5 & c7 & c8) & ~c6] = -1.0
+SAMK[(c5 & c7) & ~(c6 | c8)] = -0.5
+SAMK[(c5 | c7) & ~(c5 & c7)] = -0.25
+
+# --- SAMG calculation ---
+c9 = close.rolling(window=18).mean()
+c11 = close.shift(1).rolling(window=18).mean()
+
+SAMG = pd.Series(0.0, index=close.index)
+SAMG[(c9 > c11 * 1.0015) & (c9 > c11)] = 0.5
+SAMG[(c9 < c11 * 1.0015) & (c9 > c11)] = -0.5
+SAMG[(c9 > c11 / 1.0015) & (c9 <= c11)] = 0.5
+SAMG[(c9 < c11 / 1.0015) & (c9 <= c11)] = -0.5
+
+# --- SAMT calculation ---
+c12 = close.rolling(window=6).mean()
+c13 = close.shift(1).rolling(window=6).mean()
+c19 = close.rolling(window=80).mean()
+
+SAMT = pd.Series(0.0, index=close.index)
+SAMT[(c12 > c13) & (c12 > c19)] = 0.5
+SAMT[(c12 > c13) & (c12 <= c19)] = 0.25
+SAMT[(c12 <= c13) & (c12 <= c19)] = -0.75
+SAMT[(c12 <= c13) & (c12 > c19)] = -0.5
+
+# --- MACD-based SAMM calculation ---
+ema12 = close.ewm(span=12, adjust=False).mean()
+ema26 = close.ewm(span=26, adjust=False).mean()
+macd_line = ema12 - ema26
+signal_line = macd_line.ewm(span=9, adjust=False).mean()
+
+SAMM = pd.Series(0.0, index=close.index)
+SAMM[(macd_line > signal_line) & (macd_line.shift(1) <= signal_line.shift(1))] = 1.0
+SAMM[(macd_line > signal_line) & (macd_line.shift(1) > signal_line.shift(1))] = 0.5
+SAMM[(macd_line < signal_line) & (macd_line.shift(1) >= signal_line.shift(1))] = -1.0
+SAMM[(macd_line < signal_line) & (macd_line.shift(1) < signal_line.shift(1))] = -0.5
+
+# --- SAMD (placeholder for DI[14], replaced with random example) ---
+# In live trading, use a library like TA-Lib or pandas-ta for real DI(14)
+SAMD = pd.Series(0.0, index=close.index)
+SAMD[close.diff() > 0] = 0.5
+SAMD[close.diff() <= 0] = -0.5
+
+# --- TRIX-based SAMX calculation ---
+trix = close.pct_change().ewm(span=15).mean()
+trix_prev = trix.shift(1)
+
+SAMX = pd.Series(0.0, index=close.index)
+SAMX[(trix > 0) & (trix > trix_prev)] = 0.75
+SAMX[(trix > 0) & (trix <= trix_prev)] = 0.5
+SAMX[(trix < 0) & (trix < trix_prev)] = -0.75
+SAMX[(trix < 0) & (trix >= trix_prev)] = -0.5
+
+# --- Final SAM and weighted average ---
+SAM = SAMK + SAMG + SAMT + SAMM + SAMD + SAMX
+WMASAM = SAM.rolling(window=12).mean()
+
+# --- Sensitivity adjustment ---
+st.title("SAM Indicator (Simple Alert Monitor)")
+sensitivity = st.slider("Signal Sensitivity", min_value=1, max_value=5, value=1)
+
+# --- Generate signals based on sensitivity ---
+signal = pd.Series(index=SAM.index, dtype="object")
+prev_signal = None
+counter = 0
+
+for i in range(1, len(SAM)):
+    if SAM[i] > 0 and WMASAM[i] > 0:
+        if prev_signal != "Buy":
+            counter += 1
+            if counter >= sensitivity:
+                signal[i] = "Buy"
+                prev_signal = "Buy"
+                counter = 0
+    elif SAM[i] < 0 and WMASAM[i] < 0:
+        if prev_signal != "Sell":
+            counter += 1
+            if counter >= sensitivity:
+                signal[i] = "Sell"
+                prev_signal = "Sell"
+                counter = 0
+    else:
+        counter = 0
+        signal[i] = "Hold"
+
+# --- Plotting ---
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.plot(SAM.index, SAM, label="SAM", color="blue", alpha=0.5)
+ax.plot(WMASAM.index, WMASAM, label="Trend SAM", color="green", linestyle="--")
+
+buy_signals = signal[signal == "Buy"]
+sell_signals = signal[signal == "Sell"]
+
+ax.scatter(buy_signals.index, SAM[buy_signals.index], marker="^", color="green", label="Buy Signal")
+ax.scatter(sell_signals.index, SAM[sell_signals.index], marker="v", color="red", label="Sell Signal")
+
+ax.set_title("SAM Indicator and Signals")
+ax.legend()
+st.pyplot(fig.cumsum(np.random.normal(0, 1, days)) + 100 close = pd.Series(price) open_ = close.shift(1).fillna(method="bfill")
 
 #SAM Kernberekening
 
