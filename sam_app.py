@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 np.random.seed(0) 
 days = 120 
-price = n 
+price = np.cumsum(np.random.normal(0, 1, days)) + 100
 import streamlit as st
 import pandas as pd
 import numpy as np
