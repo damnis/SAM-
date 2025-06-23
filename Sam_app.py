@@ -147,38 +147,71 @@ st.pyplot(fig)
 
 # Tabel met advies
 st.subheader("Laatste signalen en rendement")
-kolommen = ["Close", "Advies", "SAM", "Trend", "Markt-%", "SAM-%"]
-st.markdown("### Laatste signalen en rendement")
+# --- Laatste rijen en formattering ---
+kolommen = ["Close", "Advies", "SAM", "Trend", "MarktRendement", "SAMRendement"]
+tabel = df[kolommen].dropna().tail(20).round(3).copy()
 
-# Kolommen afronden en laatste 20 rijen
-tabel = df[kolommen].dropna().tail(20).round(3)
+# Voeg datum toe vanuit index (in formaat dd-mm-jjjj)
+tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
 
-# HTML + CSS tabelopmaak met vaste kolombreedtes in pixels
+# Zet kolomvolgorde: eerst Datum
+tabel = tabel[["Datum"] + kolommen]
+
+# HTML-tabel bouwen met aangepaste styling
 html = """
-<table style='border-collapse: collapse; width: 100%;'>
-  <thead>
-    <tr>
-      <th style='width: 80px;'>Close</th>
-      <th style='width: 100px;'>Advies</th>
-      <th style='width: 60px;'>SAM</th>
-      <th style='width: 80px;'>Trend</th>
-      <th style='width: 90px;'>Markt-%</th>
-      <th style='width: 90px;'>SAM-%</th>
-    </tr>
-  </thead>
-  <tbody>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+    }
+    th {
+        background-color: #004080;
+        color: white;
+        padding: 6px;
+        text-align: center;
+    }
+    td {
+        border: 1px solid #ddd;
+        padding: 6px;
+        text-align: right;
+        background-color: #f9f9f9;
+    }
+    tr:nth-child(even) td {
+        background-color: #eef2f7;
+    }
+    tr:hover td {
+        background-color: #d0e4f5;
+    }
+</style>
+<table>
+    <thead>
+        <tr>
+            <th style='width: 110px;'>Datum</th>
+            <th style='width: 80px;'>Close</th>
+            <th style='width: 90px;'>Advies</th>
+            <th style='width: 60px;'>SAM</th>
+            <th style='width: 70px;'>Trend</th>
+            <th style='width: 90px;'>Markt-%</th>
+            <th style='width: 90px;'>SAM-%</th>
+        </tr>
+    </thead>
+    <tbody>
 """
 
-# Rijen toevoegen
+# Rijen toevoegen aan HTML
 for _, row in tabel.iterrows():
     html += "<tr>"
     for value in row:
-        html += f"<td style='border: 1px solid #ddd; padding: 4px; text-align: right;'>{value}</td>"
+        html += f"<td>{value}</td>"
     html += "</tr>"
 
 html += "</tbody></table>"
 
-# Tabel renderen
+# HTML weergeven in Streamlit
+import streamlit as st
+st.subheader("Laatste signalen en rendement (HTML)")
 st.markdown(html, unsafe_allow_html=True)
 
 
