@@ -140,7 +140,14 @@ ax.legend()
 
 #SAM Kernberekening
 
-c1 = close > open_ c2 = close.shift(1) > open_.shift(1) c3 = close > close.shift(1) c4 = close.shift(1) > close.shift(2) c5 = close < open_ c6 = close.shift(1) < open_.shift(1) c7 = close < close.shift(1) c8 = close.shift(1) < close.shift(2)
+c1 = close > open_ 
+c2 = close.shift(1) > open_.shift(1) 
+c3 = close > close.shift(1) 
+c4 = close.shift(1) > close.shift(2) 
+c5 = close < open_ 
+c6 = close.shift(1) < open_.shift(1) 
+c7 = close < close.shift(1) 
+c8 = close.shift(1) < close.shift(2)
 
 samk = np.select( [c1 & c2 & c3 & c4, c1 & c3 & c4, c1 & c3, c1 | c3, c5 & c6 & c7 & c8, c5 & c7 & c8, c5 & c7, c5 | c7], [1.25, 1.0, 0.5, 0.25, -1.25, -1.0, -0.5, -0.25], default=0.0 )
 
