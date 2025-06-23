@@ -95,7 +95,7 @@ def generate_signals_with_returns(df, sensitivity):
         if nieuw_advies != current_signal:
             if current_signal in ["Kopen", "Verkopen"] and start_index is not None and idx > start_index:
                 eind_koers = df["Close"].iloc[idx - 1]
-                if start_koers and start_koers != 0:
+                 if pd.notna(start_koers) and start_koers != 0:
                     try:
                         sam_rend = (eind_koers - start_koers) / start_koers
                         markt_rend = (eind_koers - df["Close"].iloc[start_index]) / df["Close"].iloc[start_index]
