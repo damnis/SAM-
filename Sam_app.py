@@ -234,7 +234,7 @@ ax.bar(sam_df.index, sam_df["SAM"],
 #ax.plot(sam_df['SAM'], 
 #        label='SAM', color='black) 
 ax.plot(sam_df['Trend SAM'], 
-        label='Trend SAM', color='blue) 
+        label='Trend SAM', color='blue') 
 ax.set_title('SAM en Trend') 
 ax.legend() 
 st.pyplot(fig)
