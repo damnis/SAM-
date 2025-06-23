@@ -168,7 +168,7 @@ html = """
     }
     th {
         background-color: #004080;
-        color: white;
+        color: black;
         padding: 6px;
         text-align: center;
     }
