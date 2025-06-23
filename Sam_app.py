@@ -160,7 +160,16 @@ samg = np.select(
 c12 = wma(close, 6) 
 c13 = wma(close.shift(1), 6) 
 c19 = wma(close, 80) 
-samt = np.select( [c12 > c13 & c12 > c19, c12 > c13 & c12 <= c19, c12 <= c13 & c12 <= c19, c12 <= c13 & c12 > c19], [0.5, 0.25, -0.75, -0.5], default=0.0 )
+samt = np.select( 
+ [
+        c12 > c13 & c12 > c19,
+        c12 > c13 & c12 <= c19, 
+        c12 <= c13 & c12 <= c19, 
+        c12 <= c13 & c12 > c19
+    ], 
+    [0.5, 0.25, -0.75, -0.5], 
+    default=0.0
+)
 
 macd_fast = close.ewm(span=12, adjust=False).mean() 
 macd_slow = close.ewm(span=26, adjust=False).mean() 
