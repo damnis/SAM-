@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 
 np.random.seed(0) 
 days = 120 
-price = nimport 
-streamlit as st
+price = n 
+import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
