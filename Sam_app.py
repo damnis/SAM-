@@ -22,32 +22,35 @@ if data.empty:
     st.error(f"Geen data gevonden voor ticker: {ticker}")
     st.stop()
 
-close = data["Close"]
-open_ = data["Open"]
-dates = data.index
+# Werk in één DataFrame
+df = data.copy()
 
 # --- SAM-componenten berekenen ---
-# SAMK (candles)
-c1 = close > open_
-c2 = close.shift(1) > open_.shift(1)
-c3 = close > close.shift(1)
-c4 = close.shift(1) > close.shift(2)
-c5 = close < open_
-c6 = close.shift(1) < open_.shift(1)
-c7 = close < close.shift(1)
-c8 = close.shift(1) < close.shift(2)
+# Candle condities
+df["c1"] = df["Close"] > df["Open"]
+df["c2"] = df["Close"].shift(1) > df["Open"].shift(1)
+df["c3"] = df["Close"] > df["Close"].shift(1)
+df["c4"] = df["Close"].shift(1) > df["Close"].shift(2)
+df["c5"] = df["Close"] < df["Open"]
+df["c6"] = df["Close"].shift(1) < df["Open"].shift(1)
+df["c7"] = df["Close"] < df["Close"].shift(1)
+df["c8"] = df["Close"].shift(1) < df["Close"].shift(2)
 
-SAMK = pd.Series(0.0, index=close.index)
+# SAMK berekening
+df["SAMK"] = 0.0
 
-SAMK.loc[(c1 & c2 & c3 & c4).fillna(False)] = 1.25
-SAMK.loc[((c1 & c3 & c4) & ~c2).fillna(False)] = 1.0
-SAMK.loc[((c1 & c3) & ~(c2 | c4)).fillna(False)] = 0.5
-SAMK.loc[((c1 | c3) & ~(c1 & c3)).fillna(False)] = 0.25
+df.loc[(df["c1"] & df["c2"] & df["c3"] & df["c4"]).fillna(False), "SAMK"] = 1.25
+df.loc[((df["c1"] & df["c3"] & df["c4"]) & ~df["c2"]).fillna(False), "SAMK"] = 1.0
+df.loc[((df["c1"] & df["c3"]) & ~(df["c2"] | df["c4"])).fillna(False), "SAMK"] = 0.5
+df.loc[((df["c1"] | df["c3"]) & ~(df["c1"] & df["c3"])).fillna(False), "SAMK"] = 0.25
 
-SAMK.loc[(c5 & c6 & c7 & c8).fillna(False)] = -1.25
-SAMK.loc[((c5 & c7 & c8) & ~c6).fillna(False)] = -1.0
-SAMK.loc[((c5 & c7) & ~(c6 | c8)).fillna(False)] = -0.5
-SAMK.loc[((c5 | c7) & ~(c5 & c7)).fillna(False)] = -0.25
+df.loc[(df["c5"] & df["c6"] & df["c7"] & df["c8"]).fillna(False), "SAMK"] = -1.25
+df.loc[((df["c5"] & df["c7"] & df["c8"]) & ~df["c6"]).fillna(False), "SAMK"] = -1.0
+df.loc[((df["c5"] & df["c7"]) & ~(df["c6"] | df["c8"])).fillna(False), "SAMK"] = -0.5
+df.loc[((df["c5"] | df["c7"]) & ~(df["c5"] & df["c7"])).fillna(False), "SAMK"] = -0.25
+
+# Indien gewenst: drop condities achteraf
+df.drop(columns=["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"], inplace=True)
 
 # SAMG (WMA18 toestand)
 wma = lambda s, p: s.rolling(p).apply(lambda x: np.average(x, weights=range(1, p+1)), raw=True)
