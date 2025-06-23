@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # --- Functie om data op te halen ---
 def fetch_data(ticker):
-    df = yf.download(ticker, period="60mo", interval="1d")
+    df = yf.download(ticker, period="12mo", interval="1d")
     df = df[["Open", "High", "Low", "Close"]]
     df.dropna(inplace=True)
     return df
