@@ -15,22 +15,10 @@ if data.empty:
     st.error(f"Geen data gevonden voor ticker: {ticker}")
     st.stop()
 
-# --- Series extraheren ---
-open_ = data["Open"].squeeze()
-high = data["High"].squeeze()
-low = data["Low"].squeeze()
-close = data["Close"].squeeze()
-dates = data.index
+# --- Data kopiëren als basis ---
+df = data[["Open", "High", "Low", "Close"]].copy()
 
-# --- DataFrame bouwen ---
-df = pd.DataFrame({
-    "Open": open_,
-    "High": high,
-    "Low": low,
-    "Close": close
-}, index=dates)
-
-# --- SAMK berekenen ---
+# --- SAMK berekening ---
 df["c1"] = df["Close"] > df["Open"]
 df["c2"] = df["Close"].shift(1) > df["Open"].shift(1)
 df["c3"] = df["Close"] > df["Close"].shift(1)
@@ -54,9 +42,7 @@ df.loc[((df["c5"] | df["c7"]) & ~(df["c5"] & df["c7"])).fillna(False), "SAMK"] =
 df["SAMM"] = df["Close"].diff()
 
 # --- SAMX (extremen) ---
-df["High_shift"] = df["High"].shift(1)
-df["Low_shift"] = df["Low"].shift(1)
-df["range"] = df["High_shift"] - df["Low_shift"]
+df["range"] = df["High"].shift(1) - df["Low"].shift(1)
 df["SAMX"] = (df["Close"] - df["Open"]) / df["range"]
 df["SAMX"] = df["SAMX"].clip(-1, 1).fillna(0)
 
@@ -64,10 +50,10 @@ df["SAMX"] = df["SAMX"].clip(-1, 1).fillna(0)
 df["rolling_mean"] = df["Close"].rolling(window=5).mean()
 df["SAMT"] = df["Close"] - df["rolling_mean"]
 
-# --- SAMD (differentiatie/versnelling) ---
+# --- SAMD (differentiatie) ---
 df["SAMD"] = df["SAMK"].diff()
 
-# --- Totale SAM-score ---
+# --- SAM-score totaal ---
 df["SAM_score"] = df["SAMK"] + df["SAMM"] + df["SAMX"] + df["SAMT"] + df["SAMD"]
 
 # --- Plotten ---
