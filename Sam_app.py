@@ -145,7 +145,7 @@ df, huidig_advies = determine_advice(df, threshold=thresh)
 # Grafieken
 #st.subheader(f"SAM-indicator en trend voor {ticker}")
 # Huidige advies ophalen
-huidig_advies = df["Advies"].dropna().iloc[-1]
+# huidig_advies = df["Advies"].dropna().iloc[-1]
 
 # Kleur bepalen op basis van advies
 advies_kleur = "green" if huidig_advies == "Kopen" else "red" if huidig_advies == "Verkopen" else "gray"
