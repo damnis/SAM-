@@ -93,18 +93,18 @@ def generate_signals_with_returns(df, sensitivity):
             nieuw_advies = current_signal
 
         if nieuw_advies != current_signal:
-            if current_signal in ["Kopen", "Verkopen"] and start_index is not None and idx > start_index:
-                eind_koers = df["Close"].iloc[idx - 1]
-                 if pd.notna(start_koers) and start_koers != 0:
-                    try:
-                        sam_rend = (eind_koers - start_koers) / start_koers
-                        markt_rend = (eind_koers - df["Close"].iloc[start_index]) / df["Close"].iloc[start_index]
-                        df.at[df.index[idx - 1], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
-                        df.at[df.index[idx - 1], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
-                    except:
-                        df.at[df.index[idx - 1], "SAM rendement"] = "Fout"
-                        df.at[df.index[idx - 1], "Marktrendement"] = "Fout"
-
+    if current_signal in ["Kopen", "Verkopen"] and start_index is not None and idx > start_index:
+        eind_koers = df["Close"].iloc[idx - 1]
+        if pd.notna(start_koers) and start_koers != 0:
+            try:
+                sam_rend = (eind_koers - start_koers) / start_koers
+                markt_rend = (eind_koers - df["Close"].iloc[start_index]) / df["Close"].iloc[start_index]
+                df.at[df.index[idx - 1], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
+                df.at[df.index[idx - 1], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
+            except:
+                df.at[df.index[idx - 1], "SAM rendement"] = "Fout"
+                df.at[df.index[idx - 1], "Marktrendement"] = "Fout"
+                
             current_signal = nieuw_advies
             start_index = idx
             start_koers = df["Close"].iloc[idx]
