@@ -212,7 +212,7 @@ html += "</tbody></table>"
 
 # HTML weergeven in Streamlit
 import streamlit as st
-st.subheader("Laatste signalen en rendement (HTML)")
+#st.subheader("Laatste signalen en rendement (HTML)")
 st.markdown(html, unsafe_allow_html=True)
 
 
