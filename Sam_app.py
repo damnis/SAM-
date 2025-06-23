@@ -73,6 +73,7 @@ def calculate_sam(df):
 
 # --- Advies en rendementen ---
 def determine_advice(df, threshold):
+    huidig_advies = df["Advies"].dropna().iloc[-1]
     df = df.copy()
     df["Trend"] = df["SAM"].rolling(window=3).mean()
     df["TrendChange"] = df["Trend"] - df["Trend"].shift(1)
@@ -85,7 +86,7 @@ def determine_advice(df, threshold):
     df["AdviesGroep"] = (df["Advies"] != df["Advies"].shift()).cumsum()
     rendementen = []
     sam_rendementen = []
-    huidig_advies = df["Advies"].dropna().iloc[-1]
+    #huidig_advies = df["Advies"].dropna().iloc[-1]
     
     for _, groep in df.groupby("AdviesGroep"):
         start = groep["Close"].iloc[0]
