@@ -69,51 +69,50 @@ def calculate_sam(df):
 # --- Signaalgeneratie met rendementen ---
 def generate_signals_with_returns(df, sensitivity):
     df = df.copy()
-    df["Trend"] = df["SAM"].rolling(window=3).mean()
-    df["Advies"] = ""
+    df["Signaal"] = ""
+    df["Slotkoers"] = df["Close"]  # nieuwe kolom voor slotkoers
     df["SAM rendement"] = ""
     df["Marktrendement"] = ""
-    df["Slotkoers"] = df["Close"]
 
-    prev_trend = 0
-    current_signal = ""
+    trend = df["SAM"].rolling(window=sensitivity).mean()
+    df["Trend"] = trend
+
+    prev_signal = None
     start_index = None
     start_koers = None
 
-    for idx in range(len(df)):
-        trend = df["Trend"].iloc[idx]
-        if np.isnan(trend):
-            continue
+    for idx in range(sensitivity, len(df)):
+        curr_trend = trend.iloc[idx]
+        prev_trend = trend.iloc[idx - 1]
 
-        if trend - prev_trend > sensitivity:
-            nieuw_advies = "Kopen"
-        elif trend - prev_trend < -sensitivity:
-            nieuw_advies = "Verkopen"
+        # Koop/verkoop logica
+        if curr_trend > prev_trend:
+            signal = "Kopen"
+        elif curr_trend < prev_trend:
+            signal = "Verkopen"
         else:
-            nieuw_advies = current_signal
+            signal = prev_signal  # Geen verandering in trend, hou het oude signaal aan
 
-        if nieuw_advies != current_signal:
-    if current_signal in ["Kopen", "Verkopen"] and start_index is not None and idx > start_index:
-        eind_koers = df["Close"].iloc[idx - 1]
-        if pd.notna(start_koers) and start_koers != 0:
-            try:
+        df.at[df.index[idx], "Signaal"] = signal
+
+        # Als het signaal verandert, bereken rendement op de vorige periode
+        if signal != prev_signal and prev_signal is not None and start_index is not None:
+            eind_koers = df["Close"].iloc[idx]
+            if start_koers is not None and not pd.isna(start_koers) and float(start_koers) != 0.0:
                 sam_rend = (eind_koers - start_koers) / start_koers
                 markt_rend = (eind_koers - df["Close"].iloc[start_index]) / df["Close"].iloc[start_index]
                 df.at[df.index[idx - 1], "SAM rendement"] = f"{sam_rend * 100:.2f}%"
                 df.at[df.index[idx - 1], "Marktrendement"] = f"{markt_rend * 100:.2f}%"
-            except:
-                df.at[df.index[idx - 1], "SAM rendement"] = "Fout"
-                df.at[df.index[idx - 1], "Marktrendement"] = "Fout"
-                
-            current_signal = nieuw_advies
+
+        # Update referentiepunten bij een nieuwe trend
+        if signal != prev_signal:
             start_index = idx
             start_koers = df["Close"].iloc[idx]
 
-        df.at[df.index[idx], "Advies"] = current_signal
-        prev_trend = trend
+        prev_signal = signal
 
     return df
-
+    
 # --- Streamlit Interface ---
 st.title("📈 SAM Trading Indicator")
 
