@@ -85,7 +85,8 @@ def determine_advice(df, threshold):
     df["AdviesGroep"] = (df["Advies"] != df["Advies"].shift()).cumsum()
     rendementen = []
     sam_rendementen = []
-
+    huidig_advies = df["Advies"].dropna().iloc[-1]
+    
     for _, groep in df.groupby("AdviesGroep"):
         start = groep["Close"].iloc[0]
         eind = groep["Close"].iloc[-1]
@@ -135,7 +136,22 @@ df = calculate_sam(df)
 df = determine_advice(df, threshold=thresh)
 
 # Grafieken
-st.subheader(f"SAM-indicator en trend voor {ticker}")
+#st.subheader(f"SAM-indicator en trend voor {ticker}")
+# Huidige advies ophalen
+huidig_advies = df["Advies"].dropna().iloc[-1]
+
+# Kleur bepalen op basis van advies
+advies_kleur = "green" if huidig_advies == "Kopen" else "red" if huidig_advies == "Verkopen" else "gray"
+
+# Titel met kleur en grootte tonen
+st.markdown(
+    f"""
+    <h2>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker}</span></h2>
+    <h3 style='color:{advies_kleur}'>Huidig advies: {huidig_advies}</h3>
+    """,
+    unsafe_allow_html=True
+)
+
 fig, ax1 = plt.subplots(figsize=(10, 4))
 ax1.bar(df.index, df["SAM"], color="lightblue", label="SAM")
 ax2 = ax1.twinx()
