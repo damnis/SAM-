@@ -97,8 +97,8 @@ def determine_advice(df, threshold):
         rendementen.extend([markt_rendement] * len(groep))
         sam_rendementen.extend([sam_rendement] * len(groep))
 
-    df["MarktRendement"] = rendementen
-    df["SAMRendement"] = sam_rendementen
+    df["Markt-%"] = rendementen
+    df["SAM-%"] = sam_rendementen
     return df
 
 # --- Streamlit UI ---
@@ -147,5 +147,5 @@ st.pyplot(fig)
 
 # Tabel met advies
 st.subheader("Laatste signalen en rendement")
-kolommen = ["Close", "Advies", "SAM", "Trend", "MarktRendement", "SAMRendement"]
+kolommen = ["Close", "Advies", "SAM", "Trend", "Markt-%", "SAM-%"]
 st.dataframe(df[kolommen].dropna().tail(20).round(3))
