@@ -136,7 +136,7 @@ ax.scatter(sell_signals.index, SAM[sell_signals.index], marker="v", color="red",
 
 ax.set_title("SAM Indicator and Signals")
 ax.legend()
-st.pyplot(fig.cumsum(np.random.normal(0, 1, days)) + 100 close = pd.Series(price) open_ = close.shift(1).fillna(method="bfill")
+
 
 #SAM Kernberekening
 
