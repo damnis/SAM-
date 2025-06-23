@@ -183,7 +183,8 @@ sam_signal = []
 last_signal = None 
 counter = 0 
 for i in range(len(sam_df)): 
-if i < signal_sensitivity: sam_signal.append("") 
+if i < signal_sensitivity: 
+    sam_signal.append("") 
 continue recent = sam_df["SAM"].iloc[i-signal_sensitivity+1:i+1] 
 avg = recent.mean() 
 if avg > 0.5: 
