@@ -22,6 +22,11 @@ low = data["Low"]
 dates = data.index
 
 # --- DataFrame maken ---
+print("Close:", close.shape)
+print("Open:", open_.shape)
+print("High:", high.shape)
+print("Low:", low.shape)
+print("Dates:", dates.shape)
 df = pd.DataFrame({
     "Close": close,
     "Open": open_,
