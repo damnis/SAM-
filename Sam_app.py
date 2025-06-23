@@ -223,21 +223,21 @@ ax.bar(sam_df.index, sam_df["SAM"],
 
 # TrendSAM als dikkere blauwe lijn
 # Trendlijn voor TrendSAM met juiste X-waarden
-ax.plot(sam_df.index, sam_df["Trend SAM"], 
-        color="blue", label="Trend SAM")
+#ax.plot(sam_df.index, sam_df["Trend SAM"], 
+  #      color="blue", label="Trend SAM")
 
-ax.set_title("SAM Indicator")
-ax.legend()
-st.pyplot(fig)
+#ax.set_title("SAM Indicator")
+#ax.legend()
+#st.pyplot(fig)
 
 #fig, ax = plt.subplots(figsize=(10, 5)) 
 #ax.plot(sam_df['SAM'], 
 #        label='SAM', color='black) 
-#ax.plot(sam_df['Trend SAM'], 
-#        label='Trend SAM', color='blue) 
-#ax.set_title('SAM en Trend') 
-#ax.legend() 
-#st.pyplot(fig)
+ax.plot(sam_df['Trend SAM'], 
+        label='Trend SAM', color='blue) 
+ax.set_title('SAM en Trend') 
+ax.legend() 
+st.pyplot(fig)
 
 #Laat signalen zien
 
