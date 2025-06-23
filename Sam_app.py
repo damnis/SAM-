@@ -176,7 +176,7 @@ html = """
         border: 1px solid #ddd;
         padding: 6px;
         text-align: right;
-        text-color: black;
+        color: black;
         background-color: #f9f9f9;
     }
     tr:nth-child(even) td {
