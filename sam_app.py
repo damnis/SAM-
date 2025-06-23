@@ -7,9 +7,6 @@ import matplotlib.pyplot as plt
 
 #Simuleer koersdata
 
-np.random.seed(0) 
-days = 120 
-price = np.cumsum(np.random.normal(0, 1, days)) + 100
 import streamlit as st
 import pandas as pd
 import numpy as np
