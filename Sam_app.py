@@ -218,10 +218,12 @@ sam_df["Signaal"] = sam_signal
 fig, ax = plt.subplots()
 
 # SAM als zwart histogram (staafdiagram)
-ax.bar(sam_df.index, sam_df["SAM"], color="black", label="SAM")
+ax.bar(sam_df.index, sam_df["SAM"], 
+       color="black", label="SAM")
 
 # TrendSAM als dikkere blauwe lijn
-ax.plot(sam_df["TrendSAM"], color="blue", linewidth=2.5, label="TrendSAM")
+ax.plot(sam_df["TrendSAM"], 
+        color="blue", linewidth=2.5, label="TrendSAM")
 
 ax.set_title("SAM Indicator")
 ax.legend()
