@@ -180,21 +180,21 @@ tab_labels = ["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇺🇸 US Tech", "🇳
 selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
 
 if selected_tab == "🇺🇸 Dow Jones":
-    ticker_label = st.selectbox("Dow Jones aandeel", [f"{v}, {k}" for k, v in dow_tickers.items()], key="dow")
-    ticker, ticker_name = ticker_label.split(", ")
+    ticker_label = st.selectbox("Dow Jones aandeel", [f"{k} - {v}" for k, v in dow_tickers.items()], key="dow")
+    ticker, ticker_name = ticker_label.split(" - ", 1)
 
 elif selected_tab == "🇺🇸 Nasdaq":
-    ticker_label = st.selectbox("Nasdaq aandeel", [f"{v}, {k}" for k, v in nasdaq_tickers.items()], key="nasdaq")
-    ticker, ticker_name = ticker_label.split(", ")
+    ticker_label = st.selectbox("Nasdaq aandeel", [f"{k} - {v}" for k, v in nasdaq_tickers.items()], key="nasdaq")
+    ticker, ticker_name = ticker_label.split(" - ", 1)
 
 elif selected_tab == "🇺🇸 US Tech":
-    ticker_label = st.selectbox("US Tech aandeel", [f"{v}, {k}" for k, v in ustech_tickers.items()], key="ustech")
-    ticker, ticker_name = ticker_label.split(", ")
+    ticker_label = st.selectbox("US Tech aandeel", [f"{k} - {v}" for k, v in ustech_tickers.items()], key="ustech")
+    ticker, ticker_name = ticker_label.split(" - ", 1)
 
 else:  # AEX
-    ticker_label = st.selectbox("AEX aandeel", [f"{v}, {k}" for k, v in aex_tickers.items()], key="aex")
-    ticker, ticker_name = ticker_label.split(", ")
-
+    ticker_label = st.selectbox("AEX aandeel", [f"{k} - {v}" for k, v in aex_tickers.items()], key="aex")
+    ticker, ticker_name = ticker_label.split(" - ", 1)
+    
 # --- Andere instellingen ---
 interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
 interval = "1d" if interval_optie == "Dagelijks" else "1wk"
