@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # --- Functie om data op te halen ---
+# --- Functie om data op te halen ---
 def fetch_data(ticker, interval):
     if interval == "15m":
         period = "7d"
@@ -19,13 +20,13 @@ def fetch_data(ticker, interval):
 
     df = yf.download(ticker, interval=interval, period=period)
 
-    # Filter dagen zonder volume (geen handel)
     # Verwijder rijen zonder handel (geen volume of geen koersverandering)
-df = df[
-    (df["Volume"] > 0) &
-    ((df["Open"] != df["Close"]) | (df["High"] != df["Low"]))
- ]
- return df
+    df = df[
+        (df["Volume"] > 0) &
+        ((df["Open"] != df["Close"]) | (df["High"] != df["Low"]))
+    ]
+
+    return df
 
 #def fetch_data(ticker, interval):
     # Bepaal de periode op basis van het gekozen interval
