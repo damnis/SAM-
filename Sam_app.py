@@ -25,7 +25,7 @@ def fetch_data(ticker, interval):
         (df["Volume"] > 0) &
         ((df["Open"] != df["Close"]) | (df["High"] != df["Low"]))
     ]
-    df = df.reset_index()
+  #  df = df.reset_index()
     # Extra stap (optioneel): zorg dat datetime correct is, en sorteer
    # df = df.sort_values("Date" if "Date" in df.columns else "Datetime")
 
