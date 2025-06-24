@@ -109,56 +109,51 @@ def determine_advice(df, threshold):
     return df, huidig_advies
     
 # --- Streamlit UI ---
-# --- Streamlit UI ---
 st.title("📊 SAM Trading Indicator")
 
-# Volledige namen per ticker
+# --- Volledige tickerlijsten ---
 aex_tickers = {
-    'ABN': 'ABN AMRO', 'ADYEN': 'Adyen', 'AEGN': 'Aegon', 'AD': 'Koninklijke Ahold Delhaize',
-    'AKZA': 'Akzo Nobel', 'MT': 'ArcelorMittal', 'ASM': 'ASM International', 'ASML': 'ASML Holding',
+    'ABN': 'ABN AMRO', 'ADYEN': 'Adyen', 'AEGN': 'Aegon', 'AD': 'Ahold Delhaize',
+    'AKZA': 'Akzo Nobel', 'MT': 'ArcelorMittal', 'ASM': 'ASM International', 'ASML': 'ASML',
     'ASRNL': 'ASR Nederland', 'BESI': 'BE Semiconductor', 'DSFIR': 'DS Smith', 'GALAP': 'Galapagos',
     'HEIA': 'Heineken', 'IMCD': 'IMCD Group', 'INGA': 'ING Groep', 'JUST': 'Just Eat Takeaway',
     'KPN': 'KPN', 'NN': 'NN Group', 'PHIA': 'Philips', 'PRX': 'Prosus', 'RAND': 'Randstad',
     'REN': 'RELX', 'SHELL': 'Shell', 'UNA': 'Unilever', 'WKL': 'Wolters Kluwer'
 }
-
 dow_tickers = {
     'MMM': '3M', 'AXP': 'American Express', 'AMGN': 'Amgen', 'AAPL': 'Apple', 'BA': 'Boeing',
-    'CAT': 'Caterpillar', 'CVX': 'Chevron', 'CSCO': 'Cisco', 'KO': 'Coca-Cola', 'DIS': 'Walt Disney',
+    'CAT': 'Caterpillar', 'CVX': 'Chevron', 'CSCO': 'Cisco', 'KO': 'Coca-Cola', 'DIS': 'Disney',
     'GS': 'Goldman Sachs', 'HD': 'Home Depot', 'HON': 'Honeywell', 'IBM': 'IBM', 'INTC': 'Intel',
     'JPM': 'JPMorgan Chase', 'JNJ': 'Johnson & Johnson', 'MCD': 'McDonald’s', 'MRK': 'Merck',
     'MSFT': 'Microsoft', 'NKE': 'Nike', 'PG': 'Procter & Gamble', 'CRM': 'Salesforce',
     'TRV': 'Travelers', 'UNH': 'UnitedHealth', 'VZ': 'Verizon', 'V': 'Visa', 'WMT': 'Walmart',
-    'DOW': 'Dow', 'RTX': 'RTX Corp.', 'WBA': 'Walgreens Boots Alliance'
+    'DOW': 'Dow', 'RTX': 'RTX Corp.', 'WBA': 'Walgreens Boots'
 }
-
 nasdaq_tickers = {
-    'MSFT': 'Microsoft', 'NVDA': 'NVIDIA', 'AAPL': 'Apple', 'AMZN': 'Amazon', 'META': 'Meta Platforms',
+    'MSFT': 'Microsoft', 'NVDA': 'NVIDIA', 'AAPL': 'Apple', 'AMZN': 'Amazon', 'META': 'Meta',
     'NFLX': 'Netflix', 'GOOG': 'Google', 'GOOGL': 'Alphabet', 'TSLA': 'Tesla', 'CSCO': 'Cisco',
     'INTC': 'Intel', 'ADBE': 'Adobe', 'CMCSA': 'Comcast', 'PEP': 'PepsiCo', 'COST': 'Costco',
     'AVGO': 'Broadcom', 'QCOM': 'Qualcomm', 'TMUS': 'T-Mobile', 'TXN': 'Texas Instruments',
     'AMAT': 'Applied Materials'
 }
 
-# Tabs met dropdowns
-tab1, tab2, tab3 = st.tabs(["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇳🇱 AEX"])
+# --- Tabs met selecties ---
+tab_labels = ["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇳🇱 AEX"]
+selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
 
-with tab1:
-    selected_dow = st.selectbox("Selecteer aandeel uit Dow Jones", [f"{k} - {v}" for k, v in dow_tickers.items()])
-with tab2:
-    selected_nasdaq = st.selectbox("Selecteer aandeel uit Nasdaq", [f"{k} - {v}" for k, v in nasdaq_tickers.items()])
-with tab3:
-    selected_aex = st.selectbox("Selecteer aandeel uit AEX", [f"{k} - {v}" for k, v in aex_tickers.items()])
+if selected_tab == "🇺🇸 Dow Jones":
+    ticker_label = st.selectbox("Dow Jones aandeel", [f"{k} - {v}" for k, v in dow_tickers.items()], key="dow")
+    ticker = ticker_label.split(" - ")[0]
 
-# Bepaal actieve ticker op basis van geselecteerd tabblad
-if tab1:
-    ticker = selected_dow.split(" - ")[0]
-elif tab2:
-    ticker = selected_nasdaq.split(" - ")[0]
-else:
-    ticker = selected_aex.split(" - ")[0]
+elif selected_tab == "🇺🇸 Nasdaq":
+    ticker_label = st.selectbox("Nasdaq aandeel", [f"{k} - {v}" for k, v in nasdaq_tickers.items()], key="nasdaq")
+    ticker = ticker_label.split(" - ")[0]
 
-# Rest van de gebruikersinstellingen
+else:  # AEX
+    ticker_label = st.selectbox("AEX aandeel", [f"{k} - {v}" for k, v in aex_tickers.items()], key="aex")
+    ticker = ticker_label.split(" - ")[0]
+
+# --- Andere instellingen ---
 interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
 interval = "1d" if interval_optie == "Dagelijks" else "1wk"
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
