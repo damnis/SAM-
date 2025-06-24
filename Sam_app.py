@@ -291,6 +291,10 @@ st.markdown(
 #    unsafe_allow_html=True
 #)
 
+import matplotlib.pyplot as plt
+import streamlit as st
+
+# --- Grafiek met SAM en Trend ---
 fig, ax1 = plt.subplots(figsize=(10, 4))
 ax1.bar(df.index, df["SAM"], color="lightblue", label="SAM")
 ax2 = ax1.twinx()
@@ -300,43 +304,29 @@ ax2.set_ylabel("Trend")
 fig.tight_layout()
 st.pyplot(fig)
 
-# Tabel met advies
+# --- Tabel met signalen en rendement ---
 st.subheader("Laatste signalen en rendement")
-# --- Laatste rijen en formattering ---
+
+# Kolommen selecteren en formatteren
 kolommen = ["Close", "Advies", "SAM", "Trend", "Markt-%", "SAM-%"]
 tabel = df[kolommen].dropna().tail(30).round(3).copy()
 
-# Voeg datum toe vanuit index (in formaat dd-mm-jjjj)
-#tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
-
-# Zorg dat de index datetime is (nodig voor strftime)
-if not isinstance(df.index, pd.DatetimeIndex):
-    df.index = pd.to_datetime(df.index, errors="coerce")
-
-# Verwijder rijen met ongeldige (NaT) indexen
-df = df[~df.index.isna()]
-
-# Bouw de tabel opnieuw
-tabel = df[kolommen].dropna().tail(30).round(3).copy()
-
-# Voeg datum toe vanuit index (in formaat dd-mm-jjjj)
+# Datumkolom aanmaken vanuit index
+if not isinstance(tabel.index, pd.DatetimeIndex):
+    tabel.index = pd.to_datetime(tabel.index, errors="coerce")
+tabel = tabel[~tabel.index.isna()]
 tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
 
-# Zet kolomvolgorde: eerst Datum
-# Zet kolomvolgorde: eerst Datum
+# Zet kolomvolgorde
 tabel = tabel[["Datum"] + kolommen]
 
-# Rond andere kolommen af op 3 decimalen (behalve percentages)
+# Afronding en formatting
 for kolom in ["Close", "SAM", "Trend"]:
     tabel[kolom] = tabel[kolom].round(3)
-
-# Format percentagekolommen netjes als 1.24% of -1.24%
 tabel["Markt-%"] = (tabel["Markt-%"].astype(float) * 100).map("{:+.2f}%".format)
 tabel["SAM-%"] = (tabel["SAM-%"].astype(float) * 100).map("{:+.2f}%".format)
-#tabel["Markt-%"] = (tabel["Markt-%"] * 100).map("{:+.2f}%".format)
-#tabel["SAM-%"] = (tabel["SAM-%"] * 100).map("{:+.2f}%".format)
 
-# HTML-tabel bouwen met aangepaste styling
+# HTML-rendering
 html = """
 <style>
     table {
@@ -354,7 +344,7 @@ html = """
     td {
         border: 1px solid #ddd;
         padding: 6px;
-        text-align: right; color: #222222;
+        text-align: right;
         background-color: #f9f9f9;
         color: #222222;
     }
@@ -380,7 +370,7 @@ html = """
     <tbody>
 """
 
-# Rijen toevoegen aan HTML
+# Voeg rijen toe aan de tabel
 for _, row in tabel.iterrows():
     html += "<tr>"
     for value in row:
@@ -389,15 +379,9 @@ for _, row in tabel.iterrows():
 
 html += "</tbody></table>"
 
-# HTML weergeven in Streamlit
-import streamlit as st
-#st.subheader("Laatste signalen en rendement (HTML)")
-#st.markdown(
-#    tabel.to_html(index=False, escape=False),
-#    unsafe_allow_html=True
-# )
-
+# Weergave in Streamlit
 st.markdown(html, unsafe_allow_html=True)
+
 
 
 
