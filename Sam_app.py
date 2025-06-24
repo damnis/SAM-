@@ -149,14 +149,30 @@ nasdaq_tickers = [
 ]
 
 # --- Selecties ---
-def make_dropdown(tickers, label):
+def make_dropdown(tickers, label, default_index=0, initial_active=False):
     display_names = [f"{symbol} - {name}" for symbol, name in tickers]
-    keuze = st.selectbox(label, ["(Geen selectie)"] + display_names)
-    return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
+    opties = ["(Geen selectie)"] + display_names
 
-ticker_dow = make_dropdown(dow_tickers, "Dow Jones Selectie")
+    # Bepaal de standaardindex (1 betekent eerste ticker, 0 betekent "Geen selectie")
+    index = 1 + default_index if initial_active else 0
+
+    keuze = st.selectbox(label, opties, index=index)
+    return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
+    
+#def make_dropdown(tickers, label):
+ #   display_names = [f"{symbol} - {name}" for symbol, name in tickers]
+  #  keuze = st.selectbox(label, ["(Geen selectie)"] + display_names)
+ #   return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
+
+# dow krijgt standaard een waarde (bijv. ABN, index 0)
+ticker_dow = make_dropdown(dow_tickers, "Dow Jones Selectie", default_index=0, initial_active=True)
+
+# Andere dropdowns starten leeg
 ticker_nasdaq = make_dropdown(nasdaq_tickers, "Nasdaq Selectie")
 ticker_aex = make_dropdown(aex_tickers, "AEX Selectie")
+#ticker_dow = make_dropdown(dow_tickers, "Dow Jones Selectie")
+#ticker_nasdaq = make_dropdown(nasdaq_tickers, "Nasdaq Selectie")
+#ticker_aex = make_dropdown(aex_tickers, "AEX Selectie")
 
 # --- Kies de geselecteerde ticker (één tegelijk) ---
 ticker =  ticker_dow or ticker_nasdaq or ticker_aex 
