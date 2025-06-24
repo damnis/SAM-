@@ -157,21 +157,59 @@ nasdaq_tickers = {
     'AMAT': 'Applied Materials'
 }
 
+us_tech_tickers = {
+    "Super Micro Computer": "SMCI",
+    "Palantir": "PLTR",
+    "Snowflake": "SNOW",
+    "NVIDIA": "NVDA",
+    "AMD": "AMD",
+    "MongoDB": "MDB",
+    "Datadog": "DDOG",
+    "CrowdStrike": "CRWD",
+    "Zscaler": "ZS",
+    "Tesla": "TSLA",
+    "Apple": "AAPL",
+    "Alphabet (GOOGL)": "GOOGL",
+    "Microsoft": "MSFT",
+    # voeg gerust meer toe
+}
+
+
 # --- Tabs met selecties ---
-tab_labels = ["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇳🇱 AEX"]
+tab_labels = ["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇺🇸 US Tech", "🇳🇱 AEX"]
 selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
+# Dow
+with tab1:
+    ticker_name = st.selectbox("Selecteer een Dow Jones aandeel", list(dow_tickers.keys()))
+    ticker = dow_tickers[ticker_name]
 
-if selected_tab == "🇺🇸 Dow Jones":
-    ticker_label = st.selectbox("Dow Jones aandeel", [f"{k} - {v}" for k, v in dow_tickers.items()], key="dow")
-    ticker = ticker_label.split(" - ")[0]
+# Nasdaq
+with tab2:
+    ticker_name = st.selectbox("Selecteer een Nasdaq aandeel", list(nasdaq_tickers.keys()))
+    ticker = nasdaq_tickers[ticker_name]
+    
+# US Tech
+with tab3:
+    ticker_name = st.selectbox("Selecteer een US Tech aandeel", list(us_tech_tickers.keys()))
+    ticker = us_tech_tickers[ticker_name]
 
-elif selected_tab == "🇺🇸 Nasdaq":
-    ticker_label = st.selectbox("Nasdaq aandeel", [f"{k} - {v}" for k, v in nasdaq_tickers.items()], key="nasdaq")
-    ticker = ticker_label.split(" - ")[0]
+# AEX
+with tab4:
+    ticker_name = st.selectbox("Selecteer een AEX aandeel", list(aex_tickers.keys()))
+    ticker = aex_tickers[ticker_name]
+    
 
-else:  # AEX
-    ticker_label = st.selectbox("AEX aandeel", [f"{k} - {v}" for k, v in aex_tickers.items()], key="aex")
-    ticker = ticker_label.split(" - ")[0]
+#if selected_tab == "🇺🇸 Dow Jones":
+#    ticker_label = st.selectbox("Dow Jones aandeel", [f"{k} - {v}" for k, v in dow_tickers.items()], key="dow")
+#    ticker = ticker_label.split(" - ")[0]
+
+#elif selected_tab == "🇺🇸 Nasdaq":
+#    ticker_label = st.selectbox("Nasdaq aandeel", [f"{k} - {v}" for k, v in nasdaq_tickers.items()], key="nasdaq")
+#    ticker = ticker_label.split(" - ")[0]
+
+#else:  # AEX
+#    ticker_label = st.selectbox("AEX aandeel", [f"{k} - {v}" for k, v in aex_tickers.items()], key="aex")
+#    ticker = ticker_label.split(" - ")[0]
 
 # --- Andere instellingen ---
 interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
