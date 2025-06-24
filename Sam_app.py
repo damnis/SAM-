@@ -196,8 +196,15 @@ else:  # AEX
     ticker, ticker_name = ticker_label.split(" - ", 1)
     
 # --- Andere instellingen ---
-interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
-interval = "1d" if interval_optie == "Dagelijks" else "1wk"
+interval_optie = st.selectbox("Kies de interval", ["4-uur", "Dagelijks", "Wekelijks"])
+if interval_optie == "4-uur":
+    interval = "4h"
+elif interval_optie == "Dagelijks":
+    interval = "1d"
+else:  # Wekelijks
+    interval = "1wk"
+#interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
+#interval = "1d" if interval_optie == "Dagelijks" else "1wk"
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
 # vanaf hier
