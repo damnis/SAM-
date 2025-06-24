@@ -366,8 +366,21 @@ kolommen = ["Close", "Advies", "SAM", "Trend", "Markt-%", "SAM-%"]
 tabel = df[kolommen].dropna().tail(30).round(3).copy()
 
 # Voeg datum toe vanuit index (in formaat dd-mm-jjjj)
+#tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
+
+# Zorg dat de index datetime is (nodig voor strftime)
+df.index = pd.to_datetime(df.index, errors="coerce")
+
+# Verwijder rijen met ongeldige (NaT) indexen
+df = df[~df.index.isna()]
+
+# Bouw de tabel opnieuw
+tabel = df[kolommen].dropna().tail(30).round(3).copy()
+
+# Voeg datum toe vanuit index (in formaat dd-mm-jjjj)
 tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
 
+# Zet kolomvolgorde: eerst Datum
 # Zet kolomvolgorde: eerst Datum
 tabel = tabel[["Datum"] + kolommen]
 
