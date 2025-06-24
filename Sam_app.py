@@ -31,10 +31,10 @@ return df
 #    period = f"{360}{'d' if interval == '1d' else 'wk'}"  # "360d" of "360wk"
     
     # Download koersdata met de juiste interval en periode
-    df = yf.download(ticker, period=period, interval=interval)
-    df = df[["Open", "High", "Low", "Close"]]
-    df.dropna(inplace=True)
-return df
+#    df = yf.download(ticker, period=period, interval=interval)
+#    df = df[["Open", "High", "Low", "Close"]]
+#    df.dropna(inplace=True)
+#return df
     
 # --- SAM Indicatorberekeningen ---
 def calculate_sam(df):
