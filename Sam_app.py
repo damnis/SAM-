@@ -158,7 +158,7 @@ nasdaq_tickers = {
 }
 
 ustech_tickers = {
-    "Super Micro Computer": "SMCI",
+#    "Super Micro Computer": "SMCI",
     "Palantir": "PLTR",
     "Snowflake": "SNOW",
     "NVIDIA": "NVDA",
