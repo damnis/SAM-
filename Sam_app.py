@@ -7,7 +7,18 @@ import matplotlib.pyplot as plt
 # --- Functie om data op te halen ---
 def fetch_data(ticker, interval):
     # Bepaal de periode op basis van het gekozen interval
-    period = f"{360}{'d' if interval == '1d' else 'wk'}"  # "360d" of "360wk"
+    if interval == "4h":
+        period = "60d"  # Maximaal bereik voor 4-uursdata, anders krijg je niks terug
+    elif interval == "1d":
+        period = "360d"
+    else:  # "1wk"
+        period = "360wk"
+
+    data = yf.download(ticker, interval=interval, period=period)
+    return data
+#def fetch_data(ticker, interval):
+    # Bepaal de periode op basis van het gekozen interval
+#    period = f"{360}{'d' if interval == '1d' else 'wk'}"  # "360d" of "360wk"
     
     # Download koersdata met de juiste interval en periode
     df = yf.download(ticker, period=period, interval=interval)
