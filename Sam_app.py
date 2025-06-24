@@ -179,7 +179,7 @@ us_tech_tickers = {
 tab_labels = ["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇺🇸 US Tech", "🇳🇱 AEX"]
 selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
 # Dow
-with tab1:
+with tab"🇺🇸 Dow Jones":
     ticker_name = st.selectbox("Selecteer een Dow Jones aandeel", list(dow_tickers.keys()))
     ticker = dow_tickers[ticker_name]
 
