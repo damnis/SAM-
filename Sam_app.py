@@ -158,20 +158,19 @@ nasdaq_tickers = {
 }
 
 ustech_tickers = {
-#    "Super Micro Computer": "SMCI",
-    "Palantir": "PLTR",
-    "Snowflake": "SNOW",
-    "NVIDIA": "NVDA",
+    "SMCI": "Super Micro Computer",
+    "PLTR": "Palantir",
+    "SNOW": "Snowflake",
+    "NVDA": "NVIDIA",
     "AMD": "AMD",
-    "MongoDB": "MDB",
-    "Datadog": "DDOG",
-    "CrowdStrike": "CRWD",
-    "Zscaler": "ZS",
-    "Tesla": "TSLA",
-    "Apple": "AAPL",
-    "Alphabet (GOOGL)": "GOOGL",
-    "Microsoft": "MSFT",
-    # voeg gerust meer toe
+    "MDB": "MongoDB",
+    "DDOG": "Datadog",
+    "CRWD": "CrowdStrike",
+    "ZS": "Zscaler",
+    "TSLA": "Tesla",
+    "AAPL": "Apple",
+    "GOOGL": "Alphabet (GOOGL)",
+    "MSFT": "Microsoft"
 }
 
 
