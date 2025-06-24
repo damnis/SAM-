@@ -340,6 +340,13 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+#st.markdown(
+#    f"""
+#    <h2>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker}</span></h2>
+#    <h3 style='color:{advies_kleur}'>Huidig advies: {huidig_advies}</h3>
+#    """,
+#    unsafe_allow_html=True
+#)
 
 fig, ax1 = plt.subplots(figsize=(10, 4))
 ax1.bar(df.index, df["SAM"], color="lightblue", label="SAM")
