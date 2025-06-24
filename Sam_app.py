@@ -109,32 +109,91 @@ def determine_advice(df, threshold):
     return df, huidig_advies
     
 # --- Streamlit UI ---
+import streamlit as st
+
 st.title("📊 SAM Trading Indicator")
-all_tickers = [
-    # AEX
-    'ABN', 'ADYEN', 'AEGN', 'AD', 'AKZA', 'MT', 'ASM', 'ASML',
-    'ASRNL', 'BESI', 'DSFIR', 'GALAP', 'HEIA', 'IMCD', 'INGA',
-    'JUST', 'KPN', 'NN', 'PHIA', 'PRX', 'RAND', 'REN', 'SHELL',
-    'UNA', 'WKL',
-    # Dow Jones
-    'MMM', 'AXP', 'AMGN', 'AAPL', 'BA', 'CAT', 'CVX', 'CSCO', 'KO',
-    'DIS', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JPM', 'JNJ', 'MCD',
-    'MRK', 'MSFT', 'NKE', 'PG', 'CRM', 'TRV', 'UNH', 'VZ', 'V',
-    'WMT', 'DOW', 'RTX', 'WBA',
-    # Nasdaq‑100 (voorbeeldsubset – uitbreiden naar ~100)
-    'MSFT', 'NVDA', 'AAPL', 'AMZN', 'META', 'NFLX', 'GOOG', 'GOOGL',
-    'TSLA', 'CSCO', 'INTC', 'ADBE', 'CMCSA', 'PEP', 'COST', 'AVGO',
-    'QCOM', 'TMUS', 'TXN', 'AMAT', 'AMD', 'CHTR', 'SBUX', 'MDLZ',
-    'PYPL', 'INTU', 'BKNG', 'ISRG', 'ADP', 'GILD', 'CSX', 'MU',
-    'LRCX', 'MELI', 'MRVL', 'PANW', 'MCHP', 'NXPI', 'ORLY', 'VRTX',
-    'ROST', 'MAR', 'DOCU', 'SNPS', 'ZM', 'WDAY', 'KHC', 'REGN'
-    # vul verder aan tot ~150 tickers
+
+# --- Tickerlijsten per beurs ---
+aex_tickers = [
+    ("ABN", "ABN AMRO"), ("ADYEN", "Adyen"), ("AEGN", "Aegon"), ("AD", "Koninklijke Ahold Delhaize"),
+    ("AKZA", "AkzoNobel"), ("MT", "ArcelorMittal"), ("ASM", "ASM International"),
+    ("ASML", "ASML Holding"), ("ASRNL", "ASR Nederland"), ("BESI", "BE Semiconductor"),
+    ("DSFIR", "DSM-Firmenich"), ("GALAP", "Galapagos"), ("HEIA", "Heineken"),
+    ("IMCD", "IMCD Group"), ("INGA", "ING Groep"), ("JUST", "Just Eat Takeaway"),
+    ("KPN", "KPN"), ("NN", "NN Group"), ("PHIA", "Philips"), ("PRX", "Prosus"),
+    ("RAND", "Randstad"), ("REN", "Renewi"), ("SHELL", "Shell"), ("UNA", "Unilever"), ("WKL", "Wolters Kluwer")
 ]
 
-ticker = st.selectbox("Selecteer een aandeel (AEX, Dow, Nasdaq)", all_tickers)
-interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
-interval = "1d" if interval_optie == "Dagelijks" else "1wk"
-thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
+dow_tickers = [
+    ("MMM", "3M"), ("AXP", "American Express"), ("AMGN", "Amgen"), ("AAPL", "Apple"),
+    ("BA", "Boeing"), ("CAT", "Caterpillar"), ("CVX", "Chevron"), ("CSCO", "Cisco"),
+    ("KO", "Coca-Cola"), ("DIS", "Disney"), ("GS", "Goldman Sachs"), ("HD", "Home Depot"),
+    ("HON", "Honeywell"), ("IBM", "IBM"), ("INTC", "Intel"), ("JPM", "JPMorgan Chase"),
+    ("JNJ", "Johnson & Johnson"), ("MCD", "McDonald's"), ("MRK", "Merck"),
+    ("MSFT", "Microsoft"), ("NKE", "Nike"), ("PG", "Procter & Gamble"),
+    ("CRM", "Salesforce"), ("TRV", "Travelers"), ("UNH", "UnitedHealth"),
+    ("VZ", "Verizon"), ("V", "Visa"), ("WMT", "Walmart"), ("DOW", "Dow Inc."),
+    ("RTX", "Raytheon Technologies"), ("WBA", "Walgreens Boots Alliance")
+]
+
+nasdaq_tickers = [
+    ("MSFT", "Microsoft"), ("NVDA", "NVIDIA"), ("AAPL", "Apple"), ("AMZN", "Amazon"),
+    ("META", "Meta"), ("NFLX", "Netflix"), ("GOOG", "Google (GOOG)"), ("GOOGL", "Google (GOOGL)"),
+    ("TSLA", "Tesla"), ("CSCO", "Cisco"), ("INTC", "Intel"), ("ADBE", "Adobe"),
+    ("CMCSA", "Comcast"), ("PEP", "PepsiCo"), ("COST", "Costco"), ("AVGO", "Broadcom"),
+    ("QCOM", "Qualcomm"), ("TMUS", "T-Mobile US"), ("TXN", "Texas Instruments"),
+    ("AMAT", "Applied Materials"), ("AMD", "AMD"), ("CHTR", "Charter Communications"),
+    ("SBUX", "Starbucks"), ("MDLZ", "Mondelez"), ("PYPL", "PayPal"),
+    ("INTU", "Intuit"), ("BKNG", "Booking Holdings"), ("ISRG", "Intuitive Surgical"),
+    ("ADP", "ADP"), ("GILD", "Gilead Sciences")
+]
+
+# --- Selecties ---
+def make_dropdown(tickers, label):
+    display_names = [f"{symbol} - {name}" for symbol, name in tickers]
+    keuze = st.selectbox(label, ["(Geen selectie)"] + display_names)
+    return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
+
+ticker_aex = make_dropdown(aex_tickers, "AEX Selectie")
+ticker_dow = make_dropdown(dow_tickers, "Dow Jones Selectie")
+ticker_nasdaq = make_dropdown(nasdaq_tickers, "Nasdaq Selectie")
+
+# --- Kies de geselecteerde ticker (één tegelijk) ---
+ticker = ticker_aex or ticker_dow or ticker_nasdaq
+
+# --- Alleen doorgaan als er een is gekozen ---
+if ticker:
+    interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
+    interval = "1d" if interval_optie == "Dagelijks" else "1wk"
+    thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
+
+    # Je kunt nu `ticker` gebruiken in je download/verwerking
+#st.title("📊 SAM Trading Indicator")
+#all_tickers = [
+    # AEX
+#    'ABN', 'ADYEN', 'AEGN', 'AD', 'AKZA', 'MT', 'ASM', 'ASML',
+#    'ASRNL', 'BESI', 'DSFIR', 'GALAP', 'HEIA', 'IMCD', 'INGA',
+#    'JUST', 'KPN', 'NN', 'PHIA', 'PRX', 'RAND', 'REN', 'SHELL',
+ #   'UNA', 'WKL',
+    # Dow Jones
+ #   'MMM', 'AXP', 'AMGN', 'AAPL', 'BA', 'CAT', 'CVX', 'CSCO', 'KO',
+ #   'DIS', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JPM', 'JNJ', 'MCD',
+ #   'MRK', 'MSFT', 'NKE', 'PG', 'CRM', 'TRV', 'UNH', 'VZ', 'V',
+ #   'WMT', 'DOW', 'RTX', 'WBA',
+    # Nasdaq‑100 (voorbeeldsubset – uitbreiden naar ~100)
+ #   'MSFT', 'NVDA', 'AAPL', 'AMZN', 'META', 'NFLX', 'GOOG', 'GOOGL',
+ #   'TSLA', 'CSCO', 'INTC', 'ADBE', 'CMCSA', 'PEP', 'COST', 'AVGO',
+ #   'QCOM', 'TMUS', 'TXN', 'AMAT', 'AMD', 'CHTR', 'SBUX', 'MDLZ',
+ #   'PYPL', 'INTU', 'BKNG', 'ISRG', 'ADP', 'GILD', 'CSX', 'MU',
+ #   'LRCX', 'MELI', 'MRVL', 'PANW', 'MCHP', 'NXPI', 'ORLY', 'VRTX',
+ #   'ROST', 'MAR', 'DOCU', 'SNPS', 'ZM', 'WDAY', 'KHC', 'REGN'
+    # vul verder aan tot ~150 tickers
+#]
+
+#ticker = st.selectbox("Selecteer een aandeel (AEX, Dow, Nasdaq)", all_tickers)
+#interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
+#interval = "1d" if interval_optie == "Dagelijks" else "1wk"
+#thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
 # Berekening
 df = fetch_data(ticker, interval)
