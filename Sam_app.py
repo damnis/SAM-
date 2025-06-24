@@ -180,6 +180,14 @@ tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
 # Zet kolomvolgorde: eerst Datum
 tabel = tabel[["Datum"] + kolommen]
 
+# Rond andere kolommen af op 3 decimalen (behalve percentages)
+for kolom in ["Close", "SAM", "Trend"]:
+    tabel[kolom] = tabel[kolom].round(3)
+
+# Format percentagekolommen netjes als 1.24% of -1.24%
+tabel["Markt-%"] = (tabel["Markt-%"] * 100).map("{:+.2f}%".format)
+tabel["SAM
+
 # HTML-tabel bouwen met aangepaste styling
 html = """
 <style>
