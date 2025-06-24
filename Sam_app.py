@@ -369,7 +369,8 @@ tabel = df[kolommen].dropna().tail(30).round(3).copy()
 #tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
 
 # Zorg dat de index datetime is (nodig voor strftime)
-df.index = pd.to_datetime(df.index, errors="coerce")
+if not isinstance(df.index, pd.DatetimeIndex):
+    df.index = pd.to_datetime(df.index, errors="coerce")
 
 # Verwijder rijen met ongeldige (NaT) indexen
 df = df[~df.index.isna()]
