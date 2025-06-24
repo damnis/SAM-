@@ -188,7 +188,7 @@ elif selected_tab == "🇺🇸 Nasdaq":
     ticker, ticker_name = ticker_label.split(", ")
 
 elif selected_tab == "🇺🇸 US Tech":
-    ticker_label = st.selectbox("US Tech aandeel", [f"{v}, {k}" for k, v in us_tech_tickers.items()], key="ustech")
+    ticker_label = st.selectbox("US Tech aandeel", [f"{v}, {k}" for k, v in ustech_tickers.items()], key="ustech")
     ticker, ticker_name = ticker_label.split(", ")
 
 else:  # AEX
