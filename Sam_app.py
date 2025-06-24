@@ -25,7 +25,7 @@ df = df[
     (df["Volume"] > 0) &
     ((df["Open"] != df["Close"]) | (df["High"] != df["Low"]))
 ]
-     return df
+return df
 #def fetch_data(ticker, interval):
     # Bepaal de periode op basis van het gekozen interval
 #    period = f"{360}{'d' if interval == '1d' else 'wk'}"  # "360d" of "360wk"
