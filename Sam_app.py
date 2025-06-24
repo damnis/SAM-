@@ -34,7 +34,7 @@ return df
     df = yf.download(ticker, period=period, interval=interval)
     df = df[["Open", "High", "Low", "Close"]]
     df.dropna(inplace=True)
-    return df
+return df
     
 # --- SAM Indicatorberekeningen ---
 def calculate_sam(df):
