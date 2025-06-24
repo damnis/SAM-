@@ -170,8 +170,8 @@ with tab_aex:
     ticker = toon_dropdown(aex_tickers)
 
 # Nu kun je 'ticker' gebruiken zoals voorheen in je code
-electbox(label, opties, index=index)
-    return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
+# selectbox(label, opties, index=index)
+#    return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
     
 #def make_dropdown(tickers, label):
  #   display_names = [f"{symbol} - {name}" for symbol, name in tickers]
