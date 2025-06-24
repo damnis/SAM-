@@ -111,52 +111,66 @@ def determine_advice(df, threshold):
 # --- Streamlit UI ---
 import streamlit as st
 
-st.title("📊 SAM Trading Indicator")
-
-# --- Tickerlijsten per beurs ---
+# --- Aandelen per beurs met volledige naam ---
 aex_tickers = [
-    ("ABN", "ABN AMRO"), ("ADYEN", "Adyen"), ("AEGN", "Aegon"), ("AD", "Koninklijke Ahold Delhaize"),
-    ("AKZA", "AkzoNobel"), ("MT", "ArcelorMittal"), ("ASM", "ASM International"),
-    ("ASML", "ASML Holding"), ("ASRNL", "ASR Nederland"), ("BESI", "BE Semiconductor"),
-    ("DSFIR", "DSM-Firmenich"), ("GALAP", "Galapagos"), ("HEIA", "Heineken"),
-    ("IMCD", "IMCD Group"), ("INGA", "ING Groep"), ("JUST", "Just Eat Takeaway"),
-    ("KPN", "KPN"), ("NN", "NN Group"), ("PHIA", "Philips"), ("PRX", "Prosus"),
-    ("RAND", "Randstad"), ("REN", "Renewi"), ("SHELL", "Shell"), ("UNA", "Unilever"), ("WKL", "Wolters Kluwer")
+    ('ABN', 'ABN AMRO'), ('ADYEN', 'Adyen'), ('AEGN', 'Aegon'), ('AD', 'Koninklijke Ahold Delhaize'),
+    ('AKZA', 'Akzo Nobel'), ('MT', 'ArcelorMittal'), ('ASM', 'ASM International'), ('ASML', 'ASML Holding'),
+    ('ASRNL', 'ASR Nederland'), ('BESI', 'BE Semiconductor'), ('DSFIR', 'DSM-Firmenich'),
+    ('GALAP', 'Galapagos'), ('HEIA', 'Heineken'), ('IMCD', 'IMCD Group'), ('INGA', 'ING Groep'),
+    ('JUST', 'Just Eat Takeaway'), ('KPN', 'KPN'), ('NN', 'NN Group'), ('PHIA', 'Philips'),
+    ('PRX', 'Prosus'), ('RAND', 'Randstad'), ('REN', 'Renewi'), ('SHELL', 'Shell'),
+    ('UNA', 'Unilever'), ('WKL', 'Wolters Kluwer')
 ]
 
 dow_tickers = [
-    ("MMM", "3M"), ("AXP", "American Express"), ("AMGN", "Amgen"), ("AAPL", "Apple"),
-    ("BA", "Boeing"), ("CAT", "Caterpillar"), ("CVX", "Chevron"), ("CSCO", "Cisco"),
-    ("KO", "Coca-Cola"), ("DIS", "Disney"), ("GS", "Goldman Sachs"), ("HD", "Home Depot"),
-    ("HON", "Honeywell"), ("IBM", "IBM"), ("INTC", "Intel"), ("JPM", "JPMorgan Chase"),
-    ("JNJ", "Johnson & Johnson"), ("MCD", "McDonald's"), ("MRK", "Merck"),
-    ("MSFT", "Microsoft"), ("NKE", "Nike"), ("PG", "Procter & Gamble"),
-    ("CRM", "Salesforce"), ("TRV", "Travelers"), ("UNH", "UnitedHealth"),
-    ("VZ", "Verizon"), ("V", "Visa"), ("WMT", "Walmart"), ("DOW", "Dow Inc."),
-    ("RTX", "Raytheon Technologies"), ("WBA", "Walgreens Boots Alliance")
+    ('MMM', '3M'), ('AXP', 'American Express'), ('AMGN', 'Amgen'), ('AAPL', 'Apple'), ('BA', 'Boeing'),
+    ('CAT', 'Caterpillar'), ('CVX', 'Chevron'), ('CSCO', 'Cisco'), ('KO', 'Coca-Cola'), ('DIS', 'Disney'),
+    ('GS', 'Goldman Sachs'), ('HD', 'Home Depot'), ('HON', 'Honeywell'), ('IBM', 'IBM'),
+    ('INTC', 'Intel'), ('JPM', 'JPMorgan Chase'), ('JNJ', 'Johnson & Johnson'), ('MCD', 'McDonald’s'),
+    ('MRK', 'Merck'), ('MSFT', 'Microsoft'), ('NKE', 'Nike'), ('PG', 'Procter & Gamble'),
+    ('CRM', 'Salesforce'), ('TRV', 'Travelers'), ('UNH', 'UnitedHealth'), ('VZ', 'Verizon'),
+    ('V', 'Visa'), ('WMT', 'Walmart'), ('DOW', 'Dow Inc.'), ('RTX', 'Raytheon Technologies'),
+    ('WBA', 'Walgreens Boots Alliance')
 ]
 
 nasdaq_tickers = [
-    ("MSFT", "Microsoft"), ("NVDA", "NVIDIA"), ("AAPL", "Apple"), ("AMZN", "Amazon"),
-    ("META", "Meta"), ("NFLX", "Netflix"), ("GOOG", "Google (GOOG)"), ("GOOGL", "Google (GOOGL)"),
-    ("TSLA", "Tesla"), ("CSCO", "Cisco"), ("INTC", "Intel"), ("ADBE", "Adobe"),
-    ("CMCSA", "Comcast"), ("PEP", "PepsiCo"), ("COST", "Costco"), ("AVGO", "Broadcom"),
-    ("QCOM", "Qualcomm"), ("TMUS", "T-Mobile US"), ("TXN", "Texas Instruments"),
-    ("AMAT", "Applied Materials"), ("AMD", "AMD"), ("CHTR", "Charter Communications"),
-    ("SBUX", "Starbucks"), ("MDLZ", "Mondelez"), ("PYPL", "PayPal"),
-    ("INTU", "Intuit"), ("BKNG", "Booking Holdings"), ("ISRG", "Intuitive Surgical"),
-    ("ADP", "ADP"), ("GILD", "Gilead Sciences")
+    ('MSFT', 'Microsoft'), ('NVDA', 'NVIDIA'), ('AAPL', 'Apple'), ('AMZN', 'Amazon'),
+    ('META', 'Meta'), ('NFLX', 'Netflix'), ('GOOG', 'Google'), ('GOOGL', 'Alphabet'),
+    ('TSLA', 'Tesla'), ('CSCO', 'Cisco'), ('INTC', 'Intel'), ('ADBE', 'Adobe'),
+    ('CMCSA', 'Comcast'), ('PEP', 'PepsiCo'), ('COST', 'Costco'), ('AVGO', 'Broadcom'),
+    ('QCOM', 'Qualcomm'), ('TMUS', 'T-Mobile US'), ('TXN', 'Texas Instruments'),
+    ('AMAT', 'Applied Materials'), ('AMD', 'AMD'), ('CHTR', 'Charter Communications'),
+    ('SBUX', 'Starbucks'), ('MDLZ', 'Mondelez'), ('PYPL', 'PayPal'), ('INTU', 'Intuit'),
+    ('BKNG', 'Booking Holdings'), ('ISRG', 'Intuitive Surgical'), ('ADP', 'ADP'),
+    ('GILD', 'Gilead'), ('CSX', 'CSX'), ('MU', 'Micron'), ('LRCX', 'Lam Research'),
+    ('MELI', 'MercadoLibre'), ('MRVL', 'Marvell'), ('PANW', 'Palo Alto Networks'),
+    ('MCHP', 'Microchip Tech'), ('NXPI', 'NXP Semiconductors'), ('ORLY', 'O’Reilly'),
+    ('VRTX', 'Vertex'), ('ROST', 'Ross Stores'), ('MAR', 'Marriott'), ('DOCU', 'DocuSign'),
+    ('SNPS', 'Synopsys'), ('ZM', 'Zoom'), ('WDAY', 'Workday'), ('KHC', 'Kraft Heinz'),
+    ('REGN', 'Regeneron')
 ]
 
-# --- Selecties ---
-def make_dropdown(tickers, label, default_index=0, initial_active=False):
-    display_names = [f"{symbol} - {name}" for symbol, name in tickers]
-    opties = ["(Geen selectie)"] + display_names
+# --- Tabs: Dow, Nasdaq, AEX ---
+tab_dow, tab_nasdaq, tab_aex = st.tabs(["🇺🇸 Dow Jones", "📈 Nasdaq", "🇳🇱 AEX"])
 
-    # Bepaal de standaardindex (1 betekent eerste ticker, 0 betekent "Geen selectie")
-    index = 1 + default_index if initial_active else 0
+# --- Functie voor selecteren ---
+def toon_dropdown(tickers):
+    opties = [f"{sym} - {naam}" for sym, naam in tickers]
+    keuze = st.selectbox("Selecteer aandeel", opties, index=0)
+    return keuze.split(" - ")[0]  # Alleen ticker symbool teruggeven
 
-    keuze = st.selectbox(label, opties, index=index)
+# --- Initialiseer ticker via actieve tab ---
+ticker = None
+
+with tab_dow:
+    ticker = toon_dropdown(dow_tickers)
+with tab_nasdaq:
+    ticker = toon_dropdown(nasdaq_tickers)
+with tab_aex:
+    ticker = toon_dropdown(aex_tickers)
+
+# Nu kun je 'ticker' gebruiken zoals voorheen in je code
+electbox(label, opties, index=index)
     return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
     
 #def make_dropdown(tickers, label):
@@ -184,6 +198,7 @@ if ticker:
     thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
     # Je kunt nu `ticker` gebruiken in je download/verwerking
+
 #st.title("📊 SAM Trading Indicator")
 #all_tickers = [
     # AEX
