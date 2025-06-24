@@ -113,13 +113,33 @@ st.title("📊 SAM Trading Indicator")
 
 # --- Volledige tickerlijsten ---
 aex_tickers = {
-    'ABN': 'ABN AMRO', 'ADYEN': 'Adyen', 'AEGN': 'Aegon', 'AD': 'Ahold Delhaize',
-    'AKZA': 'Akzo Nobel', 'MT': 'ArcelorMittal', 'ASM': 'ASM International', 'ASML': 'ASML',
-    'ASRNL': 'ASR Nederland', 'BESI': 'BE Semiconductor', 'DSFIR': 'DS Smith', 'GALAP': 'Galapagos',
-    'HEIA': 'Heineken', 'IMCD': 'IMCD Group', 'INGA': 'ING Groep', 'JUST': 'Just Eat Takeaway',
-    'KPN': 'KPN', 'NN': 'NN Group', 'PHIA': 'Philips', 'PRX': 'Prosus', 'RAND': 'Randstad',
-    'REN': 'RELX', 'SHELL': 'Shell', 'UNA': 'Unilever', 'WKL': 'Wolters Kluwer'
+    "ABN AMRO": "ABN.AS",
+    "Adyen": "ADYEN.AS",
+    "Aegon": "AGN.AS",
+    "Ahold Delhaize": "AD.AS",
+    "Akzo Nobel": "AKZA.AS",
+    "ArcelorMittal": "MT.AS",
+    "ASMI": "ASM.AS",
+    "ASML": "ASML.AS",
+    "ASR Nederland": "ASRNL.AS",
+    "BESI": "BESI.AS",
+    "DSM-Firmenich": "DSFIR.AS",
+    "Galapagos": "GLPG.AS",
+    "Heineken": "HEIA.AS",
+    "IMCD": "IMCD.AS",
+    "ING Groep": "INGA.AS",
+    "Just Eat Takeaway": "TKWY.AS",
+    "KPN": "KPN.AS",
+    "NN Group": "NN.AS",
+    "Philips": "PHIA.AS",
+    "Prosus": "PRX.AS",
+    "Randstad": "RAND.AS",
+    "Relx": "REN.AS",
+    "Shell": "SHELL.AS",
+    "Unilever": "UNA.AS",
+    "Wolters Kluwer": "WKL.AS"
 }
+
 dow_tickers = {
     'MMM': '3M', 'AXP': 'American Express', 'AMGN': 'Amgen', 'AAPL': 'Apple', 'BA': 'Boeing',
     'CAT': 'Caterpillar', 'CVX': 'Chevron', 'CSCO': 'Cisco', 'KO': 'Coca-Cola', 'DIS': 'Disney',
