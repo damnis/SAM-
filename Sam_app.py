@@ -335,8 +335,8 @@ advies_kleur = "green" if huidig_advies == "Kopen" else "red" if huidig_advies =
 # Titel met kleur en grootte tonen
 st.markdown(
     f"""
-    <h2>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker_name}</span></h2>
-    <h3 style='color:{advies_kleur}'>Huidig advies: {huidig_advies}</h3>
+    <h3>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker_name}</span></h3>
+    <h2 style='color:{advies_kleur}'>Huidig advies: {huidig_advies}</h2>
     """,
     unsafe_allow_html=True
 )
