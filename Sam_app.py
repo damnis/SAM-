@@ -27,7 +27,7 @@ def fetch_data(ticker, interval):
     ]
     df = df.reset_index()
     # Extra stap (optioneel): zorg dat datetime correct is, en sorteer
-    df = df.sort_values("Date" if "Date" in df.columns else "Datetime")
+   # df = df.sort_values("Date" if "Date" in df.columns else "Datetime")
 
 
     return df
@@ -244,76 +244,7 @@ interval = interval_mapping[interval_optie]
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
 
-# --- Tabs: Dow, Nasdaq, AEX ---
-#tab_dow, tab_nasdaq, tab_aex = st.tabs(["🇺🇸 Dow Jones", "📈 Nasdaq", "🇳🇱 AEX"])
 
-# --- Functie voor selecteren ---
-#def toon_dropdown(tickers):
-#    opties = [f"{sym} - {naam}" for sym, naam in tickers]
-#    keuze = st.selectbox("Selecteer aandeel", opties, index=0)
-#    return keuze.split(" - ")[0]  # Alleen ticker symbool teruggeven
-
-# --- Initialiseer ticker via actieve tab ---
-#ticker = None
-
-#with tab_dow:
-#    ticker = toon_dropdown(dow_tickers)
-#with tab_nasdaq:
-#    ticker = toon_dropdown(nasdaq_tickers)
-#with tab_aex:
-#    ticker = toon_dropdown(aex_tickers)
-
-# Nu kun je 'ticker' gebruiken zoals voorheen in je code
-# selectbox(label, opties, index=index)
-#    return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
-    
-#def make_dropdown(tickers, label):
- #   display_names = [f"{symbol} - {name}" for symbol, name in tickers]
-  #  keuze = st.selectbox(label, ["(Geen selectie)"] + display_names)
- #   return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
-
-# dow krijgt standaard een waarde (bijv. ABN, index 0)
-#ticker_dow = make_dropdown(dow_tickers, "Dow Jones Selectie", default_index=0, initial_active=True)
-
-# Andere dropdowns starten leeg
-#ticker_nasdaq = make_dropdown(nasdaq_tickers, "Nasdaq Selectie")
-#ticker_aex = make_dropdown(aex_tickers, "AEX Selectie")
-#ticker_dow = make_dropdown(dow_tickers, "Dow Jones Selectie")
-#ticker_nasdaq = make_dropdown(nasdaq_tickers, "Nasdaq Selectie")
-#ticker_aex = make_dropdown(aex_tickers, "AEX Selectie")
-
-# --- Kies de geselecteerde ticker (één tegelijk) ---
-#ticker =  ticker_dow or ticker_nasdaq or ticker_aex 
-
-# --- Alleen doorgaan als er een is gekozen ---
-#if ticker:
-#    interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
-#    interval = "1d" if interval_optie == "Dagelijks" else "1wk"
-#    thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
-
-    # Je kunt nu `ticker` gebruiken in je download/verwerking
-
-#st.title("📊 SAM Trading Indicator")
-#all_tickers = [
-    # AEX
-#    'ABN', 'ADYEN', 'AEGN', 'AD', 'AKZA', 'MT', 'ASM', 'ASML',
-#    'ASRNL', 'BESI', 'DSFIR', 'GALAP', 'HEIA', 'IMCD', 'INGA',
-#    'JUST', 'KPN', 'NN', 'PHIA', 'PRX', 'RAND', 'REN', 'SHELL',
- #   'UNA', 'WKL',
-    # Dow Jones
- #   'MMM', 'AXP', 'AMGN', 'AAPL', 'BA', 'CAT', 'CVX', 'CSCO', 'KO',
- #   'DIS', 'GS', 'HD', 'HON', 'IBM', 'INTC', 'JPM', 'JNJ', 'MCD',
- #   'MRK', 'MSFT', 'NKE', 'PG', 'CRM', 'TRV', 'UNH', 'VZ', 'V',
- #   'WMT', 'DOW', 'RTX', 'WBA',
-    # Nasdaq‑100 (voorbeeldsubset – uitbreiden naar ~100)
- #   'MSFT', 'NVDA', 'AAPL', 'AMZN', 'META', 'NFLX', 'GOOG', 'GOOGL',
- #   'TSLA', 'CSCO', 'INTC', 'ADBE', 'CMCSA', 'PEP', 'COST', 'AVGO',
- #   'QCOM', 'TMUS', 'TXN', 'AMAT', 'AMD', 'CHTR', 'SBUX', 'MDLZ',
- #   'PYPL', 'INTU', 'BKNG', 'ISRG', 'ADP', 'GILD', 'CSX', 'MU',
- #   'LRCX', 'MELI', 'MRVL', 'PANW', 'MCHP', 'NXPI', 'ORLY', 'VRTX',
- #   'ROST', 'MAR', 'DOCU', 'SNPS', 'ZM', 'WDAY', 'KHC', 'REGN'
-    # vul verder aan tot ~150 tickers
-#]
 
 #ticker = st.selectbox("Selecteer een aandeel (AEX, Dow, Nasdaq)", all_tickers)
 #interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
