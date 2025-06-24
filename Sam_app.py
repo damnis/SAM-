@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 # --- Functie om data op te halen ---
 # --- Functie om data op te halen ---
 def fetch_data(ticker, interval):
+    import yfinance as yf
+    import pandas as pd
+
+    # Intervalspecifieke periode instellen
     if interval == "15m":
         period = "7d"
     elif interval == "1h":
@@ -18,21 +22,27 @@ def fetch_data(ticker, interval):
     else:
         period = "360wk"
 
+    # Data ophalen
     df = yf.download(ticker, interval=interval, period=period)
 
-    # Verwijder rijen zonder handel (geen volume of geen koersverandering)
+    # Verwijder rijen zonder volume of zonder koersverandering
     df = df[
         (df["Volume"] > 0) &
         ((df["Open"] != df["Close"]) | (df["High"] != df["Low"]))
     ]
-  #  df = df.reset_index()
-    # Extra stap (optioneel): zorg dat datetime correct is, en sorteer
-  #  df = df.sort_values("Date" if "Date" in df.columns else "Datetime")
 
+    # Zorg dat de index datetime is en verwijder ongeldige datums
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df.index = pd.to_datetime(df.index, errors="coerce")
+    df = df[~df.index.isna()]
 
     return df
 
-#def fetch_data(ticker, interval):
+    #  df = df.reset_index()
+    # Extra stap (optioneel): zorg dat datetime correct is, en sorteer
+  #  df = df.sort_values("Date" if "Date" in df.columns else "Datetime")
+
+# def fetch_data(ticker, interval):
     # Bepaal de periode op basis van het gekozen interval
 #    period = f"{360}{'d' if interval == '1d' else 'wk'}"  # "360d" of "360wk"
     
