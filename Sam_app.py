@@ -6,9 +6,13 @@ import matplotlib.pyplot as plt
 
 # --- Functie om data op te halen ---
 def fetch_data(ticker, interval):
-    # Bepaal de periode op basis van het gekozen interval
-    if interval == "4h":
-        period = "60d"  # Maximaal bereik voor 4-uursdata, anders krijg je niks terug
+    # Bepaal de periode op basis van interval
+    if interval == "15m":
+        period = "7d"   # Max. bereik bij 15m interval is 7 dagen
+    elif interval == "1h":
+        period = "30d"  # Max. bereik bij 1h is ca. 30 dagen
+    elif interval == "4h":
+        period = "60d"  # Max. bereik bij 4h is ca. 60 dagen
     elif interval == "1d":
         period = "360d"
     else:  # "1wk"
@@ -207,13 +211,23 @@ else:  # AEX
     ticker, ticker_name = ticker_label.split(" - ", 1)
     
 # --- Andere instellingen ---
-interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks", "4-uur"])
-if interval_optie == "4-uur":
-    interval = "4h"
-elif interval_optie == "Dagelijks":
-    interval = "1d"
-else:  # Wekelijks
-    interval = "1wk"
+# --- Intervalopties ---
+interval_optie = st.selectbox(
+    "Kies de interval",
+    ["Dagelijks", "Wekelijks", "4-uur", "1-uur", "15-minuten"]
+)
+
+# Vertaal gebruikerskeuze naar Yahoo Finance intervalcode
+interval_mapping = {
+    "Dagelijks": "1d",
+    "Wekelijks": "1wk",
+    "4-uur": "4h",
+    "1-uur": "1h",
+    "15-minuten": "15m"
+}
+
+interval = interval_mapping[interval_optie]
+
 #interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
 #interval = "1d" if interval_optie == "Dagelijks" else "1wk"
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
