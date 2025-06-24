@@ -157,7 +157,7 @@ nasdaq_tickers = {
     'AMAT': 'Applied Materials'
 }
 
-us_tech_tickers = {
+ustech_tickers = {
     "Super Micro Computer": "SMCI",
     "Palantir": "PLTR",
     "Snowflake": "SNOW",
@@ -207,7 +207,7 @@ elif selected_tab == "🇺🇸 Nasdaq":
     ticker = ticker_label.split(" - ")[0]
 
 elif selected_tab == "🇺🇸 US Tech":
-    ticker_label = st.selectbox("US Tech aandeel", [f"{k} - {v}" for k, v in us_tech_tickers.items()], key="us_tech")
+    ticker_label = st.selectbox("US Tech aandeel", [f"{k} - {v}" for k, v in ustech_tickers.items()], key="ustech")
     ticker = ticker_label.split(" - ")[0]
 
 else:  # AEX
