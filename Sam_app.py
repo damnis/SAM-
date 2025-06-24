@@ -154,12 +154,12 @@ def make_dropdown(tickers, label):
     keuze = st.selectbox(label, ["(Geen selectie)"] + display_names)
     return keuze.split(" - ")[0] if keuze != "(Geen selectie)" else None
 
-ticker_aex = make_dropdown(aex_tickers, "AEX Selectie")
 ticker_dow = make_dropdown(dow_tickers, "Dow Jones Selectie")
 ticker_nasdaq = make_dropdown(nasdaq_tickers, "Nasdaq Selectie")
+ticker_aex = make_dropdown(aex_tickers, "AEX Selectie")
 
 # --- Kies de geselecteerde ticker (één tegelijk) ---
-ticker = ticker_aex or ticker_dow or ticker_nasdaq
+ticker =  ticker_dow or ticker_nasdaq or ticker_aex 
 
 # --- Alleen doorgaan als er een is gekozen ---
 if ticker:
