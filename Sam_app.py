@@ -207,7 +207,7 @@ else:  # AEX
     ticker, ticker_name = ticker_label.split(" - ", 1)
     
 # --- Andere instellingen ---
-interval_optie = st.selectbox("Kies de interval", ["4-uur", "Dagelijks", "Wekelijks"])
+interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks", "4-uur"])
 if interval_optie == "4-uur":
     interval = "4h"
 elif interval_optie == "Dagelijks":
