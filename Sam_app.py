@@ -198,8 +198,7 @@ selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
 #    ticker_name = st.selectbox("Selecteer een AEX aandeel", list(aex_tickers.keys()))
  #   ticker = aex_tickers[ticker_name]
     
-
- if selected_tab == "🇺🇸 Dow Jones":
+if selected_tab == "🇺🇸 Dow Jones":
     ticker_label = st.selectbox("Dow Jones aandeel", [f"{k} - {v}" for k, v in dow_tickers.items()], key="dow")
     ticker = ticker_label.split(" - ")[0]
 
