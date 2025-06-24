@@ -185,8 +185,10 @@ for kolom in ["Close", "SAM", "Trend"]:
     tabel[kolom] = tabel[kolom].round(3)
 
 # Format percentagekolommen netjes als 1.24% of -1.24%
-tabel["Markt-%"] = (tabel["Markt-%"] * 100).map("{:+.2f}%".format)
-tabel["SAM-%"] = (tabel["SAM-%"] * 100).map("{:+.2f}%".format)
+tabel["Markt-%"] = (tabel["Markt-%"].astype(float) * 100).map("{:+.2f}%".format)
+tabel["SAM-%"] = (tabel["SAM-%"].astype(float) * 100).map("{:+.2f}%".format)
+#tabel["Markt-%"] = (tabel["Markt-%"] * 100).map("{:+.2f}%".format)
+#tabel["SAM-%"] = (tabel["SAM-%"] * 100).map("{:+.2f}%".format)
 
 # HTML-tabel bouwen met aangepaste styling
 html = """
@@ -244,7 +246,12 @@ html += "</tbody></table>"
 # HTML weergeven in Streamlit
 import streamlit as st
 #st.subheader("Laatste signalen en rendement (HTML)")
-st.markdown(html, unsafe_allow_html=True)
+st.markdown(
+    tabel.to_html(index=False, escape=False),
+    unsafe_allow_html=True
+)
+
+#st.markdown(html, unsafe_allow_html=True)
 
 
 
