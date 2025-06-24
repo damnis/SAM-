@@ -186,7 +186,7 @@ for kolom in ["Close", "SAM", "Trend"]:
 
 # Format percentagekolommen netjes als 1.24% of -1.24%
 tabel["Markt-%"] = (tabel["Markt-%"] * 100).map("{:+.2f}%".format)
-tabel["SAM
+tabel["SAM-%"] = (tabel["SAM-%"] * 100).map("{:+.2f}%".format)
 
 # HTML-tabel bouwen met aangepaste styling
 html = """
