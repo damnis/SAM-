@@ -6,20 +6,23 @@ import matplotlib.pyplot as plt
 
 # --- Functie om data op te halen ---
 def fetch_data(ticker, interval):
-    # Bepaal de periode op basis van interval
     if interval == "15m":
-        period = "7d"   # Max. bereik bij 15m interval is 7 dagen
+        period = "7d"
     elif interval == "1h":
-        period = "30d"  # Max. bereik bij 1h is ca. 30 dagen
+        period = "30d"
     elif interval == "4h":
-        period = "60d"  # Max. bereik bij 4h is ca. 60 dagen
+        period = "60d"
     elif interval == "1d":
         period = "360d"
-    else:  # "1wk"
+    else:
         period = "360wk"
 
-    data = yf.download(ticker, interval=interval, period=period)
-    return data
+    df = yf.download(ticker, interval=interval, period=period)
+
+    # Filter dagen zonder volume (geen handel)
+    df = df[df["Volume"] > 0]
+
+    return df
 #def fetch_data(ticker, interval):
     # Bepaal de periode op basis van het gekozen interval
 #    period = f"{360}{'d' if interval == '1d' else 'wk'}"  # "360d" of "360wk"
