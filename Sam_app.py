@@ -20,8 +20,11 @@ def fetch_data(ticker, interval):
     df = yf.download(ticker, interval=interval, period=period)
 
     # Filter dagen zonder volume (geen handel)
-    df = df[df["Volume"] > 0]
-
+    # Verwijder rijen zonder handel (geen volume of geen koersverandering)
+df = df[
+    (df["Volume"] > 0) &
+    ((df["Open"] != df["Close"]) | (df["High"] != df["Low"]))
+]
     return df
 #def fetch_data(ticker, interval):
     # Bepaal de periode op basis van het gekozen interval
