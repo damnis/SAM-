@@ -206,7 +206,7 @@ elif selected_tab == "🇺🇸 Nasdaq":
     ticker_label = st.selectbox("Nasdaq aandeel", [f"{k} - {v}" for k, v in nasdaq_tickers.items()], key="nasdaq")
     ticker = ticker_label.split(" - ")[0]
 
-elif selected_tab == "US Tech":
+elif selected_tab == "🇺🇸 US Tech":
     ticker_label = st.selectbox("US Tech aandeel", [f"{k} - {v}" for k, v in US_tech_tickers.items()], key="us_tech")
     ticker = ticker_label.split(" - ")[0]
 
