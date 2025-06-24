@@ -25,6 +25,7 @@ def fetch_data(ticker, interval):
         (df["Volume"] > 0) &
         ((df["Open"] != df["Close"]) | (df["High"] != df["Low"]))
     ]
+    df = df.reset_index()
 
     return df
 
@@ -236,51 +237,9 @@ interval_mapping = {
 
 interval = interval_mapping[interval_optie]
 
-#interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
-#interval = "1d" if interval_optie == "Dagelijks" else "1wk"
+
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
-# vanaf hier
-#import streamlit as st
-
-# --- Aandelen per beurs met volledige naam ---
-#aex_tickers = [
-#    ('ABN', 'ABN AMRO'), ('ADYEN', 'Adyen'), ('AEGN', 'Aegon'), ('AD', 'Koninklijke Ahold Delhaize'),
-#    ('AKZA', 'Akzo Nobel'), ('MT', 'ArcelorMittal'), ('ASM', 'ASM International'), ('ASML', 'ASML Holding'),
-#    ('ASRNL', 'ASR Nederland'), ('BESI', 'BE Semiconductor'), ('DSFIR', 'DSM-Firmenich'),
-#    ('GALAP', 'Galapagos'), ('HEIA', 'Heineken'), ('IMCD', 'IMCD Group'), ('INGA', 'ING Groep'),
-#    ('JUST', 'Just Eat Takeaway'), ('KPN', 'KPN'), ('NN', 'NN Group'), ('PHIA', 'Philips'),
-#    ('PRX', 'Prosus'), ('RAND', 'Randstad'), ('REN', 'Renewi'), ('SHELL', 'Shell'),
-#    ('UNA', 'Unilever'), ('WKL', 'Wolters Kluwer')
-#]
-
-#dow_tickers = [
-#    ('MMM', '3M'), ('AXP', 'American Express'), ('AMGN', 'Amgen'), ('AAPL', 'Apple'), ('BA', 'Boeing'),
-#    ('CAT', 'Caterpillar'), ('CVX', 'Chevron'), ('CSCO', 'Cisco'), ('KO', 'Coca-Cola'), ('DIS', 'Disney'),
-#    ('GS', 'Goldman Sachs'), ('HD', 'Home Depot'), ('HON', 'Honeywell'), ('IBM', 'IBM'),
- #   ('INTC', 'Intel'), ('JPM', 'JPMorgan Chase'), ('JNJ', 'Johnson & Johnson'), ('MCD', 'McDonald’s'),
-#    ('MRK', 'Merck'), ('MSFT', 'Microsoft'), ('NKE', 'Nike'), ('PG', 'Procter & Gamble'),
-#    ('CRM', 'Salesforce'), ('TRV', 'Travelers'), ('UNH', 'UnitedHealth'), ('VZ', 'Verizon'),
-#    ('V', 'Visa'), ('WMT', 'Walmart'), ('DOW', 'Dow Inc.'), ('RTX', 'Raytheon Technologies'),
-#    ('WBA', 'Walgreens Boots Alliance')
-#]
-
-#nasdaq_tickers = [
-#    ('MSFT', 'Microsoft'), ('NVDA', 'NVIDIA'), ('AAPL', 'Apple'), ('AMZN', 'Amazon'),
-#    ('META', 'Meta'), ('NFLX', 'Netflix'), ('GOOG', 'Google'), ('GOOGL', 'Alphabet'),
-#    ('TSLA', 'Tesla'), ('CSCO', 'Cisco'), ('INTC', 'Intel'), ('ADBE', 'Adobe'),
-#    ('CMCSA', 'Comcast'), ('PEP', 'PepsiCo'), ('COST', 'Costco'), ('AVGO', 'Broadcom'),
-#    ('QCOM', 'Qualcomm'), ('TMUS', 'T-Mobile US'), ('TXN', 'Texas Instruments'),
-#    ('AMAT', 'Applied Materials'), ('AMD', 'AMD'), ('CHTR', 'Charter Communications'),
-#    ('SBUX', 'Starbucks'), ('MDLZ', 'Mondelez'), ('PYPL', 'PayPal'), ('INTU', 'Intuit'),
-#    ('BKNG', 'Booking Holdings'), ('ISRG', 'Intuitive Surgical'), ('ADP', 'ADP'),
-#    ('GILD', 'Gilead'), ('CSX', 'CSX'), ('MU', 'Micron'), ('LRCX', 'Lam Research'),
-#    ('MELI', 'MercadoLibre'), ('MRVL', 'Marvell'), ('PANW', 'Palo Alto Networks'),
-#    ('MCHP', 'Microchip Tech'), ('NXPI', 'NXP Semiconductors'), ('ORLY', 'O’Reilly'),
-#    ('VRTX', 'Vertex'), ('ROST', 'Ross Stores'), ('MAR', 'Marriott'), ('DOCU', 'DocuSign'),
-#    ('SNPS', 'Synopsys'), ('ZM', 'Zoom'), ('WDAY', 'Workday'), ('KHC', 'Kraft Heinz'),
-#    ('REGN', 'Regeneron')
-#]
 
 # --- Tabs: Dow, Nasdaq, AEX ---
 #tab_dow, tab_nasdaq, tab_aex = st.tabs(["🇺🇸 Dow Jones", "📈 Nasdaq", "🇳🇱 AEX"])
