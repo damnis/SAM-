@@ -488,8 +488,8 @@ if not df_period.empty:
             koers_start = df_period["Close"].iloc[0]
             koers_eind = df_period["Close"].iloc[-1]
             marktrendement = ((koers_eind - koers_start) / koers_start) * 100
-            except Exception:
-                marktrendement = None
+        except Exception:
+            marktrendement = None
     else:
         st.warning("Geen geldige koersdata beschikbaar voor marktrendement.")
 #    try:
