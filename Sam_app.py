@@ -531,7 +531,7 @@ else:  # Beide
 
 # Debug: toon eerste 10 signalen
 st.write("Voorbeeld van signalen:")
-st.dataframe(df_signalen[[("Advies", ""), ("Close", ticker_name)]].head(10))
+st.dataframe(df_signalen[[("Advies", ""), ("Close")]].head(10))
 
 # --- SAM-rendement berekening ---
 def bereken_sam_rendement(df_signalen, signaal_type):
