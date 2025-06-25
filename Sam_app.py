@@ -254,15 +254,32 @@ def get_live_ticker_data(tickers_dict):
     return result
 
 # --- Weergave dropdown met live info ---
+# --- Data ophalen ---
 live_info = get_live_ticker_data(tabs_mapping[selected_tab])
-dropdown_options = []
+dropdown_dict = {}
 
 for t, naam, last, change, kleur in live_info:
-    kleur_symbool = "🟢" if change > 0 else "🔴" if change < 0 else "⚪"
-    formatted = f"{t} - {naam} - {valutasymbool}{last:.2f} ({change:+.2f}%) {kleur_symbool}"
+    emoji = "🟢" if change > 0 else "🔴" if change < 0 else "⚪"
+    display = f"{t} - {naam} | {valutasymbool}{last:.2f} {emoji} {change:+.2f}%"
+    dropdown_dict[t] = display
+
+# --- Dropdown ---
+selected_ticker = st.selectbox(
+    f"Selecteer {selected_tab} ticker:",
+    options=list(dropdown_dict.keys()),
+    format_func=lambda x: dropdown_dict[x],
+    key=f"ticker_select_{selected_tab}"
+)
+
+#live_info = get_live_ticker_data(tabs_mapping[selected_tab])
+#dropdown_options = []
+
+#for t, naam, last, change, kleur in live_info:
+#    kleur_symbool = "🟢" if change > 0 else "🔴" if change < 0 else "⚪"
+#    formatted = f"{t} - {naam} - {valutasymbool}{last:.2f} ({change:+.2f}%) {kleur_symbool}"
   #  change_str = f"<span style='color:{kleur}'>({change:+.2f}%)</span>"
   #  formatted = f"{t} - {naam} - ${last:.2f} {change_str}"
-    dropdown_options.append((t, naam, formatted))
+#    dropdown_options.append((t, naam, formatted))
 
 # HTML-dropdown rendering
 selected_option = st.selectbox(
