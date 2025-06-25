@@ -530,7 +530,7 @@ else:  # Beide
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
 # ✅ SAM-rendement berekenen
-sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
+#sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # Debug: toon eerste 10 signalen
 st.write("Voorbeeld van signalen:")
@@ -589,6 +589,8 @@ def bereken_sam_rendement(df_signalen, signaal_type):
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, len(rendementen)
+
+sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
     
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
