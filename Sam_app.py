@@ -482,7 +482,7 @@ for _, row in tabel.iterrows():
 
 html += "</tbody></table>"
 
---- Toevoeging: Backtestfunctie ---
+#--- Toevoeging: Backtestfunctie ---
 
 from datetime import date
 
