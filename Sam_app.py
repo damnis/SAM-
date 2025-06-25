@@ -575,7 +575,7 @@ def bereken_sam_rendement(df_signalen, signaal_type):
     return sam_rendement, len(rendementen)
 
 # ✅ Functie aanroepen!
-sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
+#sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
