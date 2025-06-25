@@ -516,7 +516,8 @@ if not df_period.empty:
 #    except Exception:
 #        marktrendement = None
 
-    # # --- SAM-signalen selecteren ---
+# Verwijder dubbele kolommen in df_period
+df_period = df_period.loc[:, ~df_period.columns.duplicated()]
 # --- # --- SAM-signalen selecteren ---
 df_signalen = df_period[df_period["Advies"].notna()].copy()
 
