@@ -548,31 +548,37 @@ st.dataframe(df_signalen[["Advies", "Close"]].head(10))
 # --- SAM-rendement berekening ---
 def bereken_sam_rendement(df_signalen, signaal_type):
     df_signalen = df_signalen.copy()
-    df_signalen = df_signalen.sort_index()
+    df_signalen = df_signalen.sort_index()  # Zorg voor chronologische volgorde
+
+    # Kolomnaam bepalen
+    if isinstance(df_signalen.columns, pd.MultiIndex):
+        close_col = [col for col in df_signalen.columns if col[0] == "Close"][0]
+    else:
+        close_col = "Close"
 
     rendementen = []
     entry_price = None
     entry_type = None
 
     for _, row in df_signalen.iterrows():
-        advies = row["Advies"]
-        close = row["Close"]
+        try:
+            advies = str(row["Advies"])
+            close = float(row[close_col])
+        except Exception:
+            continue  # Skip bij ongeldige data
 
         if entry_price is None:
-            if signaal_type == "Koop" and advies == "Kopen":
-                entry_price = close
-                entry_type = "Kopen"
-            elif signaal_type == "Verkoop" and advies == "Verkopen":
-                entry_price = close
-                entry_type = "Verkopen"
-            elif signaal_type == "Beide":
+            # Start nieuwe trade als het type overeenkomt met de keuze of met "Beide"
+            if (signaal_type == "Koop" and advies == "Kopen") or \
+               (signaal_type == "Verkoop" and advies == "Verkopen") or \
+               (signaal_type == "Beide" and advies in ["Kopen", "Verkopen"]):
                 entry_price = close
                 entry_type = advies
         else:
-            if (entry_type == "Kopen" and advies == "Verkopen") or (entry_type == "Verkopen" and advies == "Kopen"):
-                if signaal_type == "Beide" or \
-                   (signaal_type == "Koop" and entry_type == "Kopen") or \
-                   (signaal_type == "Verkoop" and entry_type == "Verkopen"):
+            # Sluit de trade bij tegenadvies
+            if (entry_type == "Kopen" and advies == "Verkopen") or \
+               (entry_type == "Verkopen" and advies == "Kopen"):
+                if signaal_type == "Beide" or signaal_type == entry_type:
                     if entry_type == "Kopen":
                         rendement = (close - entry_price) / entry_price * 100
                     else:
@@ -581,8 +587,9 @@ def bereken_sam_rendement(df_signalen, signaal_type):
                 # Reset voor volgende trade
                 entry_price = None
                 entry_type = None
+            # Zelfde advies? Dan niets doen (houd positie aan)
             else:
-                continue  # zelfde type, wacht op tegenadvies
+                continue
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, len(rendementen)
