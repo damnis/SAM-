@@ -541,9 +541,9 @@ st.dataframe(df_signalen[["Advies", "Close"]].head(10))
 # TEST: handmatig test-signalen invoegen
 # Deze override vervangt df_signalen tijdelijk
 df_signalen = pd.DataFrame({
-    "Advies": ["Kopen", "Verkopen", "Kopen", "Verkopen"],
-    "Close": [100, 105, 102, 98]
-}, index=pd.date_range("2025-01-01", periods=4))
+    "Advies": ["Kopen", "Kopen", "Verkopen", "Kopen", "Verkopen"],
+    "Close": [100, 105, 104, 102, 98]
+}, index=pd.date_range("2025-01-01", periods=5))
 
 # --- SAM-rendement berekening ---
 def bereken_sam_rendement(df_signalen, signaal_type):
