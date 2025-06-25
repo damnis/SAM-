@@ -233,7 +233,7 @@ def get_live_ticker_data(tickers_dict):
             last = data[ticker]['Close'].iloc[-1]
             prev = data[ticker]['Open'].iloc[-1]
             change = (last - prev) / prev * 100
-            kleur = "green" if change > 0 else "red" if change < 0 else "gray"
+            kleur = "#00FF00" if change > 0 else "#FF0000" if change < 0 else "#808080"
             naam = tickers_dict[ticker]
             result.append((ticker, naam, last, change, kleur))
         except Exception:
