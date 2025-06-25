@@ -500,11 +500,15 @@ if not df_period.empty:
     instap_koers = None
 
     for _, row in df_signalen.iterrows():
+    for _, row in df_signalen.iterrows():
+        if "Advies" not in row or "Close" not in row:
+            continue
+
         advies = row["Advies"]
         close = row["Close"]
 
-        if pd.isna(close):
-            continue  # Sla lege koersen over
+        if not isinstance(close, (int, float)) or pd.isna(close):
+            continue
 
         if signaalkeuze == "Koop":
             if advies == "Kopen":
