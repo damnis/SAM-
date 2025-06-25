@@ -550,8 +550,8 @@ def bereken_sam_rendement(df_signalen, signaal_type):
     entry_type = None
 
     for i, row in df_signalen.iterrows():
-        advies = row[("Advies", "")]
-        close = row[("Close", ticker_name)]
+        advies = row["Advies"]
+        close = row["Close"]  # ✅ ENKELVOUDIGE kolomnaam gebruiken!
 
         if entry_price is None:
             entry_price = close
