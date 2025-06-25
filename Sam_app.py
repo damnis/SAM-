@@ -484,14 +484,14 @@ if not df_period.empty:
     st.write("Eerste koers (Close):", df_period["Close"].iloc[0] if not df_period.empty else "n.v.t.")
     st.write("Laatste koers (Close):", df_period["Close"].iloc[-1] if not df_period.empty else "n.v.t.")
     if not df_period.empty and df_period["Close"].notna().all():
-    try:
-        koers_start = df_period["Close"].iloc[0]
-        koers_eind = df_period["Close"].iloc[-1]
-        marktrendement = ((koers_eind - koers_start) / koers_start) * 100
-    except Exception:
-        marktrendement = None
-else:
-    st.warning("Geen geldige koersdata beschikbaar voor marktrendement.")
+        try:
+            koers_start = df_period["Close"].iloc[0]
+            koers_eind = df_period["Close"].iloc[-1]
+            marktrendement = ((koers_eind - koers_start) / koers_start) * 100
+            except Exception:
+                marktrendement = None
+    else:
+        st.warning("Geen geldige koersdata beschikbaar voor marktrendement.")
 #    try:
 #        koers_start = df_period["Close"].iloc[0]
 #        koers_eind = df_period["Close"].iloc[-1]
