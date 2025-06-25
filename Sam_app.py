@@ -198,27 +198,87 @@ ustech_tickers = {
     "MSFT": "Microsoft"
 }
 
+# --- Toevoeging tickers AMX & Crypto ---
+amx_tickers = {
+    "AMG.AS": "AMG", "ARCAD.AS": "Arcadis", "BAMNB.AS": "BAM Groep",
+    "BPOST.AS": "BPost", "FAGR.AS": "Fagron", "FUR.AS": "Fugro", "KENDR.AS": "Kendrion",
+    "SBMO.AS": "SBM Offshore", "TKWY.AS": "Just Eat", "VASTN.AS": "Vastned Retail"
+}
+
+crypto_tickers = {
+    "BTC-USD": "Bitcoin", "ETH-USD": "Ethereum", "SOL-USD": "Solana",
+    "BNB-USD": "BNB", "XRP-USD": "XRP", "DOGE-USD": "Dogecoin"
+}
+# --- Update tab labels en bijbehorende mapping ---
+tabs_mapping = {
+    "🇺🇸 Dow Jones": dow_tickers,
+    "🇺🇸 Nasdaq": nasdaq_tickers,
+    "🇺🇸 US Tech": ustech_tickers,
+    "🇳🇱 AEX": aex_tickers,
+    "🇳🇱 AMX": amx_tickers,
+    "🌐 Crypto": crypto_tickers
+}
+
+tab_labels = list(tabs_mapping.keys())
+selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
+
+# --- Data ophalen voor dropdown live view ---
+def get_live_ticker_data(tickers_dict):
+    tickers = list(tickers_dict.keys())
+    data = yf.download(tickers, period="1d", interval="1d", progress=False, group_by='ticker')
+    result = []
+
+    for ticker in tickers:
+        try:
+            last = data[ticker]['Close'].iloc[-1]
+            prev = data[ticker]['Open'].iloc[-1]
+            change = (last - prev) / prev * 100
+            kleur = "green" if change > 0 else "red" if change < 0 else "gray"
+            naam = tickers_dict[ticker]
+            result.append((ticker, naam, last, change, kleur))
+        except Exception:
+            continue
+
+    return result
+
+# --- Weergave dropdown met live info ---
+live_info = get_live_ticker_data(tabs_mapping[selected_tab])
+dropdown_options = []
+
+for t, naam, last, change, kleur in live_info:
+    change_str = f"<span style='color:{kleur}'>({change:+.2f}%)</span>"
+    formatted = f"{t} - {naam} - ${last:.2f} {change_str}"
+    dropdown_options.append((t, naam, formatted))
+
+# HTML-dropdown rendering
+selected_option = st.selectbox(
+    f"Selecteer {selected_tab} ticker:",
+    options=dropdown_options,
+    format_func=lambda x: x[2],
+    key="ticker_select"
+)
+ticker, ticker_name = selected_option[0], selected_option[1]
 
 # --- Tabs met selecties ---
 
-tab_labels = ["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇺🇸 US Tech", "🇳🇱 AEX"]
-selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
+#tab_labels = ["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇺🇸 US Tech", "🇳🇱 AEX"]
+#selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
 
-if selected_tab == "🇺🇸 Dow Jones":
-    ticker_label = st.selectbox("Dow Jones aandeel", [f"{k} - {v}" for k, v in dow_tickers.items()], key="dow")
-    ticker, ticker_name = ticker_label.split(" - ", 1)
+#if selected_tab == "🇺🇸 Dow Jones":
+ #   ticker_label = st.selectbox("Dow Jones aandeel", [f"{k} - {v}" for k, v in dow_tickers.items()], key="dow")
+#    ticker, ticker_name = ticker_label.split(" - ", 1)
 
-elif selected_tab == "🇺🇸 Nasdaq":
-    ticker_label = st.selectbox("Nasdaq aandeel", [f"{k} - {v}" for k, v in nasdaq_tickers.items()], key="nasdaq")
-    ticker, ticker_name = ticker_label.split(" - ", 1)
+#elif selected_tab == "🇺🇸 Nasdaq":
+#    ticker_label = st.selectbox("Nasdaq aandeel", [f"{k} - {v}" for k, v in nasdaq_tickers.items()], key="nasdaq")
+ #   ticker, ticker_name = ticker_label.split(" - ", 1)
 
-elif selected_tab == "🇺🇸 US Tech":
-    ticker_label = st.selectbox("US Tech aandeel", [f"{k} - {v}" for k, v in ustech_tickers.items()], key="ustech")
-    ticker, ticker_name = ticker_label.split(" - ", 1)
+#elif selected_tab == "🇺🇸 US Tech":
+ #   ticker_label = st.selectbox("US Tech aandeel", [f"{k} - {v}" for k, v in ustech_tickers.items()], key="ustech")
+ #   ticker, ticker_name = ticker_label.split(" - ", 1)
 
-else:  # AEX
-    ticker_label = st.selectbox("AEX aandeel", [f"{k} - {v}" for k, v in aex_tickers.items()], key="aex")
-    ticker, ticker_name = ticker_label.split(" - ", 1)
+#else:  # AEX
+#    ticker_label = st.selectbox("AEX aandeel", [f"{k} - {v}" for k, v in aex_tickers.items()], key="aex")
+ #   ticker, ticker_name = ticker_label.split(" - ", 1)
     
 # --- Andere instellingen ---
 # --- Intervalopties ---
