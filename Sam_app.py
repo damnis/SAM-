@@ -517,7 +517,7 @@ if not df_period.empty:
 #        marktrendement = None
 
     # # --- SAM-signalen selecteren ---
-# --- SAM-signalen selecteren ---
+# --- # --- SAM-signalen selecteren ---
 df_signalen = df_period[df_period["Advies"].notna()].copy()
 
 if signaalkeuze == "Koop":
@@ -527,50 +527,50 @@ elif signaalkeuze == "Verkoop":
 else:
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
+# Toon aantal signalen
+st.write(f"Aantal signalen geselecteerd: {len(df_signalen)}")
+
 # --- SAM-rendement berekening ---
 rendementen = []
 positie = None
 instap_koers = None
-geldig_signalen = 0  # teller
-st.write("Aantal signalen na filtering:", len(df_signalen))
-st.write("Voorbeeldsignalen:")
-st.dataframe(df_signalen[["Advies", "Close"]].head(10))
 
-for _, row in df_signalen.iterrows():
+for index, row in df_signalen.iterrows():
     try:
-        advies = row["Advies"] if "Advies" in row else None
-        close = row["Close"] if "Close" in row else None
+        advies = row["Advies"]
+        close = row["Close"]
 
-        if isinstance(advies, pd.Series) or isinstance(close, pd.Series):
+        if pd.isna(close) or pd.isna(advies):
             continue
-
-        if pd.isna(advies) or pd.isna(close):
-            continue
-
-        close = float(close)
-        geldig_signalen += 1  # geldig signaal geteld
 
         if signaalkeuze == "Koop":
             if advies == "Kopen":
-                rendement = ((df_period["Close"].iloc[-1] - close) / close) * 100
+                uitstap = df_period["Close"].iloc[-1]
+                rendement = ((uitstap - close) / close) * 100
                 rendementen.append(rendement)
+                st.write(f"Koop-signaal: instap {close}, uitstap {uitstap}, rendement {rendement:.2f}%")
 
         elif signaalkeuze == "Verkoop":
             if advies == "Verkopen":
-                rendement = ((close - df_period["Close"].iloc[-1]) / close) * 100
+                uitstap = df_period["Close"].iloc[-1]
+                rendement = ((close - uitstap) / close) * 100
                 rendementen.append(rendement)
+                st.write(f"Verkoop-signaal: verkoop {close}, terugkoop {uitstap}, rendement {rendement:.2f}%")
 
         elif signaalkeuze == "Beide":
             if positie is None and advies == "Kopen":
                 instap_koers = close
                 positie = "long"
+                st.write(f"Ingestapt op {instap_koers}")
             elif positie == "long" and advies == "Verkopen":
                 uitstap_koers = close
                 rendement = ((uitstap_koers - instap_koers) / instap_koers) * 100
                 rendementen.append(rendement)
+                st.write(f"Uitgestapt op {uitstap_koers}, rendement {rendement:.2f}%")
                 positie = None
 
-    except Exception:
+    except Exception as e:
+        st.write(f"Fout bij signaal op {index}: {e}")
         continue
 
 # Open positie sluiten op einddatum
@@ -579,11 +579,13 @@ if signaalkeuze == "Beide" and positie == "long" and instap_koers is not None:
         laatste_koers = df_period["Close"].iloc[-1]
         rendement = ((laatste_koers - instap_koers) / instap_koers) * 100
         rendementen.append(rendement)
+        st.write(f"Open positie gesloten op {laatste_koers}, rendement {rendement:.2f}%")
     except:
         pass
 
-# Totale SAM-rendement berekening
+# Eindberekening
 sam_rendement = sum(rendementen)
+st.write(f"Totaal aantal rendementen geteld: {len(rendementen)}")
 
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
