@@ -546,60 +546,71 @@ df_signalen = pd.DataFrame({
 }, index=pd.date_range("2025-01-01", periods=11))
 
 # --- SAM-rendement berekening ---
-def bereken_sam_rendement(df_signalen, signaal_type):
-    df_signalen = df_signalen.copy()
-    df_signalen = df_signalen.sort_index()  # Zorg voor chronologische volgorde
-    st.write("DEBUG: Unieke waarden in Advies:", df_signalen["Advies"].dropna().unique())
-    unieke_adviezen = df_signalen["Advies"].dropna().unique()
-    st.write("DEBUG: Unieke waarden in Advies:", unieke_adviezen)
-
-    # Kolomnaam bepalen
-    if isinstance(df_signalen.columns, pd.MultiIndex):
-        close_col = [col for col in df_signalen.columns if col[0] == "Close"][0]
-    else:
-        close_col = "Close"
-    # Strip en normaliseer de waarden in de Advies-kolom
-    df_signalen["Advies"] = df_signalen["Advies"].astype(str).str.strip().str.capitalize()
-    
-
+def bereken_sam_rendement(df_signalen: pd.DataFrame, signaal_type: str):
     rendementen = []
+    trades = []  # Voor debug
     entry_price = None
     entry_type = None
+    entry_date = None
 
-    for _, row in df_signalen.iterrows():
-        try:
-            advies = str(row["Advies"]).strip().capitalize()
-    #        advies = str(row["Advies"]).strip()
-    #        advies = str(row["Advies"])
-            close = float(row[close_col])
-        except Exception:
-            continue  # Skip bij ongeldige data
+    # Zorg dat kolomnamen correct zijn
+    if "Advies" not in df_signalen.columns or "Close" not in df_signalen.columns:
+        return 0.0, 0  # Geen data om te analyseren
+
+    for datum, rij in df_signalen.iterrows():
+        advies = rij["Advies"]
+        close = rij["Close"]
+
+        if pd.isna(advies) or pd.isna(close):
+            continue
 
         if entry_price is None:
-            # Start nieuwe trade als het type overeenkomt met de keuze of met "Beide"
+            # Start een nieuwe trade
             if (signaal_type == "Koop" and advies == "Kopen") or \
                (signaal_type == "Verkoop" and advies == "Verkopen") or \
                (signaal_type == "Beide" and advies in ["Kopen", "Verkopen"]):
                 entry_price = close
                 entry_type = advies
+                entry_date = datum
         else:
-            # Sluit de trade bij tegenadvies
-            if (entry_type == "Kopen" and advies == "Verkopen") or \
-               (entry_type == "Verkopen" and advies == "Kopen"):
+            # Sluit de trade bij tegenovergesteld advies
+            sluit_koop = (entry_type == "Kopen" and advies == "Verkopen")
+            sluit_verkoop = (entry_type == "Verkopen" and advies == "Kopen")
+
+            if (sluit_koop or sluit_verkoop):
                 if signaal_type == "Beide" or signaal_type == entry_type:
                     if entry_type == "Kopen":
                         rendement = (close - entry_price) / entry_price * 100
                     else:
                         rendement = (entry_price - close) / entry_price * 100
+
                     rendementen.append(rendement)
-                # Reset voor volgende trade
+                    trades.append({
+                        "Type": entry_type,
+                        "Entry Date": entry_date.date(),
+                        "Entry Price": round(entry_price, 2),
+                        "Exit Date": datum.date(),
+                        "Exit Price": round(close, 2),
+                        "Rendement %": round(rendement, 2)
+                    })
+
+                # Reset trade
                 entry_price = None
                 entry_type = None
-            # Zelfde advies? Dan niets doen (houd positie aan)
-            else:
-                continue
+                entry_date = None
+            # Anders: houd positie aan
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
+
+    # 🐛 DEBUG: Trades printen als tabel
+    if trades:
+        st.write("📋 **Uitgevoerde Trades:**")
+        st.dataframe(pd.DataFrame(trades))
+    else:
+        st.write("⚠️ Geen uitgevoerde trades gevonden.")
+
+   # return sam_rendement, len(rendementen)
+    
     # Debug-output: toon signalenparen
     st.write("DEBUG: Entry type:", entry_type)
     st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
