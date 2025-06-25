@@ -284,7 +284,7 @@ selected_ticker = st.selectbox(
 # HTML-dropdown rendering
 selected_option = st.selectbox(
     f"Selecteer {selected_tab} ticker:",
-    options=dropdown_options,
+    options=dropdown_dict,
     format_func=lambda x: x[2],
     key="ticker_select"
 )
