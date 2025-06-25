@@ -529,8 +529,8 @@ else:
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
 # Debug: kolomnamen checken
-st.write("Kolomnamen df_period:", df_period.columns.tolist())
-st.write("Kolomnamen df_signalen:", df_signalen.columns.tolist())
+#st.write("Kolomnamen df_period:", df_period.columns.tolist())
+#st.write("Kolomnamen df_signalen:", df_signalen.columns.tolist())
 
 # --- SAM-rendement berekening ---
 rendementen = []
