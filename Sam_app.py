@@ -413,7 +413,7 @@ tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
 tabel = tabel[["Datum"] + kolommen]
 
 # Afronding en formatting
-if selected_tab == "Crypto":
+if selected_tab == "🌐 Crypto":
     tabel["Close"] = tabel["Close"].map("{:.3f}".format)
 else:
     tabel["Close"] = tabel["Close"].map("{:.2f}".format)
