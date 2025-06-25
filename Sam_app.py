@@ -222,6 +222,17 @@ tabs_mapping = {
 tab_labels = list(tabs_mapping.keys())
 selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
 
+valutasymbool = {
+    "🇳🇱 AEX": "€",
+    "🇺🇸 Dow Jones": "$",
+    "🇺🇸 Nasdaq": "$",
+    "🇺🇸 US Tech": "$",
+    "🌐 Crypto": "",  # Geen symbool
+}.get(selected_tab, "")
+
+# Dan in je tekst:
+#f"{ticker_name} – {valutasymbool}{last:.2f}"
+
 # --- Data ophalen voor dropdown live view ---
 def get_live_ticker_data(tickers_dict):
     tickers = list(tickers_dict.keys())
@@ -339,7 +350,7 @@ st.markdown(
 #)
 #st.markdown(
     f"""
-    <h3>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker_name}</span></h3>
+    <h3>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker_name}{valutasymbool}{last:.2f}"</span></h3>
     <h2 style='color:{advies_kleur}'>Huidig advies: {huidig_advies}</h2>
     """,
     unsafe_allow_html=True
