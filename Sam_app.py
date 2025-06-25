@@ -472,8 +472,8 @@ df_period = df_period[
     (df_period.index.date >= start_date) & (df_period.index.date <= end_date)
 ]
 
-#marktrendement = None
-#sam_rendement = None
+marktrendement = None
+sam_rendement = None
 
 if not df_period.empty:
     # --- Marktrendement ---
@@ -482,13 +482,13 @@ marktrendement = None
 if not df_period.empty:
     df_valid = df_period["Close"].dropna()
 
-    if not df_valid.empty:
+    if len(df_valid) >= 2:
         koers_start = df_valid.iloc[0]
         koers_eind = df_valid.iloc[-1]
 
         if koers_start != 0:
             marktrendement = ((koers_eind - koers_start) / koers_start) * 100
-    
+            
 #    st.write("Startdatum gekozen:", start_date)
 #    st.write("Einddatum gekozen:", end_date)
 #    st.write("Beschikbare data in df_period:", df_period.index.min(), "t/m", df_period.index.max())
