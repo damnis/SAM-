@@ -517,6 +517,7 @@ if not df_period.empty:
 #        marktrendement = None
 
     # # --- SAM-signalen selecteren ---
+# --- SAM-signalen selecteren ---
 df_signalen = df_period[df_period["Advies"].notna()].copy()
 
 if signaalkeuze == "Koop":
@@ -530,73 +531,55 @@ else:
 rendementen = []
 positie = None
 instap_koers = None
+geldig_signalen = 0  # teller
 
 for _, row in df_signalen.iterrows():
-    advies = row.get("Advies")
-    close = row.get("Close")
-
-    if advies is None:
-        continue
-
-# Controleer of close een enkel getal is en niet een Series
-    if isinstance(close, pd.Series):
-        continue
-
     try:
+        advies = row["Advies"] if "Advies" in row else None
+        close = row["Close"] if "Close" in row else None
+
+        if isinstance(advies, pd.Series) or isinstance(close, pd.Series):
+            continue
+
+        if pd.isna(advies) or pd.isna(close):
+            continue
+
         close = float(close)
-    except:
-        continue
+        geldig_signalen += 1  # geldig signaal geteld
 
-    if pd.isna(close):
-        continue
+        if signaalkeuze == "Koop":
+            if advies == "Kopen":
+                rendement = ((df_period["Close"].iloc[-1] - close) / close) * 100
+                rendementen.append(rendement)
 
+        elif signaalkeuze == "Verkoop":
+            if advies == "Verkopen":
+                rendement = ((close - df_period["Close"].iloc[-1]) / close) * 100
+                rendementen.append(rendement)
 
-    # Haal numerieke waarde uit 'Close'
-    try:
-        close = float(close)
-    except:
-        continue
-
-    laatste_koers = df_period["Close"].dropna().iloc[-1]
-    try:
-        laatste_koers = float(laatste_koers)
-    except:
-        continue
-
-    if signaalkeuze == "Koop":
-        if advies == "Kopen":
-            rendement = ((laatste_koers - close) / close) * 100
-            rendementen.append(rendement)
-
-    elif signaalkeuze == "Verkoop":
-        if advies == "Verkopen":
-            rendement = ((close - laatste_koers) / close) * 100
-            rendementen.append(rendement)
-
-    elif signaalkeuze == "Beide":
-        if positie is None and advies == "Kopen":
-            instap_koers = close
-            positie = "long"
-        elif positie == "long" and advies == "Verkopen":
-            try:
-                rendement = ((close - instap_koers) / instap_koers) * 100
+        elif signaalkeuze == "Beide":
+            if positie is None and advies == "Kopen":
+                instap_koers = close
+                positie = "long"
+            elif positie == "long" and advies == "Verkopen":
+                uitstap_koers = close
+                rendement = ((uitstap_koers - instap_koers) / instap_koers) * 100
                 rendementen.append(rendement)
                 positie = None
-                instap_koers = None
-            except:
-                continue
+
+    except Exception:
+        continue
 
 # Open positie sluiten op einddatum
 if signaalkeuze == "Beide" and positie == "long" and instap_koers is not None:
-    laatste_koers = df_period["Close"].dropna().iloc[-1]
     try:
-        laatste_koers = float(laatste_koers)
+        laatste_koers = df_period["Close"].iloc[-1]
         rendement = ((laatste_koers - instap_koers) / instap_koers) * 100
         rendementen.append(rendement)
     except:
         pass
 
-# Totale SAM-rendement berekenen
+# Totale SAM-rendement berekening
 sam_rendement = sum(rendementen)
 
 # --- Resultaten tonen ---
