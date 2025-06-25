@@ -223,10 +223,11 @@ tab_labels = list(tabs_mapping.keys())
 selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
 
 valutasymbool = {
-    "🇳🇱 AEX": "€",
-    "🇺🇸 Dow Jones": "$",
-    "🇺🇸 Nasdaq": "$",
-    "🇺🇸 US Tech": "$",
+    "🇳🇱 AEX": "€ ",
+    "🇳🇱 AMX": "€ ",
+    "🇺🇸 Dow Jones": "$ ",
+    "🇺🇸 Nasdaq": "$ ",
+    "🇺🇸 US Tech": "$ ",
     "🌐 Crypto": "",  # Geen symbool
 }.get(selected_tab, "")
 
