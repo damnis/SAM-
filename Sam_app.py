@@ -451,8 +451,9 @@ st.markdown(html, unsafe_allow_html=True)
 
 from datetime import date
 
-# --- Toevoeging: Backtestfunctie ---
 st.subheader("📅 Vergelijk Marktrendement en SAM-rendement")
+
+# --- Datuminvoer ---
 today = date.today()
 default_start = df.index.min().date()
 default_end = df.index.max().date()
@@ -460,12 +461,16 @@ default_end = df.index.max().date()
 start_date = st.date_input("Startdatum analyse", default_start)
 end_date = st.date_input("Einddatum analyse", default_end)
 
-# Signaalkeuze
-signaalkeuze = st.selectbox("Welke signalen tellen mee voor SAM-rendement?", ["Koop", "Verkoop", "Beide"])
+# --- Signaalkeuze ---
+signaalkeuze = st.selectbox(
+    "Welke signalen tellen mee voor SAM-rendement?", ["Koop", "Verkoop", "Beide"]
+)
 
-# Filter data op periode
+# --- Filter op periode ---
 df_period = df.copy()
-df_period = df_period[(df_period.index.date >= start_date) & (df_period.index.date <= end_date)]
+df_period = df_period[
+    (df_period.index.date >= start_date) & (df_period.index.date <= end_date)
+]
 
 marktrendement = None
 sam_rendement = None
@@ -496,46 +501,56 @@ if not df_period.empty:
 
     for _, row in df_signalen.iterrows():
         advies = row["Advies"]
+        close = row["Close"]
+
+        if pd.isna(close):
+            continue  # Sla lege koersen over
 
         if signaalkeuze == "Koop":
             if advies == "Kopen":
-                instap_koers = row["Close"]
-                rendement = ((df_period["Close"].iloc[-1] - instap_koers) / instap_koers) * 100
-                rendementen.append(rendement)
+                try:
+                    rendement = ((df_period["Close"].iloc[-1] - close) / close) * 100
+                    rendementen.append(rendement)
+                except:
+                    continue
 
         elif signaalkeuze == "Verkoop":
             if advies == "Verkopen":
-                instap_koers = row["Close"]
-                rendement = ((instap_koers - df_period["Close"].iloc[-1]) / instap_koers) * 100
-                rendementen.append(rendement)
+                try:
+                    rendement = ((close - df_period["Close"].iloc[-1]) / close) * 100
+                    rendementen.append(rendement)
+                except:
+                    continue
 
-        else:  # Beide signalen -> koop & verkoopparen
+        elif signaalkeuze == "Beide":
             if positie is None and advies == "Kopen":
-                instap_koers = row["Close"]
+                instap_koers = close
                 positie = "long"
             elif positie == "long" and advies == "Verkopen":
-                uitstap_koers = row["Close"]
-                rendement = ((uitstap_koers - instap_koers) / instap_koers) * 100
-                rendementen.append(rendement)
-                positie = None
+                try:
+                    uitstap_koers = close
+                    rendement = ((uitstap_koers - instap_koers) / instap_koers) * 100
+                    rendementen.append(rendement)
+                    positie = None
+                except:
+                    continue
 
     # Open positie sluiten op einddatum
     if signaalkeuze == "Beide" and positie == "long" and instap_koers is not None:
         laatste_koers = df_period["Close"].iloc[-1]
-        rendement = ((laatste_koers - instap_koers) / instap_koers) * 100
-        rendementen.append(rendement)
+        try:
+            rendement = ((laatste_koers - instap_koers) / instap_koers) * 100
+            rendementen.append(rendement)
+        except:
+            pass
 
     sam_rendement = sum(rendementen)
 
-# --- Weergave ---
+# --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
 col1, col2 = st.columns(2)
 col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%" if marktrendement is not None else "n.v.t.")
 col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%" if sam_rendement is not None else "n.v.t.")
-
-# Weergave in Streamlit
-#st.markdown(html, unsafe_allow_html=True)
-
 
 
 
