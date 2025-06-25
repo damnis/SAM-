@@ -247,7 +247,7 @@ dropdown_options = []
 
 for t, naam, last, change, kleur in live_info:
     kleur_symbool = "🟢" if change > 0 else "🔴" if change < 0 else "⚪"
-    formatted = f"{t} - {naam} - ${last:.2f} ({change:+.2f}%) {kleur_symbool}"
+    formatted = f"{t} - {naam} - {last:.2f} ({change:+.2f}%) {kleur_symbool}"
   #  change_str = f"<span style='color:{kleur}'>({change:+.2f}%)</span>"
   #  formatted = f"{t} - {naam} - ${last:.2f} {change_str}"
     dropdown_options.append((t, naam, formatted))
