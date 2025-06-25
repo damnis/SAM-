@@ -414,12 +414,12 @@ tabel = tabel[["Datum"] + kolommen]
 
 # Afronding en formatting
 if selected_tab == "Crypto":
-    tabel["Close"] = tabel["Close"].round(3)
+    tabel["Close"] = tabel["Close"].map("{:.3f}".format)
 else:
-    tabel["Close"] = tabel["Close"].round(2)
+    tabel["Close"] = tabel["Close"].map("{:.2f}".format)
 
-tabel["SAM"] = tabel["SAM"].round(2)
-tabel["Trend"] = tabel["Trend"].round(3)
+tabel["SAM"] = tabel["SAM"].map("{:.2f}".format)
+tabel["Trend"] = tabel["Trend"].map("{:.3f}".format)
 
 tabel["Markt-%"] = (tabel["Markt-%"].astype(float) * 100).map("{:+.2f}%".format)
 tabel["SAM-%"] = (tabel["SAM-%"].astype(float) * 100).map("{:+.2f}%".format)
