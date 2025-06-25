@@ -235,7 +235,7 @@ valutasymbool = {
 #f"{ticker_name} – {valutasymbool}{last:.2f}"
 
 # --- Data ophalen voor dropdown live view ---
-def get_live_ticker_data(tickers_dict):
+#def get_live_ticker_data(tickers_dict):
 # --- Data ophalen voor dropdown live view ---
 def get_live_ticker_data(tickers_dict):
     tickers = list(tickers_dict.keys())
