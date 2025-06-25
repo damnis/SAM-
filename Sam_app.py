@@ -552,7 +552,7 @@ def bereken_sam_rendement(df_signalen, signaal_type):
 
     for i, row in df_signalen.iterrows():
         advies = row["Advies"]
-        close = row[("Close", ticker_name)
+        close = row[("Close", ticker_name)]
 #        close = row[("Close", row[("Close",)].name if isinstance(row[("Close",)], pd.Series) else df_signalen.columns[0][1])]  # haalt kolomnaam zoals 'MMM' op
 
         # Start een nieuwe positie
