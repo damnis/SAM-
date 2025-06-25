@@ -525,82 +525,77 @@ if signaalkeuze == "Koop":
     df_signalen = df_signalen[df_signalen["Advies"] == "Kopen"]
 elif signaalkeuze == "Verkoop":
     df_signalen = df_signalen[df_signalen["Advies"] == "Verkopen"]
-else:
+else:  # Beide
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
-# Debug: kolomnamen checken
-#st.write("Kolomnamen df_period:", df_period.columns.tolist())
-#st.write("Kolomnamen df_signalen:", df_signalen.columns.tolist())
+# Debug: eerste 10 signalen laten zien
+st.write("Voorbeeld van signalen:")
+st.dataframe(df_signalen[["Advies", "Close"]].head(10))
 
 # --- SAM-rendement berekening ---
 rendementen = []
 positie = None
 instap_koers = None
-geldig_signalen = 0  # voor telling
+geldig_signalen = 0
 
 for idx, row in df_signalen.iterrows():
+    advies = str(row["Advies"])
     try:
-        advies = row["Advies"]
-        close = row["Close"]
+        close = float(row["Close"])
+    except:
+        continue  # als koers niet numeriek is
 
-        # Zorg dat advies een string is en close een getal
-        if isinstance(advies, pd.Series) or isinstance(close, pd.Series):
-            st.write(f"Fout bij signaal op {idx}: Advies of Close is een Series.")
-            continue
+    if pd.isna(close) or pd.isna(advies):
+        continue
 
-        if pd.isna(advies) or pd.isna(close):
-            continue
-
-        advies = str(advies)
-        close = float(close)
-
-        if signaalkeuze == "Koop":
-            if advies == "Kopen":
-                rendement = ((df_period["Close"].iloc[-1] - close) / close) * 100
+    if signaalkeuze == "Koop":
+        if advies == "Kopen":
+            try:
+                koers_eind = float(df_period["Close"].iloc[-1])
+                rendement = ((koers_eind - close) / close) * 100
                 rendementen.append(rendement)
                 geldig_signalen += 1
-                st.write(f"Koop-signaal: instap {close}, uitstap {uitstap}, rendement {rendement:.2f}%")
+            except:
+                continue
 
-
-        elif signaalkeuze == "Verkoop":
-            if advies == "Verkopen":
-                rendement = ((close - df_period["Close"].iloc[-1]) / close) * 100
+    elif signaalkeuze == "Verkoop":
+        if advies == "Verkopen":
+            try:
+                koers_eind = float(df_period["Close"].iloc[-1])
+                rendement = ((close - koers_eind) / close) * 100
                 rendementen.append(rendement)
                 geldig_signalen += 1
-                st.write(f"Verkoop-signaal: verkoop {close}, terugkoop {uitstap}, rendement {rendement:.2f}%")
+            except:
+                continue
 
-
-        elif signaalkeuze == "Beide":
-            if positie is None and advies == "Kopen":
-                instap_koers = close
-                positie = "long"
-                st.write(f"Ingestapt op {instap_koers}")
-            elif positie == "long" and advies == "Verkopen":
-                uitstap_koers = close
+    elif signaalkeuze == "Beide":
+        if positie is None and advies == "Kopen":
+            instap_koers = close
+            positie = "long"
+        elif positie == "long" and advies == "Verkopen":
+            uitstap_koers = close
+            try:
                 rendement = ((uitstap_koers - instap_koers) / instap_koers) * 100
                 rendementen.append(rendement)
                 geldig_signalen += 1
-                st.write(f"Uitgestapt op {uitstap_koers}, rendement {rendement:.2f}%")
-                positie = None
+            except:
+                pass
+            positie = None
 
-    except Exception as e:
-        st.write(f"Fout bij signaal op {idx}: {e}")
-        continue
-
-# Open positie sluiten op einddatum (alleen bij 'Beide')
+# Open positie sluiten op einddatum
 if signaalkeuze == "Beide" and positie == "long" and instap_koers is not None:
-    laatste_koers = df_period["Close"].iloc[-1]
     try:
+        laatste_koers = float(df_period["Close"].iloc[-1])
         rendement = ((laatste_koers - instap_koers) / instap_koers) * 100
         rendementen.append(rendement)
+        geldig_signalen += 1
     except:
         pass
 
-# SAM-rendement berekenen
 sam_rendement = sum(rendementen)
 
-# Debug output
-st.write("Totaal aantal rendementen geteld:", len(rendementen))
+# Debug-output
+st.write(f"Totaal aantal rendementen geteld: {len(rendementen)}")
 st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
 
 # --- Resultaten tonen ---
