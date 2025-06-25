@@ -499,7 +499,7 @@ if not df_period.empty:
     positie = None
     instap_koers = None
 
-    for _, row in df_signalen.iterrows():
+  #  for _, row in df_signalen.iterrows():
     for _, row in df_signalen.iterrows():
         if "Advies" not in row or "Close" not in row:
             continue
