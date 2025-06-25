@@ -535,8 +535,21 @@ for _, row in df_signalen.iterrows():
     advies = row.get("Advies")
     close = row.get("Close")
 
-    if pd.isna(close) or advies is None:
+    if advies is None:
         continue
+
+# Controleer of close een enkel getal is en niet een Series
+    if isinstance(close, pd.Series):
+        continue
+
+    try:
+        close = float(close)
+    except:
+        continue
+
+    if pd.isna(close):
+        continue
+
 
     # Haal numerieke waarde uit 'Close'
     try:
