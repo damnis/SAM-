@@ -479,13 +479,15 @@ if not df_period.empty:
     # --- Marktrendement ---
 marktrendement = None
 
-if not df_period.empty and df_period["Close"].notna().all():
-    koers_start = df_period["Close"].iloc[0]
-    koers_eind = df_period["Close"].iloc[-1]
+if not df_period.empty:
+    df_valid = df_period["Close"].dropna()
 
-    if koers_start != 0:
-        marktrendement = ((koers_eind - koers_start) / koers_start) * 100
-    # --- Marktrendement ---
+    if not df_valid.empty:
+        koers_start = df_valid.iloc[0]
+        koers_eind = df_valid.iloc[-1]
+
+        if koers_start != 0:
+            marktrendement = ((koers_eind - koers_start) / koers_start) * 100
     
 #    st.write("Startdatum gekozen:", start_date)
 #    st.write("Einddatum gekozen:", end_date)
