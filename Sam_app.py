@@ -413,10 +413,21 @@ tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
 tabel = tabel[["Datum"] + kolommen]
 
 # Afronding en formatting
-for kolom in ["Close", "SAM", "Trend"]:
-    tabel[kolom] = tabel[kolom].round(3)
+if selected_tab == "Crypto":
+    tabel["Close"] = tabel["Close"].round(3)
+else:
+    tabel["Close"] = tabel["Close"].round(2)
+
+tabel["SAM"] = tabel["SAM"].round(2)
+tabel["Trend"] = tabel["Trend"].round(3)
+
 tabel["Markt-%"] = (tabel["Markt-%"].astype(float) * 100).map("{:+.2f}%".format)
 tabel["SAM-%"] = (tabel["SAM-%"].astype(float) * 100).map("{:+.2f}%".format)
+
+#for kolom in ["Close", "SAM", "Trend"]:
+#    tabel[kolom] = tabel[kolom].round(3)
+#tabel["Markt-%"] = (tabel["Markt-%"].astype(float) * 100).map("{:+.2f}%".format)
+#tabel["SAM-%"] = (tabel["SAM-%"].astype(float) * 100).map("{:+.2f}%".format)
 
 # HTML-rendering
 html = """
