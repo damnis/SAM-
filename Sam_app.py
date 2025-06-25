@@ -584,7 +584,7 @@ def bereken_sam_rendement(df_signalen, signaal_type):
 
 # Debug-output
 #st.write(f"Totaal aantal rendementen geteld: {len(rendementen)}")
-st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
+#st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
 
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
