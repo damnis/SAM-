@@ -529,6 +529,9 @@ elif signaalkeuze == "Verkoop":
 else:  # Beide
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
+# ✅ SAM-rendement berekenen
+sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
+
 # Debug: toon eerste 10 signalen
 st.write("Voorbeeld van signalen:")
 st.dataframe(df_signalen[["Advies", "Close"]].head(10))
@@ -536,27 +539,42 @@ st.dataframe(df_signalen[["Advies", "Close"]].head(10))
 # --- SAM-rendement berekening ---
 def bereken_sam_rendement(df_signalen, signaal_type):
     df_signalen = df_signalen.copy()
-    df_signalen = df_signalen.sort_index()
+    df_signalen = df_signalen.sort_index()  # Zorg voor oplopende datumvolgorde
 
+    # Kolom voor Close-waarde bepalen
+    if isinstance(df_signalen.columns, pd.MultiIndex):
+        close_col = [col for col in df_signalen.columns if col[0] == "Close"][0]
+    else:
+        close_col = "Close"
+
+    # Filter alleen de gewenste signalen
     if signaal_type == "Koop":
         df_signalen = df_signalen[df_signalen["Advies"] == "Kopen"]
     elif signaal_type == "Verkoop":
         df_signalen = df_signalen[df_signalen["Advies"] == "Verkopen"]
     elif signaal_type == "Beide":
         df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
+    else:
+        st.warning("Ongeldige signaalkeuze.")
+        return 0.0, 0
 
     rendementen = []
     entry_price = None
     entry_type = None
 
-    for i, row in df_signalen.iterrows():
+    for _, row in df_signalen.iterrows():
         advies = row["Advies"]
-        close = row["Close"]  # ✅ ENKELVOUDIGE kolomnaam gebruiken!
+        close = row[close_col]
+
+        # Zorg dat advies en close enkelvoudig zijn
+        if isinstance(advies, pd.Series) or isinstance(close, pd.Series):
+            continue  # skip deze foutieve regel
 
         if entry_price is None:
             entry_price = close
             entry_type = advies
         else:
+            # Kijk of dit een tegenadvies is (van kopen naar verkopen of omgekeerd)
             if (entry_type == "Kopen" and advies == "Verkopen") or (entry_type == "Verkopen" and advies == "Kopen"):
                 if entry_type == "Kopen":
                     rendement = (close - entry_price) / entry_price * 100
@@ -564,19 +582,14 @@ def bereken_sam_rendement(df_signalen, signaal_type):
                     rendement = (entry_price - close) / entry_price * 100
 
                 rendementen.append(rendement)
-
-                # Reset positie
                 entry_price = None
                 entry_type = None
             else:
-                continue
+                continue  # Zelfde advies, geen actie
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, len(rendementen)
-
-# ✅ Functie aanroepen!
-sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
-
+    
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
 col1, col2 = st.columns(2)
@@ -589,6 +602,7 @@ else:
 if isinstance(sam_rendement, (int, float)):
     col2.metric("📈 SAM-rendement", f"{sam_rendement:+.2f}%")
     st.caption(f"Aantal afgeronde trades (koop-verkoopparen): **{geldig_signalen}** binnen deze periode.")
+    st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
 else:
     col2.metric(f"SAM-rendement ({signaalkeuze})", "n.v.t.")
     
