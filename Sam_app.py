@@ -559,8 +559,7 @@ def bereken_sam_rendement(df_signalen, signaal_type):
     else:
         close_col = "Close"
     # Strip en normaliseer de waarden in de Advies-kolom
-    df_signalen["Advies"] = 
-    df_signalen["Advies"].astype(str).str.strip().str.capitalize()
+    df_signalen["Advies"] = df_signalen["Advies"].astype(str).str.strip().str.capitalize()
     
 
     rendementen = []
