@@ -563,7 +563,8 @@ def bereken_sam_rendement(df_signalen, signaal_type):
 
     for _, row in df_signalen.iterrows():
         try:
-            advies = str(row["Advies"])
+            advies = str(row["Advies"]).strip()
+    #        advies = str(row["Advies"])
             close = float(row[close_col])
         except Exception:
             continue  # Skip bij ongeldige data
