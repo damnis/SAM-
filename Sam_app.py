@@ -261,6 +261,18 @@ selected_option = st.selectbox(
 )
 ticker, ticker_name = selected_option[0], selected_option[1]
 
+import yfinance as yf
+
+# Huidige ticker ophalen uit dropdown
+ticker, ticker_name = selected_option[0], selected_option[1]
+
+# Actuele koers ophalen voor alleen de geselecteerde ticker
+try:
+    live_data = yf.download(ticker, period="1d", interval="1d", progress=False)
+    last = live_data["Close"].iloc[-1]
+except Exception:
+    last = 0.0  # fallback
+
 # --- Tabs met selecties ---
 
 #tab_labels = ["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇺🇸 US Tech", "🇳🇱 AEX"]
@@ -325,6 +337,13 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+#st.markdown(
+#    f"""
+#    <h3>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker_name} - ${last:.2f}</span></h3>
+#    <h2 style='color:{advies_kleur}'>Huidig advies: {huidig_advies}</h2>
+#    """,
+#    unsafe_allow_html=True
+#)
 
 import matplotlib.pyplot as plt
 import streamlit as st
