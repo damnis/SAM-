@@ -527,7 +527,6 @@ elif signaalkeuze == "Verkoop":
 else:
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
-# Toon aantal signalen
 st.write(f"Aantal signalen geselecteerd: {len(df_signalen)}")
 
 # --- SAM-rendement berekening ---
@@ -537,8 +536,15 @@ instap_koers = None
 
 for index, row in df_signalen.iterrows():
     try:
-        advies = row["Advies"]
-        close = row["Close"]
+        advies_raw = row["Advies"]
+        close_raw = row["Close"]
+
+        # Controleer of Series, sla dan over
+        if isinstance(advies_raw, pd.Series) or isinstance(close_raw, pd.Series):
+            raise ValueError("Advies of Close is een Series.")
+
+        advies = str(advies_raw).strip()
+        close = float(close_raw)
 
         if pd.isna(close) or pd.isna(advies):
             continue
@@ -548,14 +554,14 @@ for index, row in df_signalen.iterrows():
                 uitstap = df_period["Close"].iloc[-1]
                 rendement = ((uitstap - close) / close) * 100
                 rendementen.append(rendement)
-                st.write(f"Koop-signaal: instap {close}, uitstap {uitstap}, rendement {rendement:.2f}%")
+                st.write(f"Koop: instap {close}, uitstap {uitstap}, rendement {rendement:.2f}%")
 
         elif signaalkeuze == "Verkoop":
             if advies == "Verkopen":
                 uitstap = df_period["Close"].iloc[-1]
                 rendement = ((close - uitstap) / close) * 100
                 rendementen.append(rendement)
-                st.write(f"Verkoop-signaal: verkoop {close}, terugkoop {uitstap}, rendement {rendement:.2f}%")
+                st.write(f"Verkoop: verkoop {close}, terugkoop {uitstap}, rendement {rendement:.2f}%")
 
         elif signaalkeuze == "Beide":
             if positie is None and advies == "Kopen":
@@ -570,7 +576,7 @@ for index, row in df_signalen.iterrows():
                 positie = None
 
     except Exception as e:
-        st.write(f"Fout bij signaal op {index}: {e}")
+        st.write(f"Fout bij signaal op {index.date()}: {e}")
         continue
 
 # Open positie sluiten op einddatum
@@ -583,9 +589,11 @@ if signaalkeuze == "Beide" and positie == "long" and instap_koers is not None:
     except:
         pass
 
-# Eindberekening
 sam_rendement = sum(rendementen)
-st.write(f"Totaal aantal rendementen geteld: {len(rendementen)}")
+geldig_signalen = len(rendementen)
+
+st.write(f"Totaal aantal rendementen geteld: {geldig_signalen}")
+st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
 
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
