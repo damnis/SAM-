@@ -256,24 +256,51 @@ def get_live_ticker_data(tickers_dict):
 
 # --- Weergave dropdown met live info ---
 live_info = get_live_ticker_data(tabs_mapping[selected_tab])
-dropdown_dict = {}
+# --- Dropdown dictionary voorbereiden ---
+dropdown_dict = {}  # key = ticker, value = (display_tekst, naam)
 
 for t, naam, last, change, kleur in live_info:
     emoji = "🟢" if change > 0 else "🔴" if change < 0 else "⚪"
     display = f"{t} - {naam} | {valutasymbool}{last:.2f} {emoji} {change:+.2f}%"
-    dropdown_dict[t] = (display, naam)  # waarde = tuple (weergave, naam)
+    dropdown_dict[t] = (display, naam)
 
-# --- Dropdown ---
+# --- Bepalen van de juiste default key voor selectie
+# Herstel vorige selectie als deze nog bestaat
+default_ticker_key = st.session_state.get(f"ticker_select_{selected_tab}")
+if default_ticker_key not in dropdown_dict:
+    default_ticker_key = list(dropdown_dict.keys())[0]  # fallback naar eerste
+
+# --- Dropdown zelf ---
 selected_ticker = st.selectbox(
     f"Selecteer {selected_tab} ticker:",
-    options=list(dropdown_dict.keys()),
-    format_func=lambda x: dropdown_dict[x][0],  # toon de display string
-    key=f"ticker_select_{selected_tab}"
+    options=list(dropdown_dict.keys()),  # alleen tickers als stabiele optie-key
+    format_func=lambda x: dropdown_dict[x][0],  # toon koers etc.
+    key=f"ticker_select_{selected_tab}",
+    index=list(dropdown_dict.keys()).index(default_ticker_key)
 )
 
-# --- Opgehaalde waarden ---
+# --- Ophalen ticker info ---
 ticker = selected_ticker
 ticker_name = dropdown_dict[ticker][1]
+
+#dropdown_dict = {}
+
+#for t, naam, last, change, kleur in live_info:
+#    emoji = "🟢" if change > 0 else "🔴" if change < 0 else "⚪"
+#    display = f"{t} - {naam} | {valutasymbool}{last:.2f} {emoji} {change:+.2f}%"
+#    dropdown_dict[t] = (display, naam)  # waarde = tuple (weergave, naam)
+
+# --- Dropdown ---
+#selected_ticker = st.selectbox(
+#    f"Selecteer {selected_tab} ticker:",
+ #   options=list(dropdown_dict.keys()),
+ #   format_func=lambda x: dropdown_dict[x][0],  # toon de display string
+ #   key=f"ticker_select_{selected_tab}"
+#)
+
+# --- Opgehaalde waarden ---
+#ticker = selected_ticker
+#ticker_name = dropdown_dict[ticker][1]
 
 # --- Live koers opnieuw ophalen voor de geselecteerde ticker ---
 try:
@@ -374,7 +401,7 @@ st.subheader("Laatste signalen en rendement")
 kolommen = ["Close", "Advies", "SAM", "Trend", "Markt-%", "SAM-%"]
 #tabel = df[kolommen].dropna().tail(30).round(3).copy()
 tabel = df[kolommen].dropna().copy()
-tabel = tabel.sort_index(ascending=False).head(300)
+tabel = tabel.sort_index(ascending=False).head(100)
 
 # Datumkolom aanmaken vanuit index
 if not isinstance(tabel.index, pd.DatetimeIndex):
