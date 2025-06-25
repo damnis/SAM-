@@ -559,22 +559,28 @@ for idx, row in df_signalen.iterrows():
                 rendement = ((df_period["Close"].iloc[-1] - close) / close) * 100
                 rendementen.append(rendement)
                 geldig_signalen += 1
+                st.write(f"Koop-signaal: instap {close}, uitstap {uitstap}, rendement {rendement:.2f}%")
+
 
         elif signaalkeuze == "Verkoop":
             if advies == "Verkopen":
                 rendement = ((close - df_period["Close"].iloc[-1]) / close) * 100
                 rendementen.append(rendement)
                 geldig_signalen += 1
+                st.write(f"Verkoop-signaal: verkoop {close}, terugkoop {uitstap}, rendement {rendement:.2f}%")
+
 
         elif signaalkeuze == "Beide":
             if positie is None and advies == "Kopen":
                 instap_koers = close
                 positie = "long"
+                st.write(f"Ingestapt op {instap_koers}")
             elif positie == "long" and advies == "Verkopen":
                 uitstap_koers = close
                 rendement = ((uitstap_koers - instap_koers) / instap_koers) * 100
                 rendementen.append(rendement)
                 geldig_signalen += 1
+                st.write(f"Uitgestapt op {uitstap_koers}, rendement {rendement:.2f}%")
                 positie = None
 
     except Exception as e:
