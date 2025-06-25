@@ -549,6 +549,7 @@ st.dataframe(df_signalen[["Advies", "Close"]].head(10))
 def bereken_sam_rendement(df_signalen, signaal_type):
     df_signalen = df_signalen.copy()
     df_signalen = df_signalen.sort_index()  # Zorg voor chronologische volgorde
+    st.write("DEBUG: Unieke waarden in Advies:", df_signalen["Advies"].dropna().unique())
 
     # Kolomnaam bepalen
     if isinstance(df_signalen.columns, pd.MultiIndex):
@@ -592,6 +593,10 @@ def bereken_sam_rendement(df_signalen, signaal_type):
                 continue
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
+    # Debug-output: toon signalenparen
+    st.write("DEBUG: Entry type:", entry_type)
+    st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
+    st.write("DEBUG: Rendementenlijst:", rendementen)
     return sam_rendement, len(rendementen)
 
 sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
