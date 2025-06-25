@@ -551,8 +551,16 @@ if not df_period.empty:
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
 col1, col2 = st.columns(2)
-col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%" if marktrendement is not None else "n.v.t.")
-col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%" if sam_rendement is not None else "n.v.t.")
+if isinstance(marktrendement, (int, float)):
+    col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%")
+else:
+    col1.metric("Marktrendement (Buy & Hold)", "n.v.t.")
+#col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%" if marktrendement is not None else "n.v.t.")
+if isinstance(sam_rendement, (int, float)):
+    col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%")
+else:
+    col2.metric(f"SAM-rendement ({signaalkeuze})", "n.v.t.")
+#col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%" if sam_rendement is not None else "n.v.t.")
 
 
 
