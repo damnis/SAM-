@@ -282,7 +282,9 @@ st.subheader("Laatste signalen en rendement")
 
 # Kolommen selecteren en formatteren
 kolommen = ["Close", "Advies", "SAM", "Trend", "Markt-%", "SAM-%"]
-tabel = df[kolommen].dropna().tail(30).round(3).copy()
+#tabel = df[kolommen].dropna().tail(30).round(3).copy()
+tabel = df[kolommen].dropna().copy()
+tabel = tabel.sort_index(ascending=False).head(30)
 
 # Datumkolom aanmaken vanuit index
 if not isinstance(tabel.index, pd.DatetimeIndex):
