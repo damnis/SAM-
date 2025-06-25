@@ -477,12 +477,27 @@ sam_rendement = None
 
 if not df_period.empty:
     # --- Marktrendement ---
+    st.write("Startdatum gekozen:", start_date)
+    st.write("Einddatum gekozen:", end_date)
+    st.write("Beschikbare data in df_period:", df_period.index.min(), "t/m", df_period.index.max())
+    st.write("Aantal regels in df_period:", len(df_period))
+    st.write("Eerste koers (Close):", df_period["Close"].iloc[0] if not df_period.empty else "n.v.t.")
+    st.write("Laatste koers (Close):", df_period["Close"].iloc[-1] if not df_period.empty else "n.v.t.")
+    if not df_period.empty and df_period["Close"].notna().all():
     try:
         koers_start = df_period["Close"].iloc[0]
         koers_eind = df_period["Close"].iloc[-1]
         marktrendement = ((koers_eind - koers_start) / koers_start) * 100
     except Exception:
         marktrendement = None
+else:
+    st.warning("Geen geldige koersdata beschikbaar voor marktrendement.")
+#    try:
+#        koers_start = df_period["Close"].iloc[0]
+#        koers_eind = df_period["Close"].iloc[-1]
+#        marktrendement = ((koers_eind - koers_start) / koers_start) * 100
+#    except Exception:
+#        marktrendement = None
 
     # --- SAM-signalen selecteren ---
     df_signalen = df_period[df_period["Advies"].notna()].copy()
