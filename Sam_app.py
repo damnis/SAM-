@@ -518,7 +518,7 @@ if not df_period.empty:
 
 # Verwijder dubbele kolommen in df_period
 df_period = df_period.loc[:, ~df_period.columns.duplicated()]
-# --- # --- SAM-signalen selecteren ---
+# # --- SAM-signalen selecteren ---
 df_signalen = df_period[df_period["Advies"].notna()].copy()
 
 if signaalkeuze == "Koop":
@@ -528,74 +528,73 @@ elif signaalkeuze == "Verkoop":
 else:
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
-st.write(f"Aantal signalen geselecteerd: {len(df_signalen)}")
-# Debug: controleer kolomnamen
+# Debug: kolomnamen checken
 st.write("Kolomnamen df_period:", df_period.columns.tolist())
 st.write("Kolomnamen df_signalen:", df_signalen.columns.tolist())
+
 # --- SAM-rendement berekening ---
 rendementen = []
 positie = None
 instap_koers = None
+geldig_signalen = 0  # voor telling
 
-for index, row in df_signalen.iterrows():
+for idx, row in df_signalen.iterrows():
     try:
-        advies_raw = row["Advies"]
-        close_raw = row["Close"]
+        advies = row["Advies"]
+        close = row["Close"]
 
-        # Controleer of Series, sla dan over
-        if isinstance(advies_raw, pd.Series) or isinstance(close_raw, pd.Series):
-            raise ValueError("Advies of Close is een Series.")
-
-        advies = str(advies_raw).strip()
-        close = float(close_raw)
-
-        if pd.isna(close) or pd.isna(advies):
+        # Zorg dat advies een string is en close een getal
+        if isinstance(advies, pd.Series) or isinstance(close, pd.Series):
+            st.write(f"Fout bij signaal op {idx}: Advies of Close is een Series.")
             continue
+
+        if pd.isna(advies) or pd.isna(close):
+            continue
+
+        advies = str(advies)
+        close = float(close)
 
         if signaalkeuze == "Koop":
             if advies == "Kopen":
-                uitstap = df_period["Close"].iloc[-1]
-                rendement = ((uitstap - close) / close) * 100
+                rendement = ((df_period["Close"].iloc[-1] - close) / close) * 100
                 rendementen.append(rendement)
-                st.write(f"Koop: instap {close}, uitstap {uitstap}, rendement {rendement:.2f}%")
+                geldig_signalen += 1
 
         elif signaalkeuze == "Verkoop":
             if advies == "Verkopen":
-                uitstap = df_period["Close"].iloc[-1]
-                rendement = ((close - uitstap) / close) * 100
+                rendement = ((close - df_period["Close"].iloc[-1]) / close) * 100
                 rendementen.append(rendement)
-                st.write(f"Verkoop: verkoop {close}, terugkoop {uitstap}, rendement {rendement:.2f}%")
+                geldig_signalen += 1
 
         elif signaalkeuze == "Beide":
             if positie is None and advies == "Kopen":
                 instap_koers = close
                 positie = "long"
-                st.write(f"Ingestapt op {instap_koers}")
             elif positie == "long" and advies == "Verkopen":
                 uitstap_koers = close
                 rendement = ((uitstap_koers - instap_koers) / instap_koers) * 100
                 rendementen.append(rendement)
-                st.write(f"Uitgestapt op {uitstap_koers}, rendement {rendement:.2f}%")
+                geldig_signalen += 1
                 positie = None
 
     except Exception as e:
-        st.write(f"Fout bij signaal op {index.date()}: {e}")
+        st.write(f"Fout bij signaal op {idx}: {e}")
         continue
 
-# Open positie sluiten op einddatum
+# Open positie sluiten op einddatum (alleen bij 'Beide')
 if signaalkeuze == "Beide" and positie == "long" and instap_koers is not None:
+    laatste_koers = df_period["Close"].iloc[-1]
     try:
-        laatste_koers = df_period["Close"].iloc[-1]
         rendement = ((laatste_koers - instap_koers) / instap_koers) * 100
         rendementen.append(rendement)
-        st.write(f"Open positie gesloten op {laatste_koers}, rendement {rendement:.2f}%")
     except:
         pass
 
+# SAM-rendement berekenen
 sam_rendement = sum(rendementen)
-geldig_signalen = len(rendementen)
 
-st.write(f"Totaal aantal rendementen geteld: {geldig_signalen}")
+# Debug output
+st.write("Totaal aantal rendementen geteld:", len(rendementen))
 st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
 
 # --- Resultaten tonen ---
