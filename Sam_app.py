@@ -499,45 +499,43 @@ if not df_period.empty:
     positie = None
     instap_koers = None
 
-  #  for _, row in df_signalen.iterrows():
-    for _, row in df_signalen.iterrows():
-        if "Advies" not in row or "Close" not in row:
-            continue
+  for _, row in df_signalen.iterrows():
+        try:
+            advies = row.get("Advies", None)
+            close = row.get("Close", None)
 
-        advies = row["Advies"]
-        close = row["Close"]
+            if advies is None or close is None:
+                continue
 
-        if not isinstance(close, (int, float)) or pd.isna(close):
-            continue
+            if isinstance(close, pd.Series):
+                continue  # Als 'close' geen enkele waarde is maar een Series
 
-        if signaalkeuze == "Koop":
-            if advies == "Kopen":
-                try:
+            if pd.isna(close):
+                continue
+
+            if signaalkeuze == "Koop":
+                if advies == "Kopen":
                     rendement = ((df_period["Close"].iloc[-1] - close) / close) * 100
                     rendementen.append(rendement)
-                except:
-                    continue
 
-        elif signaalkeuze == "Verkoop":
-            if advies == "Verkopen":
-                try:
+            elif signaalkeuze == "Verkoop":
+                if advies == "Verkopen":
                     rendement = ((close - df_period["Close"].iloc[-1]) / close) * 100
                     rendementen.append(rendement)
-                except:
-                    continue
 
-        elif signaalkeuze == "Beide":
-            if positie is None and advies == "Kopen":
-                instap_koers = close
-                positie = "long"
-            elif positie == "long" and advies == "Verkopen":
-                try:
+            elif signaalkeuze == "Beide":
+                if positie is None and advies == "Kopen":
+                    instap_koers = close
+                    positie = "long"
+                elif positie == "long" and advies == "Verkopen":
                     uitstap_koers = close
                     rendement = ((uitstap_koers - instap_koers) / instap_koers) * 100
                     rendementen.append(rendement)
                     positie = None
-                except:
-                    continue
+
+        except Exception as e:
+            # optioneel: foutmelding printen of loggen
+            continue
 
     # Open positie sluiten op einddatum
     if signaalkeuze == "Beide" and positie == "long" and instap_koers is not None:
