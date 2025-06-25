@@ -539,9 +539,9 @@ instap_koers = None
 geldig_signalen = 0
 
 for idx, row in df_signalen.iterrows():
-    advies = str(row["Advies"])
+    advies = str(row["Advies", ""])
     try:
-        close = float(row["Close"])
+        close = float(row["Close", selected_ticker])
     except:
         continue  # als koers niet numeriek is
 
