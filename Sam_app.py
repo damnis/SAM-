@@ -264,7 +264,7 @@ for t, naam, last, change, kleur in live_info:
     dropdown_dict[t] = display
 
 # --- Dropdown ---
-selected_ticker = st.selectbox(
+selected_option = st.selectbox(
     f"Selecteer {selected_tab} ticker:",
     options=list(dropdown_dict.keys()),
     format_func=lambda x: dropdown_dict[x],
@@ -282,18 +282,18 @@ selected_ticker = st.selectbox(
 #    dropdown_options.append((t, naam, formatted))
 
 # HTML-dropdown rendering
-selected_option = st.selectbox(
-    f"Selecteer {selected_tab} ticker:",
-    options=dropdown_dict,
-    format_func=lambda x: x[2],
-    key="ticker_select"
+#selected_option = st.selectbox(
+#    f"Selecteer {selected_tab} ticker:",
+#    options=dropdown_dict,
+#    format_func=lambda x: x[2],
+ #   key="ticker_select"
 )
 ticker, ticker_name = selected_option[0], selected_option[1]
 
 import yfinance as yf
 
 # Huidige ticker ophalen uit dropdown
-ticker, ticker_name = selected_option[0], selected_option[1]
+#ticker, ticker_name = selected_option[0], selected_option[1]
 
 # Actuele koers ophalen voor alleen de geselecteerde ticker
 try:
