@@ -283,20 +283,6 @@ selected_ticker = st.selectbox(
 ticker = selected_ticker
 ticker_name = dropdown_dict[ticker][1]
 
-#dropdown_dict = {}
-
-#for t, naam, last, change, kleur in live_info:
-#    emoji = "🟢" if change > 0 else "🔴" if change < 0 else "⚪"
-#    display = f"{t} - {naam} | {valutasymbool}{last:.2f} {emoji} {change:+.2f}%"
-#    dropdown_dict[t] = (display, naam)  # waarde = tuple (weergave, naam)
-
-# --- Dropdown ---
-#selected_ticker = st.selectbox(
-#    f"Selecteer {selected_tab} ticker:",
- #   options=list(dropdown_dict.keys()),
- #   format_func=lambda x: dropdown_dict[x][0],  # toon de display string
- #   key=f"ticker_select_{selected_tab}"
-#)
 
 # --- Opgehaalde waarden ---
 #ticker = selected_ticker
@@ -309,27 +295,7 @@ try:
 except Exception:
     last = 0.0  # fallback
 
-# --- Tabs met selecties ---
 
-#tab_labels = ["🇺🇸 Dow Jones", "🇺🇸 Nasdaq", "🇺🇸 US Tech", "🇳🇱 AEX"]
-#selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
-
-#if selected_tab == "🇺🇸 Dow Jones":
- #   ticker_label = st.selectbox("Dow Jones aandeel", [f"{k} - {v}" for k, v in dow_tickers.items()], key="dow")
-#    ticker, ticker_name = ticker_label.split(" - ", 1)
-
-#elif selected_tab == "🇺🇸 Nasdaq":
-#    ticker_label = st.selectbox("Nasdaq aandeel", [f"{k} - {v}" for k, v in nasdaq_tickers.items()], key="nasdaq")
- #   ticker, ticker_name = ticker_label.split(" - ", 1)
-
-#elif selected_tab == "🇺🇸 US Tech":
- #   ticker_label = st.selectbox("US Tech aandeel", [f"{k} - {v}" for k, v in ustech_tickers.items()], key="ustech")
- #   ticker, ticker_name = ticker_label.split(" - ", 1)
-
-#else:  # AEX
-#    ticker_label = st.selectbox("AEX aandeel", [f"{k} - {v}" for k, v in aex_tickers.items()], key="aex")
- #   ticker, ticker_name = ticker_label.split(" - ", 1)
-    
 # --- Andere instellingen ---
 # --- Intervalopties ---
 interval_optie = st.selectbox(
@@ -424,10 +390,6 @@ tabel["Trend"] = tabel["Trend"].map("{:.3f}".format)
 tabel["Markt-%"] = (tabel["Markt-%"].astype(float) * 100).map("{:+.2f}%".format)
 tabel["SAM-%"] = (tabel["SAM-%"].astype(float) * 100).map("{:+.2f}%".format)
 
-#for kolom in ["Close", "SAM", "Trend"]:
-#    tabel[kolom] = tabel[kolom].round(3)
-#tabel["Markt-%"] = (tabel["Markt-%"].astype(float) * 100).map("{:+.2f}%".format)
-#tabel["SAM-%"] = (tabel["SAM-%"].astype(float) * 100).map("{:+.2f}%".format)
 
 # HTML-rendering
 html = """
