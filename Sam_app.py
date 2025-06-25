@@ -472,8 +472,8 @@ df_period = df_period[
     (df_period.index.date >= start_date) & (df_period.index.date <= end_date)
 ]
 
-marktrendement = None
-sam_rendement = None
+#marktrendement = None
+#sam_rendement = None
 
 if not df_period.empty:
     # --- Marktrendement ---
