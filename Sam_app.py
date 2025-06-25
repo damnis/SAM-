@@ -444,6 +444,9 @@ for _, row in tabel.iterrows():
 
 html += "</tbody></table>"
 
+#Weergave in Streamlit
+st.markdown(html, unsafe_allow_html=True)
+
 #--- Toevoeging: Backtestfunctie ---
 
 from datetime import date
@@ -531,7 +534,7 @@ col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%" if marktren
 col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%" if sam_rendement is not None else "n.v.t.")
 
 # Weergave in Streamlit
-st.markdown(html, unsafe_allow_html=True)
+#st.markdown(html, unsafe_allow_html=True)
 
 
 
