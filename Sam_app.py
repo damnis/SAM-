@@ -540,32 +540,15 @@ st.dataframe(df_signalen[["Advies", "Close"]].head(10))
 
 # TEST: handmatig test-signalen invoegen
 # Deze override vervangt df_signalen tijdelijk
-df_signalen = pd.DataFrame({
-    "Advies": ["Kopen", "Verkopen", "Kopen", "Verkopen"],
-    "Close": [100, 105, 102, 98]
-}, index=pd.date_range("2025-01-01", periods=4))
+#df_signalen = pd.DataFrame({
+#    "Advies": ["Kopen", "Verkopen", "Kopen", "Verkopen"],
+#    "Close": [100, 105, 102, 98]
+#}, index=pd.date_range("2025-01-01", periods=4))
 
 # --- SAM-rendement berekening ---
 def bereken_sam_rendement(df_signalen, signaal_type):
     df_signalen = df_signalen.copy()
-    df_signalen = df_signalen.sort_index()  # Zorg voor oplopende datumvolgorde
-
-    # Kolom voor Close-waarde bepalen
-    if isinstance(df_signalen.columns, pd.MultiIndex):
-        close_col = [col for col in df_signalen.columns if col[0] == "Close"][0]
-    else:
-        close_col = "Close"
-
-    # Filter alleen de gewenste signalen
-    if signaal_type == "Koop":
-        df_signalen = df_signalen[df_signalen["Advies"] == "Kopen"]
-    elif signaal_type == "Verkoop":
-        df_signalen = df_signalen[df_signalen["Advies"] == "Verkopen"]
-    elif signaal_type == "Beide":
-        df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
-    else:
-        st.warning("Ongeldige signaalkeuze.")
-        return 0.0, 0
+    df_signalen = df_signalen.sort_index()
 
     rendementen = []
     entry_price = None
@@ -573,28 +556,33 @@ def bereken_sam_rendement(df_signalen, signaal_type):
 
     for _, row in df_signalen.iterrows():
         advies = row["Advies"]
-        close = row[close_col]
-
-        # Zorg dat advies en close enkelvoudig zijn
-        if isinstance(advies, pd.Series) or isinstance(close, pd.Series):
-            continue  # skip deze foutieve regel
+        close = row["Close"]
 
         if entry_price is None:
-            entry_price = close
-            entry_type = advies
+            if signaal_type == "Koop" and advies == "Kopen":
+                entry_price = close
+                entry_type = "Kopen"
+            elif signaal_type == "Verkoop" and advies == "Verkopen":
+                entry_price = close
+                entry_type = "Verkopen"
+            elif signaal_type == "Beide":
+                entry_price = close
+                entry_type = advies
         else:
-            # Kijk of dit een tegenadvies is (van kopen naar verkopen of omgekeerd)
             if (entry_type == "Kopen" and advies == "Verkopen") or (entry_type == "Verkopen" and advies == "Kopen"):
-                if entry_type == "Kopen":
-                    rendement = (close - entry_price) / entry_price * 100
-                else:
-                    rendement = (entry_price - close) / entry_price * 100
-
-                rendementen.append(rendement)
+                if signaal_type == "Beide" or \
+                   (signaal_type == "Koop" and entry_type == "Kopen") or \
+                   (signaal_type == "Verkoop" and entry_type == "Verkopen"):
+                    if entry_type == "Kopen":
+                        rendement = (close - entry_price) / entry_price * 100
+                    else:
+                        rendement = (entry_price - close) / entry_price * 100
+                    rendementen.append(rendement)
+                # Reset voor volgende trade
                 entry_price = None
                 entry_type = None
             else:
-                continue  # Zelfde advies, geen actie
+                continue  # zelfde type, wacht op tegenadvies
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, len(rendementen)
