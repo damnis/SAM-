@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # --- Functie om data op te halen ---
-# --- Functie om data op te halen ---
 def fetch_data(ticker, interval):
     import yfinance as yf
     import pandas as pd
@@ -349,7 +348,7 @@ st.markdown(
 #)
 #st.markdown(
     f"""
-    <h3>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker_name}"</span></h3>
+    <h3>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker_name}</span></h3>
     <h2 style='color:{advies_kleur}'>Huidig advies: {huidig_advies}</h2>
     """,
     unsafe_allow_html=True
