@@ -550,6 +550,8 @@ def bereken_sam_rendement(df_signalen, signaal_type):
     df_signalen = df_signalen.copy()
     df_signalen = df_signalen.sort_index()  # Zorg voor chronologische volgorde
     st.write("DEBUG: Unieke waarden in Advies:", df_signalen["Advies"].dropna().unique())
+    unieke_adviezen = df_signalen["Advies"].dropna().unique()
+    st.write("DEBUG: Unieke waarden in Advies:", unieke_adviezen)
 
     # Kolomnaam bepalen
     if isinstance(df_signalen.columns, pd.MultiIndex):
@@ -563,7 +565,8 @@ def bereken_sam_rendement(df_signalen, signaal_type):
 
     for _, row in df_signalen.iterrows():
         try:
-            advies = str(row["Advies"]).strip()
+            advies = str(row["Advies"]).strip().capitalize()
+    #        advies = str(row["Advies"]).strip()
     #        advies = str(row["Advies"])
             close = float(row[close_col])
         except Exception:
