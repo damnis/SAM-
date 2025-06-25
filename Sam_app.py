@@ -499,7 +499,7 @@ if not df_period.empty:
     positie = None
     instap_koers = None
 
-  for _, row in df_signalen.iterrows():
+    for _, row in df_signalen.iterrows():
         try:
             advies = row.get("Advies", None)
             close = row.get("Close", None)
