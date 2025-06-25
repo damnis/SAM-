@@ -493,10 +493,10 @@ if not df_period.empty and close_notna:
     marktrendement = ((koers_eind - koers_start) / koers_start) * 100
 else:
     marktrendement = None
-        try:
-            koers_start = df_period["Close"].iloc[0]
-            koers_eind = df_period["Close"].iloc[-1]
-            marktrendement = ((koers_eind - koers_start) / koers_start) * 100
+    try:
+        koers_start = df_period["Close"].iloc[0]
+        koers_eind = df_period["Close"].iloc[-1]
+        marktrendement = ((koers_eind - koers_start) / koers_start) * 100
         except Exception:
             marktrendement = None
     else:
