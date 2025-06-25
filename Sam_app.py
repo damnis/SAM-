@@ -528,7 +528,9 @@ else:
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
 st.write(f"Aantal signalen geselecteerd: {len(df_signalen)}")
-
+# Debug: controleer kolomnamen
+st.write("Kolomnamen df_period:", df_period.columns.tolist())
+st.write("Kolomnamen df_signalen:", df_signalen.columns.tolist())
 # --- SAM-rendement berekening ---
 rendementen = []
 positie = None
