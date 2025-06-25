@@ -533,66 +533,54 @@ st.write("Voorbeeld van signalen:")
 st.dataframe(df_signalen[["Advies", "Close"]].head(10))
 
 # --- SAM-rendement berekening ---
-rendementen = []
-positie = None
-instap_koers = None
-geldig_signalen = 0
+def bereken_sam_rendement(df_signalen, signaal_type):
+    df_signalen = df_signalen.copy()
+    df_signalen = df_signalen.sort_index()  # Zorg voor oplopende datumvolgorde
 
-for idx, row in df_signalen.iterrows():
-    advies = str(row["Advies", ""])
-    try:
-        close = float(row["Close", selected_ticker])
-    except:
-        continue  # als koers niet numeriek is
+    # Filter alleen de gewenste signalen
+    if signaal_type == "Koop":
+        df_signalen = df_signalen[df_signalen["Advies"] == "Kopen"]
+    elif signaal_type == "Verkoop":
+        df_signalen = df_signalen[df_signalen["Advies"] == "Verkopen"]
+    # Als "Beide", dan nemen we alle rijen met 'Kopen' of 'Verkopen' als Advies
+    elif signaal_type == "Beide":
+        df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
-    if pd.isna(close) or pd.isna(advies):
-        continue
+    rendementen = []
+    entry_price = None
+    entry_type = None
 
-    if signaalkeuze == "Koop":
-        if advies == "Kopen":
-            try:
-                koers_eind = float(df_period["Close"].iloc[-1])
-                rendement = ((koers_eind - close) / close) * 100
+    for i, row in df_signalen.iterrows():
+        advies = row["Advies"]
+        close = row[("Close", row[("Close",)].name if isinstance(row[("Close",)], pd.Series) else df_signalen.columns[0][1])]  # haalt kolomnaam zoals 'MMM' op
+
+        # Start een nieuwe positie
+        if entry_price is None:
+            entry_price = close
+            entry_type = advies
+        else:
+            # Kijk of dit een tegenpositie is
+            if (entry_type == "Kopen" and advies == "Verkopen") or (entry_type == "Verkopen" and advies == "Kopen"):
+                if entry_type == "Kopen":
+                    rendement = (close - entry_price) / entry_price * 100
+                else:
+                    rendement = (entry_price - close) / entry_price * 100
+
                 rendementen.append(rendement)
-                geldig_signalen += 1
-            except:
+
+                # Sluit de positie
+                entry_price = None
+                entry_type = None
+            else:
+                # Zelfde advies als vorige, sla over
                 continue
 
-    elif signaalkeuze == "Verkoop":
-        if advies == "Verkopen":
-            try:
-                koers_eind = float(df_period["Close"].iloc[-1])
-                rendement = ((close - koers_eind) / close) * 100
-                rendementen.append(rendement)
-                geldig_signalen += 1
-            except:
-                continue
+    if rendementen:
+        sam_rendement = sum(rendementen)
+    else:
+        sam_rendement = 0.0
 
-    elif signaalkeuze == "Beide":
-        if positie is None and advies == "Kopen":
-            instap_koers = close
-            positie = "long"
-        elif positie == "long" and advies == "Verkopen":
-            uitstap_koers = close
-            try:
-                rendement = ((uitstap_koers - instap_koers) / instap_koers) * 100
-                rendementen.append(rendement)
-                geldig_signalen += 1
-            except:
-                pass
-            positie = None
-
-# Open positie sluiten op einddatum
-if signaalkeuze == "Beide" and positie == "long" and instap_koers is not None:
-    try:
-        laatste_koers = float(df_period["Close"].iloc[-1])
-        rendement = ((laatste_koers - instap_koers) / instap_koers) * 100
-        rendementen.append(rendement)
-        geldig_signalen += 1
-    except:
-        pass
-
-sam_rendement = sum(rendementen)
+    return sam_rendement, len(rendementen)
 
 # Debug-output
 st.write(f"Totaal aantal rendementen geteld: {len(rendementen)}")
