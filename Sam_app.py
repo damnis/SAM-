@@ -535,7 +535,7 @@ geldig_signalen = 0  # teller
 st.write("Aantal signalen na filtering:", len(df_signalen))
 st.write("Voorbeeldsignalen:")
 st.dataframe(df_signalen[["Advies", "Close"]].head(10))
-st.write(f"Rendement toegevoegd: {rendement:.2f}%")
+
 for _, row in df_signalen.iterrows():
     try:
         advies = row["Advies"] if "Advies" in row else None
