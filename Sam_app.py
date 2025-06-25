@@ -38,19 +38,6 @@ def fetch_data(ticker, interval):
 
     return df
 
-    #  df = df.reset_index()
-    # Extra stap (optioneel): zorg dat datetime correct is, en sorteer
-  #  df = df.sort_values("Date" if "Date" in df.columns else "Datetime")
-
-# def fetch_data(ticker, interval):
-    # Bepaal de periode op basis van het gekozen interval
-#    period = f"{360}{'d' if interval == '1d' else 'wk'}"  # "360d" of "360wk"
-    
-    # Download koersdata met de juiste interval en periode
-#    df = yf.download(ticker, period=period, interval=interval)
-#    df = df[["Open", "High", "Low", "Close"]]
-#    df.dropna(inplace=True)
-#return df
     
 # --- SAM Indicatorberekeningen ---
 def calculate_sam(df):
@@ -253,14 +240,6 @@ interval = interval_mapping[interval_optie]
 
 thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
 
-
-
-
-#ticker = st.selectbox("Selecteer een aandeel (AEX, Dow, Nasdaq)", all_tickers)
-#interval_optie = st.selectbox("Kies de interval", ["Dagelijks", "Wekelijks"])
-#interval = "1d" if interval_optie == "Dagelijks" else "1wk"
-#thresh = st.slider("Gevoeligheid van trendverandering", 0.01, 2.0, 0.5, step=0.01)
-
 # Berekening
 df = fetch_data(ticker, interval)
 df = calculate_sam(df)
@@ -283,13 +262,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-#st.markdown(
-#    f"""
-#    <h2>SAM-indicator en trend voor <span style='color:#3366cc'>{ticker}</span></h2>
-#    <h3 style='color:{advies_kleur}'>Huidig advies: {huidig_advies}</h3>
-#    """,
-#    unsafe_allow_html=True
-#)
 
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -381,6 +353,11 @@ html += "</tbody></table>"
 
 # Weergave in Streamlit
 st.markdown(html, unsafe_allow_html=True)
+
+
+
+
+
 
 
 
