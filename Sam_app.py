@@ -533,8 +533,17 @@ else:  # Beide
 #sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # Debug: toon eerste 10 signalen
-st.write("Voorbeeld van signalen:")
+#st.write("Voorbeeld van signalen:")
+#st.dataframe(df_signalen[["Advies", "Close"]].head(10))
+st.write("Aantal signalen in df_signalen:", len(df_signalen))
 st.dataframe(df_signalen[["Advies", "Close"]].head(10))
+
+# TEST: handmatig test-signalen invoegen
+# Deze override vervangt df_signalen tijdelijk
+df_signalen = pd.DataFrame({
+    "Advies": ["Kopen", "Verkopen", "Kopen", "Verkopen"],
+    "Close": [100, 105, 102, 98]
+}, index=pd.date_range("2025-01-01", periods=4))
 
 # --- SAM-rendement berekening ---
 def bereken_sam_rendement(df_signalen, signaal_type):
