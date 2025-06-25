@@ -516,9 +516,10 @@ if not df_period.empty:
 #    except Exception:
 #        marktrendement = None
 
-# Verwijder dubbele kolommen in df_period
+# # Verwijder dubbele kolommen in df_period
 df_period = df_period.loc[:, ~df_period.columns.duplicated()]
-# # --- SAM-signalen selecteren ---
+
+# --- SAM-signalen selecteren ---
 df_signalen = df_period[df_period["Advies"].notna()].copy()
 
 if signaalkeuze == "Koop":
@@ -528,21 +529,19 @@ elif signaalkeuze == "Verkoop":
 else:  # Beide
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
-# Debug: eerste 10 signalen laten zien
+# Debug: toon eerste 10 signalen
 st.write("Voorbeeld van signalen:")
-st.dataframe(df_signalen[["Advies", "Close"]].head(10))
+st.dataframe(df_signalen[[("Advies", ""), ("Close", ticker_name)]].head(10))
 
 # --- SAM-rendement berekening ---
 def bereken_sam_rendement(df_signalen, signaal_type):
     df_signalen = df_signalen.copy()
-    df_signalen = df_signalen.sort_index()  # Zorg voor oplopende datumvolgorde
+    df_signalen = df_signalen.sort_index()
 
-    # Filter alleen de gewenste signalen
     if signaal_type == "Koop":
         df_signalen = df_signalen[df_signalen["Advies"] == "Kopen"]
     elif signaal_type == "Verkoop":
         df_signalen = df_signalen[df_signalen["Advies"] == "Verkopen"]
-    # Als "Beide", dan nemen we alle rijen met 'Kopen' of 'Verkopen' als Advies
     elif signaal_type == "Beide":
         df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
@@ -553,14 +552,11 @@ def bereken_sam_rendement(df_signalen, signaal_type):
     for i, row in df_signalen.iterrows():
         advies = row["Advies"]
         close = row[("Close", ticker_name)]
-#        close = row[("Close", row[("Close",)].name if isinstance(row[("Close",)], pd.Series) else df_signalen.columns[0][1])]  # haalt kolomnaam zoals 'MMM' op
 
-        # Start een nieuwe positie
         if entry_price is None:
             entry_price = close
             entry_type = advies
         else:
-            # Kijk of dit een tegenpositie is
             if (entry_type == "Kopen" and advies == "Verkopen") or (entry_type == "Verkopen" and advies == "Kopen"):
                 if entry_type == "Kopen":
                     rendement = (close - entry_price) / entry_price * 100
@@ -569,38 +565,47 @@ def bereken_sam_rendement(df_signalen, signaal_type):
 
                 rendementen.append(rendement)
 
-                # Sluit de positie
+                # Reset positie
                 entry_price = None
                 entry_type = None
             else:
-                # Zelfde advies als vorige, sla over
                 continue
 
-    if rendementen:
-        sam_rendement = sum(rendementen)
-    else:
-        sam_rendement = 0.0
-
+    sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, len(rendementen)
 
-# Debug-output
-#st.write(f"Totaal aantal rendementen geteld: {len(rendementen)}")
-#st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
+# ✅ Functie aanroepen!
+sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
 col1, col2 = st.columns(2)
+
 if isinstance(marktrendement, (int, float)):
     col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%")
 else:
     col1.metric("Marktrendement (Buy & Hold)", "n.v.t.")
-#col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%" if marktrendement is not None else "n.v.t.")
+
 if isinstance(sam_rendement, (int, float)):
     col2.metric("📈 SAM-rendement", f"{sam_rendement:+.2f}%")
-    st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
-#col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%")
+    st.caption(f"Aantal afgeronde trades (koop-verkoopparen): **{geldig_signalen}** binnen deze periode.")
 else:
     col2.metric(f"SAM-rendement ({signaalkeuze})", "n.v.t.")
+    
+# --- Resultaten tonen ---
+#st.subheader("📈 Vergelijking van rendementen")
+#col1, col2 = st.columns(2)
+#if isinstance(marktrendement, (int, float)):
+#    col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%")
+#else:
+#    col1.metric("Marktrendement (Buy & Hold)", "n.v.t.")
+#col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%" if marktrendement is not None else "n.v.t.")
+#if isinstance(sam_rendement, (int, float)):
+#    col2.metric("📈 SAM-rendement", f"{sam_rendement:+.2f}%")
+#    st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
+#col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%")
+#else:
+#    col2.metric(f"SAM-rendement ({signaalkeuze})", "n.v.t.")
 #col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%" if sam_rendement is not None else "n.v.t.")
 
 
