@@ -646,8 +646,8 @@ else:
 # Debug: toon rendementenlijst
 #st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
 #st.write("DEBUG: Rendementenlijst:", rendementen)
-
-sam_rendement, trades = bereken_sam_rendement(df_signalen, signaalkeuze)
+sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
+#sam_rendement, trades = bereken_sam_rendement(df_signalen, signaalkeuze)
 #sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
  # 🔍 Debug-output
 st.write("🔍 DEBUG: Aantal trades:", len(trades))
