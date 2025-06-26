@@ -493,11 +493,11 @@ if "Close" in df_period.columns and not df_period["Close"].empty:
         and "Close" in df_period.columns
         and isinstance(df_period["Close"], pd.Series)
         ):
-    df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
-    df_period = df_period.dropna(subset=["Close"])
-else:
-    st.warning("❗ Geen geldige koersdata gevonden binnen de gekozen periode.")
-    df_period = pd.DataFrame(columns=df.columns)  # lege fallback
+        df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
+        df_period = df_period.dropna(subset=["Close"])
+    else:
+        st.warning("❗ Geen geldige koersdata gevonden binnen de gekozen periode.")
+        df_period = pd.DataFrame(columns=df.columns)  # lege fallback
 #else:
 #    df_period["Close"] = pd.Series(dtype=float)  # lege kolom met float-type
 
