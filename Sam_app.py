@@ -518,16 +518,47 @@ if not df_period.empty:
 
 # # Verwijder dubbele kolommen in df_period
 df_period = df_period.loc[:, ~df_period.columns.duplicated()]
-
-# --- SAM-signalen selecteren ---
+# --- SAM-signalen selecteren en filteren ---
 df_signalen = df_period[df_period["Advies"].notna()].copy()
 
+# Signaalfilter corrigeren (let op: 'Kopen' vs 'Koop')
 if signaalkeuze == "Koop":
     df_signalen = df_signalen[df_signalen["Advies"] == "Kopen"]
 elif signaalkeuze == "Verkoop":
     df_signalen = df_signalen[df_signalen["Advies"] == "Verkopen"]
 else:  # Beide
     df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
+
+# Debug na filtering
+st.write("🔎 DEBUG - Signaalkeuze:", signaalkeuze)
+st.write("🔎 DEBUG - Aantal signalen in df_signalen:", len(df_signalen))
+st.write("🔎 DEBUG - Unieke waarden in Advies:", df_signalen["Advies"].unique())
+
+# --- SAM-rendement berekenen ---
+sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
+
+# 📈 Toon SAM-resultaten
+if isinstance(sam_rendement, (int, float)):
+    st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
+else:
+    st.write("📈 SAM-rendement (onverwacht type):", sam_rendement)
+
+st.write("Aantal trades:", len(trades))
+st.dataframe(pd.DataFrame(trades))
+
+# 🔍 Debug-output
+st.write("🔍 DEBUG: Aantal trades:", len(trades))
+st.write("🔍 DEBUG: Rendementenlijst:", rendementen)
+
+# --- SAM-signalen selecteren ---
+#df_signalen = df_period[df_period["Advies"].notna()].copy()
+
+#if signaalkeuze == "Koop":
+#    df_signalen = df_signalen[df_signalen["Advies"] == "Kopen"]
+#elif signaalkeuze == "Verkoop":
+#    df_signalen = df_signalen[df_signalen["Advies"] == "Verkopen"]
+#else:  # Beide
+#    df_signalen = df_signalen[df_signalen["Advies"].isin(["Kopen", "Verkopen"])]
 
 # ✅ SAM-rendement berekenen
 #sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
