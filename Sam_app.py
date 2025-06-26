@@ -528,11 +528,15 @@ else:
 #elif signaalkeuze == "Verkoop":
  #df_signalen = df_signalen[df_signalen[advies_col] == "Verkopen"]
 ## test##
-
-#df_test = pd.DataFrame({
+# TEST: handmatig test-signalen invoegen
+#df_signalen = pd.DataFrame({
 #    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
-#    "Close":  [100,    105,     104,       102,       98,     100,        105,     104,       102,    98,       95]
-#}, index=pd.date_range("2025-01-01", periods=11))
+#    "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
+#}, index=pd.date_range("2025-01-01", periods=11)
+df_test = pd.DataFrame({
+    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
+    "Close":  [100,    105,     104,       102,       98,     100,        105,     104,       102,    98,       95]
+}, index=pd.date_range("2025-01-01", periods=11))
 
 # 9. SAM-rendement berekening
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
