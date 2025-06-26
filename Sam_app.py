@@ -539,7 +539,7 @@ else:
 #}, index=pd.date_range("2025-01-01", periods=11))
 
 # 9. SAM-rendement berekening
-def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
+#def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
 def bereken_sam_rendement_uit_beide(df_signalen, filter_type="Beide"):
     # Eerst alles berekenen met signaal_type = "Beide"
     volledige_rendement, alle_trades, alle_rendementen = bereken_sam_rendement(df_signalen, "Beide")
