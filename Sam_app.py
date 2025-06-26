@@ -650,8 +650,8 @@ else:
 sam_rendement, trades = bereken_sam_rendement(df_signalen, signaalkeuze)
 #sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
  # 🔍 Debug-output
-    st.write("🔍 DEBUG: Aantal trades:", len(trades))
-    st.write("🔍 DEBUG: Rendementenlijst:", rendementen)
+st.write("🔍 DEBUG: Aantal trades:", len(trades))
+st.write("🔍 DEBUG: Rendementenlijst:", rendementen)
 
     if trades:
         st.subheader("📋 Uitgevoerde Trades (debug)")
