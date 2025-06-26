@@ -617,6 +617,15 @@ def bereken_sam_rendement(df_signalen, signaal_type):
     st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
     st.write("DEBUG: Rendementenlijst:", rendementen)
     return sam_rendement, len(rendementen)
+    sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
+
+st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
+st.write("Aantal trades:", len(trades))
+st.dataframe(pd.DataFrame(trades))
+
+# Debug: toon rendementenlijst
+st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
+st.write("DEBUG: Rendementenlijst:", rendementen)
 
 sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
     
