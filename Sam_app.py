@@ -490,7 +490,7 @@ st.write("✅ DEBUG: df_period shape:", df_period.shape)
 st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
 st.write("✅ DEBUG: Gekozen kolom voor 'Close':", close_col)
 st.write("✅ DEBUG: Eerste rijen df_period:")
-st.dataframe(df_period.head())
+st.dataframe(df_period.head(20))
 
 # ⛑️ Verwerk 'Close'-data
 df_valid = pd.Series([], dtype=float)
@@ -604,6 +604,17 @@ st.write("🔍 Rendementenlijst:", rendementen)
 st.dataframe(pd.DataFrame(trades))
 
 
+
+
+
+
+
+
+
+
+
+
+# extra witregels 
 
 
 
