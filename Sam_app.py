@@ -543,12 +543,6 @@ if isinstance(sam_rendement, (int, float)):
 else:
     st.write("📈 SAM-rendement (onverwacht type):", sam_rendement)
 
-st.write("Aantal trades:", len(trades))
-st.dataframe(pd.DataFrame(trades))
-
-# 🔍 Debug-output
-st.write("🔍 DEBUG: Aantal trades:", len(trades))
-st.write("🔍 DEBUG: Rendementenlijst:", rendementen)
 
 # --- SAM-signalen selecteren ---
 #df_signalen = df_period[df_period["Advies"].notna()].copy()
