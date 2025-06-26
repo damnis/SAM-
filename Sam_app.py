@@ -653,9 +653,9 @@ sam_rendement, trades = bereken_sam_rendement(df_signalen, signaalkeuze)
 st.write("🔍 DEBUG: Aantal trades:", len(trades))
 st.write("🔍 DEBUG: Rendementenlijst:", rendementen)
 
-    if trades:
-        st.subheader("📋 Uitgevoerde Trades (debug)")
-        st.dataframe(pd.DataFrame(trades))
+if trades:
+    st.subheader("📋 Uitgevoerde Trades (debug)")
+    st.dataframe(pd.DataFrame(trades))
    
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
