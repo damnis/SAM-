@@ -558,56 +558,66 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
         advies = row["Advies"]
         close = row["Close"]
 
-        if entry_price is None:
-            if (signaal_type == "Koop" and advies == "Kopen") or \
-               (signaal_type == "Verkoop" and advies == "Verkopen") or \
-               (signaal_type == "Beide" and advies in ["Kopen", "Verkopen"]):
+        if entry_type is None:
+            # Eerste entry, afhankelijk van gekozen type
+            if signaal_type == "Beide" or advies == signaal_type or \
+               (signaal_type == "Koop" and advies == "Kopen") or \
+               (signaal_type == "Verkoop" and advies == "Verkopen"):
+                entry_type = advies
                 entry_price = close
                 entry_date = datum
-                entry_type = advies
         else:
-            # Alleen sluiten als tegenovergestelde signaal komt
-            if (entry_type == "Kopen" and advies == "Verkopen") or \
-               (entry_type == "Verkopen" and advies == "Kopen"):
-                if signaal_type == "Beide" or signaal_type == entry_type:
-                    if entry_type == "Kopen":
-                        rendement = (close - entry_price) / entry_price * 100
-                    else:
-                        rendement = (entry_price - close) / entry_price * 100
+            # Wisseling van signaal: sluit positie
+            if advies != entry_type and \
+               (signaal_type == "Beide" or entry_type == signaal_type):
+                if entry_type == "Kopen":
+                    rendement = (close - entry_price) / entry_price * 100
+                else:
+                    rendement = (entry_price - close) / entry_price * 100
 
-                    rendementen.append(rendement)
-                    trades.append({
-                        "Type": entry_type,
-                        "Open datum": entry_date.strftime("%d-%m-%Y"),
-                        "Open prijs": entry_price,
-                        "Sluit datum": datum.strftime("%d-%m-%Y"),
-                        "Sluit prijs": close,
-                        "Rendement (%)": round(rendement, 2)
-                    })
+                rendementen.append(rendement)
+                trades.append({
+                    "Type": entry_type,
+                    "Open datum": entry_date.strftime("%d-%m-%Y"),
+                    "Open prijs": entry_price,
+                    "Sluit datum": datum.strftime("%d-%m-%Y"),
+                    "Sluit prijs": close,
+                    "Rendement (%)": round(rendement, 2)
+                })
 
-                # Reset voor volgende trade
-                entry_price = None
-                entry_date = None
-                entry_type = None
+                # Start nieuwe positie
+                if signaal_type == "Beide" or advies == signaal_type or \
+                   (signaal_type == "Koop" and advies == "Kopen") or \
+                   (signaal_type == "Verkoop" and advies == "Verkopen"):
+                    entry_type = advies
+                    entry_price = close
+                    entry_date = datum
+                else:
+                    entry_type = None
+                    entry_price = None
+                    entry_date = None
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, trades, rendementen
 
 
-# ✅ SAM-rendement uitvoeren
+# --- SAM-rendement berekenen ---
 sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
-# 🔢 Rendement en trades tonen
-st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
-st.write("📊 Aantal trades:", len(trades))
+# 📈 Toon SAM-resultaten
+if isinstance(sam_rendement, (int, float)):
+    st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
+else:
+    st.write("📈 SAM-rendement (onverwacht type):", sam_rendement)
+
+st.write("Aantal trades:", len(trades))
 st.dataframe(pd.DataFrame(trades))
 
-# 🐞 DEBUG-output
-st.write("🔍 DEBUG: Aantal trades:", len(rendementen))
-st.write("🔍 DEBUG: Rendementenlijst:")
-st.json(rendementen)
+# 🔍 Debug-output
+st.write("🔍 DEBUG: Aantal trades:", len(trades))
+st.write("🔍 DEBUG: Rendementenlijst:", rendementen)
 
-# 📊 Vergelijking met marktrendement
+# --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
 col1, col2 = st.columns(2)
 
@@ -621,3 +631,9 @@ if isinstance(sam_rendement, (int, float)):
     st.caption(f"Aantal afgeronde trades (koop-verkoopparen): **{len(trades)}** binnen deze periode.")
 else:
     col2.metric(f"SAM-rendement ({signaalkeuze})", "n.v.t.")
+
+
+
+
+
+
