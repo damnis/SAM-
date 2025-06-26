@@ -527,10 +527,10 @@ df_signalen = df_period[df_period["Advies"].isin(["Kopen", "Verkopen"])].copy()
 #else:
 #    st.error("❗ Geen kolom gevonden die begint met 'Close' in df_signalen.")
 
-if signaalkeuze == "Koop":
-    df_signalen = df_signalen[df_signalen[advies_col] == "Kopen"]
-elif signaalkeuze == "Verkoop":
-    df_signalen = df_signalen[df_signalen[advies_col] == "Verkopen"]
+#if signaalkeuze == "Koop":
+#    df_signalen = df_signalen[df_signalen[advies_col] == "Kopen"]
+#elif signaalkeuze == "Verkoop":
+#    df_signalen = df_signalen[df_signalen[advies_col] == "Verkopen"]
 
 # TEST: handmatig test-signalen invoegen
 #df_signalen = pd.DataFrame({
