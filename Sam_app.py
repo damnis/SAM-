@@ -546,7 +546,7 @@ df_signalen = pd.DataFrame({
 }, index=pd.date_range("2025-01-01", periods=11))
 
 # --- SAM-rendement berekening ---
-def bereken_sam_rendement(df_signalen, signaal_type):
+#def bereken_sam_rendement(df_signalen, signaal_type):
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     rendementen = []
     trades = []
