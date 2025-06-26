@@ -466,105 +466,49 @@ default_end = df.index.max().date()
 start_date = st.date_input("Startdatum analyse", default_start)
 end_date = st.date_input("Einddatum analyse", default_end)
 
-# --- Signaal selectie en voorbereiding ---
-
-advies_col = "Advies"
-
-# ❗ Altijd eerst alle signalen selecteren (onafhankelijk van signaalkeuze)
-df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
-
-# ✅ Zorg dat df_signalen een kolom 'Close' heeft
-close_col = [col for col in df_signalen.columns if str(col).startswith("Close")]
-if close_col:
-    df_signalen = df_signalen.rename(columns={close_col[0]: "Close"})
-else:
-    st.error("❗ Geen kolom gevonden die begint met 'Close' in df_signalen.")
-    df_signalen = pd.DataFrame()  # Leeg maken voor zekerheid
-
-# 🔍 Pas filter toe op basis van gebruikerskeuze
-if signaalkeuze == "Koop":
-    df_signalen = df_signalen[df_signalen[advies_col] == "Kopen"]
-elif signaalkeuze == "Verkoop":
-    df_signalen = df_signalen[df_signalen[advies_col] == "Verkopen"]
-
-# ✅ DEBUG output
-st.write("🔍 DEBUG - Signaalkeuze:", signaalkeuze)
-st.write("🔍 Aantal signalen:", len(df_signalen))
-st.write("🔍 Unieke adviezen:", df_signalen["Advies"].unique() if not df_signalen.empty else [])
-
-
 # 📍 2. Signaalkeuze
-#signaalkeuze = st.selectbox(
- #   "Welke signalen tellen mee voor SAM-rendement?",
-  #  options=["Beide", "Koop", "Verkoop"],
- #   index=0
-#)
+signaalkeuze = st.selectbox(
+    "Welke signalen tellen mee voor SAM-rendement?",
+    options=["Beide", "Koop", "Verkoop"],
+    index=0
+)
 
 # 🧽 3. Filter op periode
-#df_period = df.loc[
- #   (df.index.date >= start_date) & (df.index.date <= end_date)
-#].copy()
+df_period = df.loc[
+    (df.index.date >= start_date) & (df.index.date <= end_date)
+].copy()
 
-# 🔧 Flat multi-index kolommen (indien nodig)
-#if isinstance(df_period.columns, pd.MultiIndex):
-#    df_period.columns = ["_".join([str(i) for i in col if i]) for col in df_period.columns]
-
-# 🔎 Zoek juiste Close-kolom
-#close_col = next((col for col in df_period.columns if col.lower().startswith("close")), None)
-
-# 🔍 Debug
-#st.write("✅ DEBUG: df_period shape:", df_period.shape)
-#st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
-#st.write("✅ DEBUG: Gekozen kolom voor 'Close':", close_col)
-#st.write("✅ DEBUG: Eerste rijen df_period:")
-s#t.dataframe(df_period.head(20))
-
-# ⛑️ Verwerk 'Close'-data
-df_valid = pd.Series([], dtype=float)
-
-if close_col:
-    df_period[close_col] = pd.to_numeric(df_period[close_col], errors="coerce")
-    df_valid = df_period[close_col].dropna()
-    df_period = df_period.dropna(subset=[close_col])
+# 🔍 Detecteer juiste Close-kolom
+close_cols = [col for col in df_period.columns if str(col).startswith("Close")]
+if close_cols:
+    df_period = df_period.rename(columns={close_cols[0]: "Close"})
+    st.write("✅ DEBUG: Gekozen kolom voor 'Close':", close_cols[0])
 else:
-    st.warning("❗ Geen geldige 'Close'-kolom gevonden in de data.")
-    df_period = pd.DataFrame(columns=df.columns)
+    st.error("❗ Geen kolom gevonden die begint met 'Close'")
+    st.stop()
+
+# 📊 DEBUG
+st.write("✅ DEBUG: df_period shape:", df_period.shape)
+st.write("✅ DEBUG: Eerste rijen df_period:")
+st.dataframe(df_period.head(20))
+
+# 💡 Zorg dat Close numeriek is
+df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
+df_period = df_period.dropna(subset=["Close"])
+df_valid = df_period["Close"].dropna()
 
 st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
-#st.write("✅ DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
 
 # 📊 4. Marktrendement
 marktrendement = None
-if not df_valid.empty and len(df_valid) >= 2:
-    koers_start = df_valid.iloc[0]
-    koers_eind = df_valid.iloc[-1]
+if not df_period.empty and df_period["Close"].count() >= 2:
+    koers_start = df_period["Close"].iloc[0]
+    koers_eind = df_period["Close"].iloc[-1]
     if koers_start != 0.0:
         marktrendement = ((koers_eind - koers_start) / koers_start) * 100
 
-# ✂️ 5. Filter op geldige adviezen
-advies_col = "Advies"
-# ❌ NIET filteren op signaalkeuze
+# ✂️ 5. Signalen filteren
 df_signalen = df_period[df_period["Advies"].isin(["Kopen", "Verkopen"])].copy()
-#df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
-# 🔧 Zorg dat df_signalen een 'Close'-kolom bevat
-# Herhaal eventueel de kolomextractie (zoals eerder gedaan bij df_period)
-#close_col = [col for col in df_signalen.columns if str(col).startswith("Close")]
-#if close_col:
-#    df_signalen = df_signalen.rename(columns={close_col[0]: "Close"})
-#else:
-#    st.error("❗ Geen kolom gevonden die begint met 'Close' in df_signalen.")
-
-#if signaalkeuze == "Koop":
-#    df_signalen = df_signalen[df_signalen[advies_col] == "Kopen"]
-#elif signaalkeuze == "Verkoop":
-#    df_signalen = df_signalen[df_signalen[advies_col] == "Verkopen"]
-
-# TEST: handmatig test-signalen invoegen
-#df_signalen = pd.DataFrame({
-#    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
-#    "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
-#}, index=pd.date_range("2025-01-01", periods=11))
-#close_col = "Close"
 
 # 🧠 6. SAM-berekening
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
@@ -574,24 +518,20 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     entry_date = None
     entry_type = None
 
-    if df_signalen.empty:
-        return 0.0, [], []
-
     for datum, row in df_signalen.iterrows():
         advies = row["Advies"]
         close = row["Close"]
 
         if entry_type is None:
-            # Start een nieuwe trade alleen als dit het juiste type is of als we beide toelaten
-            if signaal_type == "Beide" or advies == signaal_type:
+            if signaal_type == "Beide" or advies == ("Kopen" if signaal_type == "Koop" else "Verkopen"):
                 entry_type = advies
                 entry_price = close
                 entry_date = datum
-
         else:
+            # Andere signaal sluit huidige trade af
             if advies != entry_type:
-                # Alleen sluiten als de entry overeenkomt met het geselecteerde type
-                if signaal_type == "Beide" or entry_type == signaal_type:
+                # Sluit alleen af als signaal wel past in huidige filter
+                if signaal_type == "Beide" or entry_type == ("Kopen" if signaal_type == "Koop" else "Verkopen"):
                     if entry_type == "Kopen":
                         rendement = (close - entry_price) / entry_price * 100
                     else:
@@ -606,9 +546,8 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                         "Sluit prijs": round(close, 2),
                         "Rendement (%)": round(rendement, 2)
                     })
-
-                # Hier mogen we een nieuwe trade starten als advies matcht met geselecteerd type
-                if signaal_type == "Beide" or advies == signaal_type:
+                # Start eventueel een nieuwe trade als het nieuwe signaal mag
+                if signaal_type == "Beide" or advies == ("Kopen" if signaal_type == "Koop" else "Verkopen"):
                     entry_type = advies
                     entry_price = close
                     entry_date = datum
@@ -617,30 +556,28 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                     entry_price = None
                     entry_date = None
 
-    # Sluit openstaande trade op laatste datum indien van juiste type
-    if entry_type is not None and entry_price is not None:
-        laatste_datum = df_signalen.index[-1]
-        laatste_close = df_signalen["Close"].iloc[-1]
+    # Sluit openstaande trade op einddatum
+    if entry_type and (signaal_type == "Beide" or entry_type == ("Kopen" if signaal_type == "Koop" else "Verkopen")):
+        close = df_signalen["Close"].iloc[-1]
+        datum = df_signalen.index[-1]
+        if entry_type == "Kopen":
+            rendement = (close - entry_price) / entry_price * 100
+        else:
+            rendement = (entry_price - close) / entry_price * 100
 
-        if signaal_type == "Beide" or entry_type == signaal_type:
-            if entry_type == "Kopen":
-                rendement = (laatste_close - entry_price) / entry_price * 100
-            else:
-                rendement = (entry_price - laatste_close) / entry_price * 100
-
-            rendementen.append(rendement)
-            trades.append({
-                "Type": entry_type,
-                "Open datum": entry_date.strftime("%d-%m-%Y"),
-                "Open prijs": round(entry_price, 2),
-                "Sluit datum": laatste_datum.strftime("%d-%m-%Y"),
-                "Sluit prijs": round(laatste_close, 2),
-                "Rendement (%)": round(rendement, 2)
-            })
+        rendementen.append(rendement)
+        trades.append({
+            "Type": entry_type,
+            "Open datum": entry_date.strftime("%d-%m-%Y"),
+            "Open prijs": round(entry_price, 2),
+            "Sluit datum": datum.strftime("%d-%m-%Y"),
+            "Sluit prijs": round(close, 2),
+            "Rendement (%)": round(rendement, 2)
+        })
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, trades, rendementen
-    
+
 sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # 📈 7. Resultaten tonen
@@ -660,7 +597,7 @@ else:
 # 🧪 Debug
 st.write("🔍 DEBUG - Signaalkeuze:", signaalkeuze)
 st.write("🔍 Aantal signalen:", len(df_signalen))
-st.write("🔍 Unieke adviezen:", df_signalen[advies_col].unique())
+st.write("🔍 Unieke adviezen:", df_signalen["Advies"].unique())
 st.write("🔍 Aantal trades:", len(trades))
 st.write("🔍 Rendementenlijst:", rendementen)
 st.dataframe(pd.DataFrame(trades))
@@ -670,13 +607,4 @@ st.dataframe(pd.DataFrame(trades))
 
 
 
-
-
-
-
-
-
-# extra witregels 
-
-
-
+# wit
