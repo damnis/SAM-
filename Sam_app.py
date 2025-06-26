@@ -621,7 +621,7 @@ if isinstance(sam_rendement, (int, float)):
 else:
     st.write("📈 SAM-rendement (onverwacht type):", sam_rendement)
 
-st.write("Aantal trades:", len(trades))
+#st.write("Aantal trades:", len(trades))
 st.dataframe(pd.DataFrame(trades))
 
 # Debug: toon rendementenlijst
