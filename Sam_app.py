@@ -517,13 +517,6 @@ if not df_valid.empty and len(df_valid) >= 2:
 # âœ‚ï¸ 5. Filter op geldige adviezen
 advies_col = "Advies"
 df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
-# ðŸ”§ Zorg dat df_signalen een 'Close'-kolom bevat
-# Herhaal eventueel de kolomextractie (zoals eerder gedaan bij df_period)
-close_col = [col for col in df_signalen.columns if str(col).startswith("Close")]
-if close_col:
-    df_signalen = df_signalen.rename(columns={close_col[0]: "Close"})
-else:
-    st.error("â— Geen kolom gevonden die begint met 'Close' in df_signalen.")
 
 if signaalkeuze == "Koop":
     df_signalen = df_signalen[df_signalen[advies_col] == "Kopen"]
@@ -549,8 +542,8 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     mapped_type = type_map.get(signaal_type, "Beide")
 
     for datum, row in df_signalen.iterrows():
-        advies = row["Advies"]
-        close = row["Close"]
+        advies = row[advies_col]
+        close = row[close_col]
 
         if entry_type is None:
             if mapped_type == "Beide" or advies == mapped_type:
@@ -559,7 +552,6 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                 entry_date = datum
         else:
             if advies != entry_type and (mapped_type == "Beide" or entry_type == mapped_type):
-                # Sluit trade
                 if entry_type == "Kopen":
                     rendement = (close - entry_price) / entry_price * 100
                 else:
@@ -575,7 +567,6 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                     "Rendement (%)": round(rendement, 2)
                 })
 
-                # Start nieuwe trade als huidige advies binnen mapping valt
                 if mapped_type == "Beide" or advies == mapped_type:
                     entry_type = advies
                     entry_price = close
@@ -585,29 +576,9 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                     entry_price = None
                     entry_date = None
 
-    # âš ï¸ Sluit openstaande trade aan het einde van de periode
-    if entry_type is not None and entry_price is not None:
-        laatste_datum = df_signalen.index[-1]
-        laatste_koers = df_signalen["Close"].iloc[-1]
-
-        if entry_type == "Kopen":
-            rendement = (laatste_koers - entry_price) / entry_price * 100
-        else:
-            rendement = (entry_price - laatste_koers) / entry_price * 100
-
-        rendementen.append(rendement)
-        trades.append({
-            "Type": entry_type,
-            "Open datum": entry_date.strftime("%d-%m-%Y"),
-            "Open prijs": round(entry_price, 2),
-            "Sluit datum": laatste_datum.strftime("%d-%m-%Y"),
-            "Sluit prijs": round(laatste_koers, 2),
-            "Rendement (%)": round(rendement, 2)
-        })
-
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, trades, rendementen
-    
+
 sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # ðŸ“ˆ 7. Resultaten tonen
