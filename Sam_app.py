@@ -498,6 +498,7 @@ st.write("✅ DEBUG: Eerste rijen df_period:")
 st.dataframe(df_period.head(20))
 
 # 💡 Zorg dat Close numeriek is
+st.write("📋 DEBUG: Kolomnamen in df_period:", df_period.columns.tolist())
 # 🔍 Zorg voor een correcte 'Close'-kolom
 close_col_candidates = [col for col in df_period.columns if str(col).startswith("Close")]
 if close_col_candidates:
