@@ -517,6 +517,13 @@ if not df_valid.empty and len(df_valid) >= 2:
 # ✂️ 5. Filter op geldige adviezen
 advies_col = "Advies"
 df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
+# 🔧 Zorg dat df_signalen een 'Close'-kolom bevat
+# Herhaal eventueel de kolomextractie (zoals eerder gedaan bij df_period)
+close_col = [col for col in df_signalen.columns if str(col).startswith("Close")]
+if close_col:
+    df_signalen = df_signalen.rename(columns={close_col[0]: "Close"})
+else:
+    st.error("❗ Geen kolom gevonden die begint met 'Close' in df_signalen.")
 
 if signaalkeuze == "Koop":
     df_signalen = df_signalen[df_signalen[advies_col] == "Kopen"]
@@ -600,6 +607,7 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, trades, rendementen
+    
 sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # 📈 7. Resultaten tonen
