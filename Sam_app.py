@@ -554,22 +554,25 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     entry_date = None
     entry_type = None
 
+    # Mapping signaal_type ("Koop", "Verkoop") naar waarden in Advies ("Kopen", "Verkopen")
+    type_map = {
+        "Koop": "Kopen",
+        "Verkoop": "Verkopen",
+        "Beide": "Beide"
+    }
+    mapped_type = type_map.get(signaal_type, "Beide")
+
     for datum, row in df_signalen.iterrows():
         advies = row["Advies"]
         close = row["Close"]
 
         if entry_type is None:
-            # Eerste entry, afhankelijk van gekozen type
-            if signaal_type == "Beide" or advies == signaal_type or \
-               (signaal_type == "Koop" and advies == "Kopen") or \
-               (signaal_type == "Verkoop" and advies == "Verkopen"):
+            if mapped_type == "Beide" or advies == mapped_type:
                 entry_type = advies
                 entry_price = close
                 entry_date = datum
         else:
-            # Wisseling van signaal: sluit positie
-            if advies != entry_type and \
-               (signaal_type == "Beide" or entry_type == signaal_type):
+            if advies != entry_type and (mapped_type == "Beide" or entry_type == mapped_type):
                 if entry_type == "Kopen":
                     rendement = (close - entry_price) / entry_price * 100
                 else:
@@ -585,10 +588,8 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                     "Rendement (%)": round(rendement, 2)
                 })
 
-                # Start nieuwe positie
-                if signaal_type == "Beide" or advies == signaal_type or \
-                   (signaal_type == "Koop" and advies == "Kopen") or \
-                   (signaal_type == "Verkoop" and advies == "Verkopen"):
+                # Nieuwe entry?
+                if mapped_type == "Beide" or advies == mapped_type:
                     entry_type = advies
                     entry_price = close
                     entry_date = datum
