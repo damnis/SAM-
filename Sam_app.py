@@ -519,59 +519,79 @@ if not df_period.empty and df_period["Close"].count() >= 2:
 df_signalen = df_period[df_period["Advies"].isin(["Kopen", "Verkopen"])].copy()
 
 # 🧠 7. Berekening SAM-rendement
-def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
+# 🧮 Functie: Vergelijk SAM-rendement met markt (Buy & Hold)
+def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
+    # 👉 Flatten eventueel MultiIndex kolommen
+    df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
+
+    # 📌 Dynamische kolomnamen op basis van ticker
+    close_col = f"Close_{ticker}"
+    advies_col = "Advies"
+    sam_pct_col = "SAM-%"
+    markt_pct_col = "Markt-%"
+
+    # 🧼 Naar numeriek (alleen als kolommen bestaan)
+    for col in [close_col, sam_pct_col, markt_pct_col]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    # 🗓️ Filter op periode
+    df_period = df[(df["Date"] >= startdatum) & (df["Date"] <= einddatum)].copy()
+
+    if df_period.empty:
+        return "⚠️ Geen data in de opgegeven periode.", None, None
+
+    # 📈 Markt (Buy & Hold) rendement
+    eerste_close = df_period.iloc[0][close_col]
+    laatste_close = df_period.iloc[-1][close_col]
+    markt_rendement = ((laatste_close - eerste_close) / eerste_close) * 100
+
+    # 📊 SAM-rendement berekening op basis van signalen
     rendementen = []
-    trades = []
-    entry_price = None
-    entry_date = None
-    entry_type = None
+    actief = False
+    entry = None
+    vorige_signaal = None
 
-    for datum, row in df_signalen.iterrows():
-        advies = row["Advies"]
-        close = row["Close"]
+    for index, row in df_period.iterrows():
+        advies = row[advies_col]
+        prijs = row[close_col]
 
-        if entry_type is None:
-            if signaal_type == "Beide" or advies == {"Koop": "Kopen", "Verkoop": "Verkopen"}.get(signaal_type, advies):
-                entry_type = advies
-                entry_price = close
-                entry_date = datum
-        else:
-            # Kijk of het een geldig sluitpunt is
-            is_tegenovergestelde = (
-                (entry_type == "Kopen" and advies == "Verkopen") or
-                (entry_type == "Verkopen" and advies == "Kopen")
-            )
-            if is_tegenovergestelde:
-                if entry_type == "Kopen":
-                    rendement = (close - entry_price) / entry_price * 100
-                else:
-                    rendement = (entry_price - close) / entry_price * 100
+        if signalen_optie == "Koop":
+            if advies == "Kopen" and not actief:
+                entry = prijs
+                actief = True
+                vorige_signaal = "Kopen"
+            elif advies == "Verkopen" and actief and vorige_signaal == "Kopen":
+                rendementen.append((prijs - entry) / entry * 100)
+                actief = False
 
-                # ✅ Alleen toevoegen als deze trade meetelt
-                if signaal_type == "Beide" or entry_type == {"Koop": "Kopen", "Verkoop": "Verkopen"}[signaal_type]:
-                    rendementen.append(rendement)
-                    trades.append({
-                        "Type": entry_type,
-                        "Open datum": entry_date.strftime("%Y-%m-%d"),
-                        "Open prijs": round(entry_price, 2),
-                        "Sluit datum": datum.strftime("%Y-%m-%d"),
-                        "Sluit prijs": round(close, 2),
-                        "Rendement (%)": round(rendement, 2)
-                    })
+        elif signalen_optie == "Verkoop":
+            if advies == "Verkopen" and not actief:
+                entry = prijs
+                actief = True
+                vorige_signaal = "Verkopen"
+            elif advies == "Kopen" and actief and vorige_signaal == "Verkopen":
+                rendementen.append((entry - prijs) / entry * 100)
+                actief = False
 
-                # Start eventueel een nieuwe positie
-                if signaal_type == "Beide" or advies == {"Koop": "Kopen", "Verkoop": "Verkopen"}.get(signaalkeuze, advies):
-                    entry_type = advies
-                    entry_price = close
-                    entry_date = datum
-                else:
-                    entry_type = None
-                    entry_price = None
-                    entry_date = None
+        elif signalen_optie == "Beide":
+            if advies in ["Kopen", "Verkopen"]:
+                if not actief:
+                    entry = prijs
+                    actief = True
+                    vorige_signaal = advies
+                elif actief and advies != vorige_signaal:
+                    if vorige_signaal == "Kopen":
+                        rendementen.append((prijs - entry) / entry * 100)
+                    else:
+                        rendementen.append((entry - prijs) / entry * 100)
+                    entry = prijs
+                    vorige_signaal = advies
 
-    sam_rendement = sum(rendementen) if rendementen else 0.0
-    return sam_rendement, trades, rendementen
+    sam_rendement = sum(rendementen)
 
+    return markt_rendement, sam_rendement, rendementen
+    
 sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # 📈 8. Resultaten
