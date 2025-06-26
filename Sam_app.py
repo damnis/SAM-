@@ -547,56 +547,52 @@ df_signalen = pd.DataFrame({
 
 # --- SAM-rendement berekening ---
 def bereken_sam_rendement(df_signalen, signaal_type):
+def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     rendementen = []
     trades = []
     entry_price = None
-    entry_type = None
     entry_date = None
+    entry_type = None
 
-    for date, row in df_signalen.iterrows():
+    for datum, row in df_signalen.iterrows():
         advies = row["Advies"]
         close = row["Close"]
 
+        # Open nieuwe trade
         if entry_price is None:
             if (signaal_type == "Koop" and advies == "Kopen") or \
                (signaal_type == "Verkoop" and advies == "Verkopen") or \
                (signaal_type == "Beide" and advies in ["Kopen", "Verkopen"]):
                 entry_price = close
+                entry_date = datum
                 entry_type = advies
-                entry_date = date
         else:
-            sluit_trade = False
+            # Sluit trade bij tegenadvies
             if (entry_type == "Kopen" and advies == "Verkopen") or \
                (entry_type == "Verkopen" and advies == "Kopen"):
-                sluit_trade = True
-            elif advies == entry_type:
-                sluit_trade = True
-
-            if sluit_trade:
                 if signaal_type == "Beide" or signaal_type == entry_type:
                     if entry_type == "Kopen":
                         rendement = (close - entry_price) / entry_price * 100
                     else:
                         rendement = (entry_price - close) / entry_price * 100
+
                     rendementen.append(rendement)
                     trades.append({
                         "Type": entry_type,
-                        "Entry date": entry_date.strftime("%d-%m-%Y"),
-                        "Entry price": entry_price,
-                        "Exit date": date.strftime("%d-%m-%Y"),
-                        "Exit price": close,
-                        "Rendement %": round(rendement, 2)
+                        "Open datum": entry_date.strftime("%d-%m-%Y"),
+                        "Open prijs": entry_price,
+                        "Sluit datum": datum.strftime("%d-%m-%Y"),
+                        "Sluit prijs": close,
+                        "Rendement (%)": round(rendement, 2)
                     })
-                if advies == entry_type:
-                    entry_price = close
-                    entry_date = date
-                else:
-                    entry_price = None
-                    entry_type = None
-                    entry_date = None
+
+                # Reset voor volgende trade
+                entry_price = None
+                entry_date = None
+                entry_type = None
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
-
+    #return sam_rendement, trades
     # ➕ RETURN alles wat je nodig hebt
     return sam_rendement, trades, rendementen
 
@@ -612,17 +608,19 @@ def bereken_sam_rendement(df_signalen, signaal_type):
     st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
     st.write("Aantal trades:", len(trades))
     st.dataframe(pd.DataFrame(trades))
+    
     # Debug-output: toon signalenparen
-    st.write("DEBUG: Entry type:", entry_type)
-    st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
-    st.write("DEBUG: Rendementenlijst:", rendementen)
-    return sam_rendement, len(rendementen)
-    sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
+#    st.write("DEBUG: Entry type:", entry_type)
+#    st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
+#    st.write("DEBUG: Rendementenlijst:", rendementen)
+#    return sam_rendement, len(rendementen)
+#    sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 if isinstance(sam_rendement, (int, float)):
     st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
 else:
     st.write("📈 SAM-rendement (onverwacht type):", sam_rendement)
+
 st.write("Aantal trades:", len(trades))
 st.dataframe(pd.DataFrame(trades))
 
