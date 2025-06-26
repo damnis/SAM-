@@ -566,6 +566,10 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
         advies = row["Advies"]
         close = row["Close"]
 
+    # Sla over als advies ontbreekt of geen string is
+        if not isinstance(advies, str) or advies not in ["Kopen", "Verkopen"]:
+            continue
+
         if entry_type is None:
             if mapped_type == "Beide" or advies == mapped_type:
                 entry_type = advies
