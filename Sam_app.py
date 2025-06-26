@@ -591,8 +591,14 @@ def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
     sam_rendement = sum(rendementen)
 
     return markt_rendement, sam_rendement, rendementen
-    
-sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
+ markt_rendement, sam_rendement, rendementen = vergelijk_rendement(
+    df=df_signalen,
+    startdatum=gekozen_startdatum,
+    einddatum=gekozen_einddatum,
+    ticker=selected_ticker,
+    signalen_optie=signaalkeuze
+ )   
+#sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # 📈 8. Resultaten
 col1, col2 = st.columns(2)
