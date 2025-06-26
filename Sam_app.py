@@ -642,8 +642,9 @@ else:
 
 if isinstance(sam_rendement, (int, float)):
     col2.metric("📈 SAM-rendement", f"{sam_rendement:+.2f}%")
-    st.caption(f"Aantal afgeronde trades (koop-verkoopparen): **{geldig_signalen}** binnen deze periode.")
-    st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
+    st.caption(f"Aantal afgeronde trades (koop-verkoopparen): **{len(trades)}** binnen deze periode.")
+#    st.caption(f"Aantal afgeronde trades (koop-verkoopparen): **{geldig_signalen}** binnen deze periode.")
+#    st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
 else:
     col2.metric(f"SAM-rendement ({signaalkeuze})", "n.v.t.")
     
