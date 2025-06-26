@@ -501,6 +501,20 @@ if "Close" in df_period.columns and not df_period["Close"].empty:
 #else:
 #    df_period["Close"] = pd.Series(dtype=float)  # lege kolom met float-type
 
+# --- Check inhoud df_period ---
+st.write("✅ DEBUG: df_period shape:", df_period.shape)
+st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
+st.write("✅ DEBUG: Eerste rijen df_period:")
+st.dataframe(df_period.head())
+
+# --- Ensure Close is numeric ---
+df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
+
+# --- Check valid close data ---
+df_valid = df_period["Close"].dropna()
+st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
+st.write("✅ DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
+
 # 📊 4. Marktrendement
 marktrendement = None
 if not df_period.empty and df_period["Close"].count() >= 2:
