@@ -539,26 +539,88 @@ else:
 #}, index=pd.date_range("2025-01-01", periods=11))
 
 # 9. SAM-rendement berekening
-#def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
-def bereken_sam_rendement_uit_beide(df_signalen, filter_type="Beide"):
-    # Eerst alles berekenen met signaal_type = "Beide"
+def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
+    rendementen = []
+    trades = []
+    entry_price = None
+    entry_date = None
+    entry_type = None
+
+    for datum, row in df_signalen.iterrows():
+        advies = row["Advies"]
+        close = row["Close"]
+
+        if entry_type is None:
+            if signaal_type == "Beide" or advies == signaal_type:
+                entry_type = advies
+                entry_price = close
+                entry_date = datum
+        else:
+            if advies != entry_type:
+                if entry_type == "Kopen":
+                    rendement = (close - entry_price) / entry_price * 100
+                else:
+                    rendement = (entry_price - close) / entry_price * 100
+
+                rendementen.append(rendement)
+                trades.append({
+                    "Type": entry_type,
+                    "Open datum": entry_date.strftime("%d-%m-%Y"),
+                    "Open prijs": round(entry_price, 2),
+                    "Sluit datum": datum.strftime("%d-%m-%Y"),
+                    "Sluit prijs": round(close, 2),
+                    "Rendement (%)": round(rendement, 2)
+                })
+
+                if signaal_type == "Beide" or advies == signaal_type:
+                    entry_type = advies
+                    entry_price = close
+                    entry_date = datum
+                else:
+                    entry_type = None
+                    entry_price = None
+                    entry_date = None
+
+    if entry_type is not None and entry_price is not None:
+        laatste_datum = df_signalen.index[-1]
+        laatste_koers = df_signalen["Close"].iloc[-1]
+
+        if entry_type == "Kopen":
+            rendement = (laatste_koers - entry_price) / entry_price * 100
+        else:
+            rendement = (entry_price - laatste_koers) / entry_price * 100
+
+        rendementen.append(rendement)
+        trades.append({
+            "Type": entry_type,
+            "Open datum": entry_date.strftime("%d-%m-%Y"),
+            "Open prijs": round(entry_price, 2),
+            "Sluit datum": laatste_datum.strftime("%d-%m-%Y"),
+            "Sluit prijs": round(laatste_koers, 2),
+            "Rendement (%)": round(rendement, 2)
+        })
+
+    sam_rendement = sum(rendementen) if rendementen else 0.0
+    return sam_rendement, trades, rendementen
+
+def bereken_sam_rendement_uit_beide(df_signalen, signaal_type):
+    # Bereken alle trades met "Beide"
     volledige_rendement, alle_trades, alle_rendementen = bereken_sam_rendement(df_signalen, "Beide")
 
-    # Filter op alleen koop- of verkooptrades als dat gevraagd is
-    if filter_type == "Koop":
-        trades = [t for t in alle_trades if t["Type"] == "Kopen"]
-    elif filter_type == "Verkoop":
-        trades = [t for t in alle_trades if t["Type"] == "Verkopen"]
-    else:
-        trades = alle_trades
+    # Filter trades per type
+    gefilterde_trades = [t for t in alle_trades if t["Type"] == signaal_type]
+    gefilterde_rendementen = [t["Rendement (%)"] for t in gefilterde_trades]
 
-    rendementen = [t["Rendement (%)"] for t in trades]
-    sam_rendement = sum(rendementen) if rendementen else 0.0
-
-    return sam_rendement, trades, rendementen
+    sam_rendement = sum(gefilterde_rendementen) if gefilterde_rendementen else 0.0
+    return sam_rendement, gefilterde_trades, gefilterde_rendementen
     
 # 10. Bereken en toon resultaten
-sam_rendement, trades, rendementen = bereken_sam_rendement_uit_beide(df_signalen, signaalkeuze)
+if signaalkeuze == "Beide":
+    sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, "Beide")
+else:
+    sam_rendement, trades, rendementen = bereken_sam_rendement_uit_beide(df_signalen, signaalkeuze)
+
+#sam_rendement, trades, rendementen = bereken_sam_rendement_uit_beide(df_signalen, signaalkeuze)
 #sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 col1, col2 = st.columns(2)
