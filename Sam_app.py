@@ -516,14 +516,16 @@ if not df_valid.empty and len(df_valid) >= 2:
 
 # ✂️ 5. Filter op geldige adviezen
 advies_col = "Advies"
-df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
+# ❌ NIET filteren op signaalkeuze
+df_signalen = df_period[df_period["Advies"].isin(["Kopen", "Verkopen"])].copy()
+#df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
 # 🔧 Zorg dat df_signalen een 'Close'-kolom bevat
 # Herhaal eventueel de kolomextractie (zoals eerder gedaan bij df_period)
-close_col = [col for col in df_signalen.columns if str(col).startswith("Close")]
-if close_col:
-    df_signalen = df_signalen.rename(columns={close_col[0]: "Close"})
-else:
-    st.error("❗ Geen kolom gevonden die begint met 'Close' in df_signalen.")
+#close_col = [col for col in df_signalen.columns if str(col).startswith("Close")]
+#if close_col:
+#    df_signalen = df_signalen.rename(columns={close_col[0]: "Close"})
+#else:
+#    st.error("❗ Geen kolom gevonden die begint met 'Close' in df_signalen.")
 
 if signaalkeuze == "Koop":
     df_signalen = df_signalen[df_signalen[advies_col] == "Kopen"]
@@ -545,10 +547,7 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     entry_date = None
     entry_type = None
 
-    # Zorg dat signaal_type één van deze drie is
-    geldig_type = signaal_type in ["Koop", "Verkoop", "Beide"]
-
-    if not geldig_type or df_signalen.empty:
+    if df_signalen.empty:
         return 0.0, [], []
 
     for datum, row in df_signalen.iterrows():
@@ -556,20 +555,19 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
         close = row["Close"]
 
         if entry_type is None:
-            # Start trade bij toegestaan entry-signaal
+            # Start een nieuwe trade alleen als dit het juiste type is of als we beide toelaten
             if signaal_type == "Beide" or advies == signaal_type:
                 entry_type = advies
                 entry_price = close
                 entry_date = datum
 
         else:
-            # Sluit trade bij tegenovergesteld signaal
             if advies != entry_type:
-                # Alleen afsluiten als oorspronkelijke entry overeenkomt met gekozen type
+                # Alleen sluiten als de entry overeenkomt met het geselecteerde type
                 if signaal_type == "Beide" or entry_type == signaal_type:
                     if entry_type == "Kopen":
                         rendement = (close - entry_price) / entry_price * 100
-                    else:  # Verkopen
+                    else:
                         rendement = (entry_price - close) / entry_price * 100
 
                     rendementen.append(rendement)
@@ -582,7 +580,7 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                         "Rendement (%)": round(rendement, 2)
                     })
 
-                # Nieuwe entry starten als deze overeenkomt met het gekozen signaaltype
+                # Hier mogen we een nieuwe trade starten als advies matcht met geselecteerd type
                 if signaal_type == "Beide" or advies == signaal_type:
                     entry_type = advies
                     entry_price = close
@@ -592,12 +590,11 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                     entry_price = None
                     entry_date = None
 
-    # ✅ Sluit openstaande trade af op laatste datum (alleen als entry type matcht)
+    # Sluit openstaande trade op laatste datum indien van juiste type
     if entry_type is not None and entry_price is not None:
         laatste_datum = df_signalen.index[-1]
         laatste_close = df_signalen["Close"].iloc[-1]
 
-        # Alleen afsluiten als het entry_type overeenkomt met gekozen signaal
         if signaal_type == "Beide" or entry_type == signaal_type:
             if entry_type == "Kopen":
                 rendement = (laatste_close - entry_price) / entry_price * 100
