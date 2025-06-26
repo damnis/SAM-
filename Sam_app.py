@@ -628,7 +628,8 @@ else:
 #st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
 #st.write("DEBUG: Rendementenlijst:", rendementen)
 
-sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
+sam_rendement, trades = bereken_sam_rendement(df_signalen, signaalkeuze)
+#sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
     
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
