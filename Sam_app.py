@@ -622,7 +622,7 @@ else:
     st.write("📈 SAM-rendement (onverwacht type):", sam_rendement)
 
 #st.write("Aantal trades:", len(trades))
-st.dataframe(pd.DataFrame(trades))
+#st.dataframe(pd.DataFrame(trades))
 
 # Debug: toon rendementenlijst
 st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
