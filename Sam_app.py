@@ -609,7 +609,7 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                 entry_type = advies
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
-    return sam_rendement, trades
+    return sam_rendement, trades, rendementen 
     # ➕ RETURN alles wat je nodig hebt
     #return sam_rendement, trades, rendementen
 
