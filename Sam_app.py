@@ -558,19 +558,21 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
         advies = row["Advies"]
         close = row["Close"]
 
-        # Alleen signalen die passen bij de gekozen strategie
+        # Filter: alleen relevante signalen
         if signaal_type != "Beide" and advies != ("Kopen" if signaal_type == "Koop" else "Verkopen"):
             continue
 
         if entry_price is None:
-            # Nog geen open positie: open bij geldig signaal
+            # Open positie
             entry_price = close
             entry_date = datum
             entry_type = advies
         else:
-            # Alleen sluiten bij tegenadvies
-            if (entry_type == "Kopen" and advies == "Verkopen") or (entry_type == "Verkopen" and advies == "Kopen"):
-                if signaal_type == "Beide" or signaal_type == entry_type:
+            if signaal_type == "Beide":
+                # Sluiten bij tegenadvies
+                if (entry_type == "Kopen" and advies == "Verkopen") or \
+                   (entry_type == "Verkopen" and advies == "Kopen"):
+
                     rendement = (close - entry_price) / entry_price * 100 if entry_type == "Kopen" \
                                 else (entry_price - close) / entry_price * 100
                     rendementen.append(rendement)
@@ -583,13 +585,28 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                         "Rendement (%)": round(rendement, 2)
                     })
 
-                # Reset: gereed voor een nieuwe trade vanaf het tegenadvies
+                    # Heropen vanaf huidig signaal
+                    entry_price = close
+                    entry_date = datum
+                    entry_type = advies
+            else:
+                # Voor "Koop" of "Verkoop": sluit bij volgende zelfde signaal
+                rendement = (close - entry_price) / entry_price * 100 if entry_type == "Kopen" \
+                            else (entry_price - close) / entry_price * 100
+                rendementen.append(rendement)
+                trades.append({
+                    "Type": entry_type,
+                    "Open datum": entry_date.strftime("%d-%m-%Y"),
+                    "Open prijs": entry_price,
+                    "Sluit datum": datum.strftime("%d-%m-%Y"),
+                    "Sluit prijs": close,
+                    "Rendement (%)": round(rendement, 2)
+                })
+
+                # Heropen vanaf huidig signaal
                 entry_price = close
                 entry_date = datum
                 entry_type = advies
-            else:
-                # Zelfde advies als open positie → negeren
-                continue
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, trades
