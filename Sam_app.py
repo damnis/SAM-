@@ -549,19 +549,15 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     entry_date = None
     entry_type = None
 
-    # Mapping signaal_type ("Koop", "Verkoop") naar waarden in Advies ("Kopen", "Verkopen")
-    type_map = {
-        "Koop": "Kopen",
-        "Verkoop": "Verkopen",
-        "Beide": "Beide"
-    }
+    # Verwachte mapping: "Koop" ➜ "Kopen", "Verkoop" ➜ "Verkopen"
+    type_map = {"Koop": "Kopen", "Verkoop": "Verkopen", "Beide": "Beide"}
     mapped_type = type_map.get(signaal_type, "Beide")
 
     for datum, row in df_signalen.iterrows():
         advies = row["Advies"]
         close = row["Close"]
 
-    # Sla over als advies ontbreekt of geen string is
+        # Sla over als advies niet geldig is
         if not isinstance(advies, str) or advies not in ["Kopen", "Verkopen"]:
             continue
 
@@ -572,6 +568,7 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                 entry_date = datum
         else:
             if advies != entry_type and (mapped_type == "Beide" or entry_type == mapped_type):
+                # Trade sluiten
                 if entry_type == "Kopen":
                     rendement = (close - entry_price) / entry_price * 100
                 else:
