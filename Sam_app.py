@@ -546,7 +546,7 @@ df_signalen = pd.DataFrame({
 }, index=pd.date_range("2025-01-01", periods=11))
 
 # --- SAM-rendement berekening ---
-#def bereken_sam_rendement(df_signalen, signaal_type):
+# --- SAM-rendement berekening ---
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     rendementen = []
     trades = []
@@ -554,12 +554,9 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     entry_date = None
     entry_type = None
 
-    signalen_lijst = df_signalen.reset_index()
-
-    for i in range(len(signalen_lijst)):
-        datum = signalen_lijst.loc[i, 'index']
-        advies = signalen_lijst.loc[i, 'Advies']
-        close = signalen_lijst.loc[i, 'Close']
+    for datum, row in df_signalen.iterrows():
+        advies = row["Advies"]
+        close = row["Close"]
 
         if entry_price is None:
             if (signaal_type == "Koop" and advies == "Kopen") or \
@@ -569,90 +566,48 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                 entry_date = datum
                 entry_type = advies
         else:
-            sluit_trade = False
+            # Alleen sluiten als tegenovergestelde signaal komt
+            if (entry_type == "Kopen" and advies == "Verkopen") or \
+               (entry_type == "Verkopen" and advies == "Kopen"):
+                if signaal_type == "Beide" or signaal_type == entry_type:
+                    if entry_type == "Kopen":
+                        rendement = (close - entry_price) / entry_price * 100
+                    else:
+                        rendement = (entry_price - close) / entry_price * 100
 
-            if signaal_type == "Beide":
-                sluit_trade = (entry_type == "Kopen" and advies == "Verkopen") or \
-                              (entry_type == "Verkopen" and advies == "Kopen")
-            else:
-                # Sluit trade bij volgend gelijk advies of einde
-                if i == len(signalen_lijst) - 1:
-                    sluit_trade = True
-                else:
-                    next_advies = signalen_lijst.loc[i, "Advies"]
-                    if next_advies == entry_type:
-                        sluit_trade = True
+                    rendementen.append(rendement)
+                    trades.append({
+                        "Type": entry_type,
+                        "Open datum": entry_date.strftime("%d-%m-%Y"),
+                        "Open prijs": entry_price,
+                        "Sluit datum": datum.strftime("%d-%m-%Y"),
+                        "Sluit prijs": close,
+                        "Rendement (%)": round(rendement, 2)
+                    })
 
-            if sluit_trade:
-                if entry_type == "Kopen":
-                    rendement = (close - entry_price) / entry_price * 100
-                else:
-                    rendement = (entry_price - close) / entry_price * 100
-
-                rendementen.append(rendement)
-                trades.append({
-                    "Type": entry_type,
-                    "Open datum": entry_date.strftime("%d-%m-%Y"),
-                    "Open prijs": entry_price,
-                    "Sluit datum": datum.strftime("%d-%m-%Y"),
-                    "Sluit prijs": close,
-                    "Rendement (%)": round(rendement, 2)
-                })
-
+                # Reset voor volgende trade
                 entry_price = None
                 entry_date = None
                 entry_type = None
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, trades, rendementen
-    # ➕ RETURN alles wat je nodig hebt
-    #return sam_rendement, trades, rendementen
-
-    # 🐛 DEBUG: Trades printen als tabel
-    if trades:
-        st.write("📋 **Uitgevoerde Trades:**")
-        st.dataframe(pd.DataFrame(trades))
-    else:
-        st.write("⚠️ Geen uitgevoerde trades gevonden.")
-
-   # return sam_rendement, len(rendementen)
-    sam_rendement, trades = bereken_sam_rendement(df_signalen, signaalkeuze)
-    st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
-    st.write("Aantal trades:", len(trades))
-    st.dataframe(pd.DataFrame(trades))
 
 
-    
-    # Debug-output: toon signalenparen
-#    st.write("DEBUG: Entry type:", entry_type)
-#    st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
-#    st.write("DEBUG: Rendementenlijst:", rendementen)
-#    return sam_rendement, len(rendementen)
-#    sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
-
-if isinstance(sam_rendement, (int, float)):
-    st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
-else:
-    st.write("📈 SAM-rendement (onverwacht type):", sam_rendement)
-
-#st.write("Aantal trades:", len(trades))
-#st.dataframe(pd.DataFrame(trades))
-
-# Debug: toon rendementenlijst
-#st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
-#st.write("DEBUG: Rendementenlijst:", rendementen)
+# ✅ SAM-rendement uitvoeren
 sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
-#sam_rendement, trades = bereken_sam_rendement(df_signalen, signaalkeuze)
-#sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
- # 🔍 Debug-output
-st.write("🔍 DEBUG: Aantal trades:", len(trades))
-st.write("🔍 DEBUG: Rendementenlijst:", rendementen)
 
-if trades:
-    st.subheader("📋 Uitgevoerde Trades (debug)")
-    st.dataframe(pd.DataFrame(trades))
-   
-# --- Resultaten tonen ---
+# 🔢 Rendement en trades tonen
+st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
+st.write("📊 Aantal trades:", len(trades))
+st.dataframe(pd.DataFrame(trades))
+
+# 🐞 DEBUG-output
+st.write("🔍 DEBUG: Aantal trades:", len(rendementen))
+st.write("🔍 DEBUG: Rendementenlijst:")
+st.json(rendementen)
+
+# 📊 Vergelijking met marktrendement
 st.subheader("📈 Vergelijking van rendementen")
 col1, col2 = st.columns(2)
 
@@ -664,42 +619,5 @@ else:
 if isinstance(sam_rendement, (int, float)):
     col2.metric("📈 SAM-rendement", f"{sam_rendement:+.2f}%")
     st.caption(f"Aantal afgeronde trades (koop-verkoopparen): **{len(trades)}** binnen deze periode.")
-#    st.caption(f"Aantal afgeronde trades (koop-verkoopparen): **{geldig_signalen}** binnen deze periode.")
-#    st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
 else:
     col2.metric(f"SAM-rendement ({signaalkeuze})", "n.v.t.")
-    
-# --- Resultaten tonen ---
-#st.subheader("📈 Vergelijking van rendementen")
-#col1, col2 = st.columns(2)
-#if isinstance(marktrendement, (int, float)):
-#    col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%")
-#else:
-#    col1.metric("Marktrendement (Buy & Hold)", "n.v.t.")
-#col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%" if marktrendement is not None else "n.v.t.")
-#if isinstance(sam_rendement, (int, float)):
-#    col2.metric("📈 SAM-rendement", f"{sam_rendement:+.2f}%")
-#    st.caption(f"Aantal geldige signalen: **{geldig_signalen}** binnen deze periode.")
-#col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%")
-#else:
-#    col2.metric(f"SAM-rendement ({signaalkeuze})", "n.v.t.")
-#col2.metric(f"SAM-rendement ({signaalkeuze})", f"{sam_rendement:+.2f}%" if sam_rendement is not None else "n.v.t.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
