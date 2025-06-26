@@ -620,6 +620,10 @@ st.dataframe(df_signalen.head(10))
 st.write("✅ DEBUG: Aantal trades:", len(trades))
 st.write("✅ DEBUG: Unieke entry_types:", set(t["Type"] for t in trades))
 st.write("✅ DEBUG: Eerste 5 trades:", trades[:5])
+
+st.write("🔎 DEBUG - Inhoud van signaalkeuze:", signaalkeuze, type(signaalkeuze))
+
+
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
 col1, col2 = st.columns(2)
