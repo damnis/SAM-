@@ -447,7 +447,7 @@ html += "</tbody></table>"
 #Weergave in Streamlit
 st.markdown(html, unsafe_allow_html=True)
 
-##--- Toevoeging: Backtestfunctie ---
+###--- Toevoeging: Backtestfunctie ---
 
 from datetime import date
 import pandas as pd
@@ -478,53 +478,59 @@ df_period = df.loc[
     (df.index.date >= start_date) & (df.index.date <= end_date)
 ].copy()
 
-# 🧠 Detecteer juiste kolomnamen bij MultiIndex
+# 🔧 Flat multi-index kolommen (indien nodig)
 if isinstance(df_period.columns, pd.MultiIndex):
-    flat_columns = ["_".join([str(level) for level in col if str(level) != ""]) for col in df_period.columns]
-    df_period.columns = flat_columns
+    df_period.columns = ["_".join([str(i) for i in col if i]) for col in df_period.columns]
 
-# --- Debug ---
+# 🔎 Zoek juiste Close-kolom
+close_col = next((col for col in df_period.columns if col.lower().startswith("close")), None)
+
+# 🔍 Debug
 st.write("✅ DEBUG: df_period shape:", df_period.shape)
 st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
+st.write("✅ DEBUG: Gekozen kolom voor 'Close':", close_col)
 st.write("✅ DEBUG: Eerste rijen df_period:")
 st.dataframe(df_period.head())
 
-# 🔍 Controleer op geldige koersdata
-if "Close" in df_period.columns:
-    df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
-    df_valid = df_period["Close"].dropna()
+# ⛑️ Verwerk 'Close'-data
+df_valid = pd.Series([], dtype=float)
+
+if close_col:
+    df_period[close_col] = pd.to_numeric(df_period[close_col], errors="coerce")
+    df_valid = df_period[close_col].dropna()
+    df_period = df_period.dropna(subset=[close_col])
 else:
-    df_valid = pd.Series([], dtype=float)
+    st.warning("❗ Geen geldige 'Close'-kolom gevonden in de data.")
+    df_period = pd.DataFrame(columns=df.columns)
 
 st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
 st.write("✅ DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
 
-# 🧹 Opschonen kolommen en rows zonder Close
-df_period = df_period.dropna(subset=["Close"])
-
 # 📊 4. Marktrendement
 marktrendement = None
-if not df_period.empty and len(df_valid) >= 2:
+if not df_valid.empty and len(df_valid) >= 2:
     koers_start = df_valid.iloc[0]
     koers_eind = df_valid.iloc[-1]
     if koers_start != 0.0:
         marktrendement = ((koers_eind - koers_start) / koers_start) * 100
 
-# ✂️ 5. Signalen selecteren
-df_signalen = df_period[df_period["Advies"].isin(["Kopen", "Verkopen"])].copy()
+# ✂️ 5. Filter op geldige adviezen
+advies_col = "Advies"
+df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
 
 if signaalkeuze == "Koop":
-    df_signalen = df_signalen[df_signalen["Advies"] == "Kopen"]
+    df_signalen = df_signalen[df_signalen[advies_col] == "Kopen"]
 elif signaalkeuze == "Verkoop":
-    df_signalen = df_signalen[df_signalen["Advies"] == "Verkopen"]
+    df_signalen = df_signalen[df_signalen[advies_col] == "Verkopen"]
 
 # TEST: handmatig test-signalen invoegen
 #df_signalen = pd.DataFrame({
 #    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
 #    "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
 #}, index=pd.date_range("2025-01-01", periods=11))
+#close_col = "Close"
 
-# 🧠 6. SAM-rendement berekening
+# 🧠 6. SAM-berekening
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     rendementen = []
     trades = []
@@ -536,8 +542,8 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     mapped_type = type_map.get(signaal_type, "Beide")
 
     for datum, row in df_signalen.iterrows():
-        advies = row["Advies"]
-        close = row["Close"]
+        advies = row[advies_col]
+        close = row[close_col]
 
         if entry_type is None:
             if mapped_type == "Beide" or advies == mapped_type:
@@ -592,14 +598,10 @@ else:
 # 🧪 Debug
 st.write("🔍 DEBUG - Signaalkeuze:", signaalkeuze)
 st.write("🔍 Aantal signalen:", len(df_signalen))
-st.write("🔍 Unieke adviezen:", df_signalen["Advies"].unique())
+st.write("🔍 Unieke adviezen:", df_signalen[advies_col].unique())
 st.write("🔍 Aantal trades:", len(trades))
 st.write("🔍 Rendementenlijst:", rendementen)
 st.dataframe(pd.DataFrame(trades))
-
-
-
-
 
 
 
