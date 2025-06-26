@@ -520,7 +520,7 @@ sam_rendement = sum(gefilterde_rendementen) if gefilterde_rendementen else 0.0
 
 return sam_rendement, gefilterde_trades, gefilterde_rendementen
 
-📈 7. SAM-rendement en trade-analyse
+#📈 7. SAM-rendement en trade-analyse
 
 sam_rendement, trades, rendementen = bereken_sam_rendement_uit_beide(df_signalen, signaalkeuze)
 
