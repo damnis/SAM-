@@ -602,7 +602,45 @@ else:
 #st.write("ðŸ” Unieke adviezen:", df_signalen[advies_col].unique())
 st.write("ðŸ” Aantal trades:", len(trades))
 #st.write("ðŸ” Rendementenlijst:", rendementen)
-st.dataframe(pd.DataFrame(trades))
+#st.dataframe(pd.DataFrame(trades))
+import pandas as pd
+import streamlit as st
+
+# Zet de trades om in een DataFrame
+df_trades = pd.DataFrame(trades)
+
+# Voeg kolom 'Nr.' toe
+df_trades.insert(0, "Nr.", range(1, len(df_trades) + 1))
+
+# Voeg kolommen 'SAM-% Koop' en 'SAM-% Verkoop' toe
+df_trades["SAM-% Koop"] = df_trades.apply(
+    lambda row: row["Rendement (%)"] if row["Type"] == "Kopen" else None, axis=1
+)
+df_trades["SAM-% Verkoop"] = df_trades.apply(
+    lambda row: row["Rendement (%)"] if row["Type"] == "Verkopen" else None, axis=1
+)
+
+# Hernoem 'Rendement (%)' naar 'SAM-% tot.'
+df_trades = df_trades.rename(columns={"Rendement (%)": "SAM-% tot."})
+
+# Houd alleen de gewenste kolommen over
+df_trades = df_trades[
+    ["Nr.", "Open datum", "Open prijs", "Sluit datum", "Sluit prijs", "SAM-% tot.", "SAM-% Koop", "SAM-% Verkoop"]
+]
+
+# Toon alleen de laatste 12 trades, met optie om alles te tonen
+toon_alle = st.toggle("Toon alle trades", value=False)
+
+if toon_alle or len(df_trades) <= 12:
+    st.dataframe(df_trades, use_container_width=True)
+else:
+    st.dataframe(df_trades.tail(12), use_container_width=True)
+
+
+
+
+
+
 
 
 
