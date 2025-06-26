@@ -448,12 +448,67 @@ html += "</tbody></table>"
 st.markdown(html, unsafe_allow_html=True)
 
 ###--- Toevoeging: Backtestfunctie ---
-# 📊 SAM Backtestfunctie (volledig en gefixt)
-
+from datetime import date
 import pandas as pd
 import streamlit as st
 
-# 🧠 1. SAM-rendement logica (berekent ALTIJD eerst "Beide")
+# Zorg dat index datetime is
+df = df.copy()
+df.index = pd.to_datetime(df.index)
+
+# 📅 1. Datumselectie
+st.subheader("📅 Vergelijk Marktrendement en SAM-rendement")
+
+default_start = df.index.min().date()
+default_end = df.index.max().date()
+
+start_date = st.date_input("Startdatum analyse", default_start, key="start_date")
+end_date = st.date_input("Einddatum analyse", default_end, key="end_date")
+
+# 📋 2. Signaalkeuze
+signaalkeuze = st.selectbox(
+    "Welke signalen tellen mee voor SAM-rendement?",
+    options=["Beide", "Koop", "Verkoop"],
+    index=0
+)
+
+# 📆 3. Filter op periode
+df_period = df.loc[
+    (df.index.date >= start_date) & (df.index.date <= end_date)
+].copy()
+
+# 🛠️ 4. MultiIndex flatten indien nodig
+if isinstance(df_period.columns, pd.MultiIndex):
+    df_period.columns = ["_".join([str(i) for i in col if i]) for col in df_period.columns]
+
+# 🔍 5. Zoek Close-kolom
+close_col = next((col for col in df_period.columns if col.lower().startswith("close")), None)
+
+if close_col:
+    df_period[close_col] = pd.to_numeric(df_period[close_col], errors="coerce")
+    df_valid = df_period[close_col].dropna()
+else:
+    st.warning("⚠️ Geen geldige 'Close'-kolom gevonden.")
+    df_valid = pd.Series([], dtype=float)
+
+# 📉 6. Bereken marktrendement
+marktrendement = None
+if not df_valid.empty and len(df_valid) >= 2:
+    koers_start = df_valid.iloc[0]
+    koers_eind = df_valid.iloc[-1]
+    if koers_start != 0.0:
+        marktrendement = ((koers_eind - koers_start) / koers_start) * 100
+
+# 🧼 7. Filter op adviezen
+advies_col = "Advies"
+df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
+
+# Zet close om naar uniforme naam
+close_kolommen = [col for col in df_signalen.columns if str(col).startswith("Close")]
+if close_kolommen:
+    df_signalen = df_signalen.rename(columns={close_kolommen[0]: "Close"})
+
+# 🧠 8. SAM-rendement basisfunctie
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     rendementen = []
     trades = []
@@ -472,7 +527,6 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                 entry_date = datum
         else:
             if advies != entry_type:
-                # Sluit trade
                 if entry_type == "Kopen":
                     rendement = (close - entry_price) / entry_price * 100
                 else:
@@ -497,7 +551,7 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                     entry_price = None
                     entry_date = None
 
-    # Sluit open trade op laatste datum
+    # Sluit laatste openstaande trade
     if entry_type is not None and entry_price is not None:
         laatste_datum = df_signalen.index[-1]
         laatste_koers = df_signalen["Close"].iloc[-1]
@@ -520,7 +574,7 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, trades, rendementen
 
-# 🧠 2. Filterde variant: haalt trades uit volledige "Beide"-berekening
+# 🧠 9. Afgeleid rendement vanuit 'Beide'
 def bereken_sam_rendement_uit_beide(df_signalen, signaal_type):
     volledige_rendement, alle_trades, alle_rendementen = bereken_sam_rendement(df_signalen, "Beide")
 
@@ -533,16 +587,16 @@ def bereken_sam_rendement_uit_beide(df_signalen, signaal_type):
 
     return sam_rendement, gefilterde_trades, gefilterde_rendementen
 
-# 🧪 3. Bereken SAM-rendement op basis van gekozen signaal
+# 🔍 10. Uitvoering rendement
 sam_rendement, trades, rendementen = bereken_sam_rendement_uit_beide(df_signalen, signaalkeuze)
 
-# 📈 4. Visualiseer resultaten
+# 📊 11. Toon resultaten
 col1, col2 = st.columns(2)
 
 if isinstance(marktrendement, (int, float)):
-    col1.metric("📉 Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%")
+    col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%")
 else:
-    col1.metric("📉 Marktrendement (Buy & Hold)", "n.v.t.")
+    col1.metric("Marktrendement (Buy & Hold)", "n.v.t.")
 
 if isinstance(sam_rendement, (int, float)):
     col2.metric("📈 SAM-rendement", f"{sam_rendement:+.2f}%")
@@ -550,13 +604,14 @@ if isinstance(sam_rendement, (int, float)):
 else:
     col2.metric("📈 SAM-rendement", "n.v.t.")
 
-# 🐞 5. Debug-output
+# 🐞 12. Debug info
 st.write("🔍 DEBUG - Signaalkeuze:", signaalkeuze)
 st.write("🔍 Aantal signalen:", len(df_signalen))
-st.write("🔍 Unieke adviezen:", df_signalen['Advies'].unique())
+st.write("🔍 Unieke adviezen:", df_signalen[advies_col].unique())
 st.write("🔍 Aantal trades:", len(trades))
 st.write("🔍 Rendementenlijst:", rendementen)
 st.dataframe(pd.DataFrame(trades))
+
 
 
 
