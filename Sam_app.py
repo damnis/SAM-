@@ -533,6 +533,7 @@ elif signaalkeuze == "Verkoop":
 
 #  6. SAM-berekening
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
+def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     rendementen = []
     trades = []
     entry_price = None
@@ -542,9 +543,10 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     type_map = {"Koop": "Kopen", "Verkoop": "Verkopen", "Beide": "Beide"}
     mapped_type = type_map.get(signaal_type, "Beide")
 
-    for datum, row in df_signalen.iterrows():
-        advies = row[advies_col]
-        close = row[close_col]
+    for i in range(len(df_signalen)):
+        advies = df_signalen.iloc[i]["Advies"]
+        datum = df_signalen.index[i]
+        close = df_signalen.iloc[i]["Close"]
 
         if entry_type is None:
             if mapped_type == "Beide" or advies == mapped_type:
@@ -552,24 +554,28 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                 entry_price = close
                 entry_date = datum
         else:
-            if advies != entry_type and (mapped_type == "Beide" or entry_type == mapped_type):
-                # Sluit bestaande trade
+            # Detecteer omslag naar ander advies
+            if advies != entry_type:
+                # Kijk terug naar vorige rij, daar sluiten we de trade
+                prev_close = df_signalen.iloc[i - 1]["Close"]
+                prev_datum = df_signalen.index[i - 1]
+
                 if entry_type == "Kopen":
-                    rendement = (close - entry_price) / entry_price * 100
+                    rendement = (prev_close - entry_price) / entry_price * 100
                 else:
-                    rendement = (entry_price - close) / entry_price * 100
+                    rendement = (entry_price - prev_close) / entry_price * 100
 
                 rendementen.append(rendement)
                 trades.append({
                     "Type": entry_type,
                     "Open datum": entry_date.strftime("%d-%m-%Y"),
                     "Open prijs": round(entry_price, 2),
-                    "Sluit datum": datum.strftime("%d-%m-%Y"),
-                    "Sluit prijs": round(close, 2),
+                    "Sluit datum": prev_datum.strftime("%d-%m-%Y"),
+                    "Sluit prijs": round(prev_close, 2),
                     "Rendement (%)": round(rendement, 2)
                 })
 
-                # Start eventueel nieuwe trade
+                # Mogelijk nieuwe trade openen als huidig advies bij selectie past
                 if mapped_type == "Beide" or advies == mapped_type:
                     entry_type = advies
                     entry_price = close
@@ -579,10 +585,10 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                     entry_price = None
                     entry_date = None
 
-    # ✅ SLUIT OPEN TRADE OP LAATSTE DATUM
+    # Sluit open trade aan einde
     if entry_type is not None and entry_price is not None:
         laatste_datum = df_signalen.index[-1]
-        laatste_koers = df_signalen[close_col].iloc[-1]
+        laatste_koers = df_signalen["Close"].iloc[-1]
 
         if entry_type == "Kopen":
             rendement = (laatste_koers - entry_price) / entry_price * 100
