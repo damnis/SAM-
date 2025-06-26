@@ -508,6 +508,16 @@ st.write(df_period.columns.tolist())
 #st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
 
 # 🧠 5. SAM Backtest & Marktvergelijk
+gekozen_startdatum = st.date_input("Startdatum analyse", value=df["Date"].min().date())
+gekozen_einddatum = st.date_input("Einddatum analyse", value=df["Date"].max().date())
+
+signaalkeuze = st.selectbox(
+    "Welke signalen tellen mee voor SAM-rendement?",
+    options=["Koop", "Verkoop", "Beide"],
+    index=2  # standaard: Beide
+)
+
+selected_ticker = ticker  # of gebruik jouw variabele met de gekozen tickernaam
 
 # 🧮 Functie: Vergelijk SAM-rendement met markt (Buy & Hold)
 def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
