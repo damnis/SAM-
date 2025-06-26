@@ -132,7 +132,7 @@ def determine_advice(df, threshold):
     return df, huidig_advies
     
 # --- Streamlit UI ---
-st.title("ðŸ“Š SAM Trading Indicator")
+st.title("SAM Trading Indicator")
 
 # --- Volledige tickerlijsten ---
 aex_tickers = {
@@ -210,30 +210,27 @@ crypto_tickers = {
 }
 # --- Update tab labels en bijbehorende mapping ---
 tabs_mapping = {
-    "ðŸ‡ºðŸ‡¸ Dow Jones": dow_tickers,
-    "ðŸ‡ºðŸ‡¸ Nasdaq": nasdaq_tickers,
-    "ðŸ‡ºðŸ‡¸ US Tech": ustech_tickers,
-    "ðŸ‡³ðŸ‡± AEX": aex_tickers,
-    "ðŸ‡³ðŸ‡± AMX": amx_tickers,
-    "ðŸŒ Crypto": crypto_tickers
+    "🇺🇸 Dow Jones": dow_tickers,
+    "🇺🇸 Nasdaq": nasdaq_tickers,
+    "🇺🇸 US Tech": ustech_tickers,
+    "🇳🇱 AEX": aex_tickers,
+    "🇳🇱 AMX": amx_tickers,
+    "🌐 Crypto": crypto_tickers
 }
 
 tab_labels = list(tabs_mapping.keys())
 selected_tab = st.radio("Kies beurs", tab_labels, horizontal=True)
 
 valutasymbool = {
-    "ðŸ‡³ðŸ‡± AEX": "â‚¬ ",
-    "ðŸ‡³ðŸ‡± AMX": "â‚¬ ",
-    "ðŸ‡ºðŸ‡¸ Dow Jones": "$ ",
-    "ðŸ‡ºðŸ‡¸ Nasdaq": "$ ",
-    "ðŸ‡ºðŸ‡¸ US Tech": "$ ",
-    "ðŸŒ Crypto": "",  # Geen symbool
+    "🇳🇱 AEX": "€ ",
+    "🇳🇱 AMX": "€ ",
+    "🇺🇸 Dow Jones": "$ ",
+    "🇺🇸 Nasdaq": "$ ",
+    "🇺🇸 US Tech": "$ ",
+    "🌐 Crypto": "",  # Geen symbool
 }.get(selected_tab, "")
 
-# Dan in je tekst:
-#f"{ticker_name} â€“ {valutasymbool}{last:.2f}"
-
-# --- Data ophalen voor dropdown live view ---
+#- Data ophalen voor dropdown live view ---
 #def get_live_ticker_data(tickers_dict):
 # --- Data ophalen voor dropdown live view ---
 def get_live_ticker_data(tickers_dict):
@@ -260,7 +257,7 @@ live_info = get_live_ticker_data(tabs_mapping[selected_tab])
 dropdown_dict = {}  # key = ticker, value = (display_tekst, naam)
 
 for t, naam, last, change, kleur in live_info:
-    emoji = "ðŸŸ¢" if change > 0 else "ðŸ”´" if change < 0 else "âšª"
+    emoji = "🟢" if change > 0 else "🔴" if change < 0 else "⚪"
     display = f"{t} - {naam} | {valutasymbool}{last:.2f} {emoji} {change:+.2f}%"
     dropdown_dict[t] = (display, naam)
 
@@ -379,7 +376,7 @@ tabel["Datum"] = tabel.index.strftime("%d-%m-%Y")
 tabel = tabel[["Datum"] + kolommen]
 
 # Afronding en formatting
-if selected_tab == "ðŸŒ Crypto":
+if selected_tab == "🌐 Crypto":
     tabel["Close"] = tabel["Close"].map("{:.3f}".format)
 else:
     tabel["Close"] = tabel["Close"].map("{:.2f}".format)
@@ -453,12 +450,12 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
-# ðŸ§¼ Zorg dat index datetime is
+# Zorg dat index datetime is
 df = df.copy()
 df.index = pd.to_datetime(df.index)
 
-# ðŸ“… 1. Datumkeuze
-st.subheader("ðŸ“… Vergelijk Marktrendement en SAM-rendement")
+#  1. Datumkeuze
+st.subheader("Vergelijk Marktrendement en SAM-rendement")
 
 default_start = df.index.min().date()
 default_end = df.index.max().date()
@@ -466,7 +463,7 @@ default_end = df.index.max().date()
 start_date = st.date_input("Startdatum analyse", default_start)
 end_date = st.date_input("Einddatum analyse", default_end)
 
-# ðŸ“ 2. Signaalkeuze
+# 2. Signaalkeuze
 signaalkeuze = "Beide"
 #signaalkeuze = st.selectbox(
  #   "Welke signalen tellen mee voor SAM-rendement?",
@@ -474,16 +471,16 @@ signaalkeuze = "Beide"
   #  index=0
 #)
 
-# ðŸ§½ 3. Filter op periode
+# 3. Filter op periode
 df_period = df.loc[
     (df.index.date >= start_date) & (df.index.date <= end_date)
 ].copy()
 
-# ðŸ”§ Flat multi-index kolommen (indien nodig)
+#  Flat multi-index kolommen (indien nodig)
 if isinstance(df_period.columns, pd.MultiIndex):
     df_period.columns = ["_".join([str(i) for i in col if i]) for col in df_period.columns]
 
-# ðŸ”Ž Zoek juiste Close-kolom
+# Zoek juiste Close-kolom
 close_col = next((col for col in df_period.columns if col.lower().startswith("close")), None)
 
 # ðŸ” Debug
@@ -501,13 +498,13 @@ if close_col:
     df_valid = df_period[close_col].dropna()
     df_period = df_period.dropna(subset=[close_col])
 else:
-    st.warning("â— Geen geldige 'Close'-kolom gevonden in de data.")
+    st.warning("Geen geldige 'Close'-kolom gevonden in de data.")
     df_period = pd.DataFrame(columns=df.columns)
 
 #st.write("âœ… DEBUG: Lengte df_valid:", len(df_valid))
 #st.write("âœ… DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
 
-# ðŸ“Š 4. Marktrendement
+#  4. Marktrendement
 marktrendement = None
 if not df_valid.empty and len(df_valid) >= 2:
     koers_start = df_valid.iloc[0]
@@ -515,7 +512,7 @@ if not df_valid.empty and len(df_valid) >= 2:
     if koers_start != 0.0:
         marktrendement = ((koers_eind - koers_start) / koers_start) * 100
 
-# âœ‚ï¸ 5. Filter op geldige adviezen
+# 5. Filter op geldige adviezen
 advies_col = "Advies"
 df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
 
@@ -531,7 +528,7 @@ elif signaalkeuze == "Verkoop":
 #}, index=pd.date_range("2025-01-01", periods=11))
 #close_col = "Close"
 
-# ðŸ§  6. SAM-berekening
+#  6. SAM-berekening
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     rendementen = []
     trades = []
