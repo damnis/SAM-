@@ -558,61 +558,38 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
         advies = row["Advies"]
         close = row["Close"]
 
+        # Alleen signalen die passen bij de gekozen strategie
+        if signaal_type != "Beide" and advies != ("Kopen" if signaal_type == "Koop" else "Verkopen"):
+            continue
+
         if entry_price is None:
-            # Start nieuwe trade
-            if (signaal_type == "Koop" and advies == "Kopen") or \
-               (signaal_type == "Verkoop" and advies == "Verkopen") or \
-               (signaal_type == "Beide" and advies in ["Kopen", "Verkopen"]):
+            # Nog geen open positie: open bij geldig signaal
+            entry_price = close
+            entry_date = datum
+            entry_type = advies
+        else:
+            # Alleen sluiten bij tegenadvies
+            if (entry_type == "Kopen" and advies == "Verkopen") or (entry_type == "Verkopen" and advies == "Kopen"):
+                if signaal_type == "Beide" or signaal_type == entry_type:
+                    rendement = (close - entry_price) / entry_price * 100 if entry_type == "Kopen" \
+                                else (entry_price - close) / entry_price * 100
+                    rendementen.append(rendement)
+                    trades.append({
+                        "Type": entry_type,
+                        "Open datum": entry_date.strftime("%d-%m-%Y"),
+                        "Open prijs": entry_price,
+                        "Sluit datum": datum.strftime("%d-%m-%Y"),
+                        "Sluit prijs": close,
+                        "Rendement (%)": round(rendement, 2)
+                    })
+
+                # Reset: gereed voor een nieuwe trade vanaf het tegenadvies
                 entry_price = close
                 entry_date = datum
                 entry_type = advies
-        else:
-            if (entry_type == "Kopen" and advies == "Verkopen") or \
-               (entry_type == "Verkopen" and advies == "Kopen"):
-                # Sluit bestaande trade
-                if signaal_type == "Beide" or signaal_type == entry_type:
-                    rendement = (close - entry_price) / entry_price * 100 if entry_type == "Kopen" \
-                                else (entry_price - close) / entry_price * 100
-                    rendementen.append(rendement)
-                    trades.append({
-                        "Type": entry_type,
-                        "Open datum": entry_date.strftime("%d-%m-%Y"),
-                        "Open prijs": entry_price,
-                        "Sluit datum": datum.strftime("%d-%m-%Y"),
-                        "Sluit prijs": close,
-                        "Rendement (%)": round(rendement, 2)
-                    })
-
-                # Nieuwe trade direct starten
-                if (signaal_type == "Beide" and advies in ["Kopen", "Verkopen"]) or \
-                   (signaal_type == "Koop" and advies == "Kopen") or \
-                   (signaal_type == "Verkoop" and advies == "Verkopen"):
-                    entry_price = close
-                    entry_date = datum
-                    entry_type = advies
-                else:
-                    entry_price = None
-                    entry_date = None
-                    entry_type = None
-
-            elif advies == entry_type:
-                # Zelfde advies = sluit huidige en open nieuwe
-                if signaal_type == "Beide" or signaal_type == entry_type:
-                    rendement = (close - entry_price) / entry_price * 100 if entry_type == "Kopen" \
-                                else (entry_price - close) / entry_price * 100
-                    rendementen.append(rendement)
-                    trades.append({
-                        "Type": entry_type,
-                        "Open datum": entry_date.strftime("%d-%m-%Y"),
-                        "Open prijs": entry_price,
-                        "Sluit datum": datum.strftime("%d-%m-%Y"),
-                        "Sluit prijs": close,
-                        "Rendement (%)": round(rendement, 2)
-                    })
-                    # Start nieuwe trade
-                    entry_price = close
-                    entry_date = datum
-                    entry_type = advies
+            else:
+                # Zelfde advies als open positie → negeren
+                continue
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, trades
