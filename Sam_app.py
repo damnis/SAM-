@@ -501,20 +501,6 @@ if "Close" in df_period.columns and not df_period["Close"].empty:
 #else:
 #    df_period["Close"] = pd.Series(dtype=float)  # lege kolom met float-type
 
-# --- Check inhoud df_period ---
-st.write("✅ DEBUG: df_period shape:", df_period.shape)
-st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
-st.write("✅ DEBUG: Eerste rijen df_period:")
-st.dataframe(df_period.head())
-
-# --- Ensure Close is numeric ---
-df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
-
-# --- Check valid close data ---
-df_valid = df_period["Close"].dropna()
-st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
-st.write("✅ DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
-
 # 📊 4. Marktrendement
 marktrendement = None
 if not df_period.empty and df_period["Close"].count() >= 2:
@@ -536,6 +522,21 @@ elif signaalkeuze == "Verkoop":
 #    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
 #    "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
 #}, index=pd.date_range("2025-01-01", periods=11))
+
+# --- Check inhoud df_period ---
+st.write("✅ DEBUG: df_period shape:", df_period.shape)
+st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
+st.write("✅ DEBUG: Eerste rijen df_period:")
+st.dataframe(df_period.head())
+
+# --- Ensure Close is numeric ---
+df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
+
+# --- Check valid close data ---
+df_valid = df_period["Close"].dropna()
+st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
+st.write("✅ DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
+
 
 # 🧠 6. SAM-berekening
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
