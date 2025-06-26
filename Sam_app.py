@@ -480,8 +480,13 @@ df_period = df.loc[
 
 # 🧹 Opschonen kolommen en check types
 df_period = df_period.loc[:, ~df_period.columns.duplicated()]
-df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
-df_period = df_period.dropna(subset=["Close"])
+#df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
+#df_period = df_period.dropna(subset=["Close"])
+if "Close" in df_period.columns and not df_period["Close"].empty:
+    df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
+    df_period = df_period.dropna(subset=["Close"])
+else:
+    df_period["Close"] = pd.Series(dtype=float)  # lege kolom met float-type
 
 # 📊 4. Marktrendement
 marktrendement = None
