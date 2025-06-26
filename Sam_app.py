@@ -447,11 +447,6 @@ html += "</tbody></table>"
 #Weergave in Streamlit
 st.markdown(html, unsafe_allow_html=True)
 
-# 🔁 OVERRIDE df_signalen met testdata (11 periodes, 7 trades)
-df_signalen = pd.DataFrame({
-    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
-    "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
-}, index=pd.date_range("2025-01-01", periods=11))
 
 
 ###--- Toevoeging: Backtestfunctie ---
@@ -514,6 +509,13 @@ df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy(
 close_kolommen = [col for col in df_signalen.columns if str(col).startswith("Close")]
 if close_kolommen:
     df_signalen = df_signalen.rename(columns={close_kolommen[0]: "Close"})
+
+# 🔁 OVERRIDE df_signalen met testdata (11 periodes, 7 trades)
+df_signalen = pd.DataFrame({
+    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
+    "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
+}, index=pd.date_range("2025-01-01", periods=11))
+
 
 # 🧠 8. SAM-rendement basisfunctie
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
