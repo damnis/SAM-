@@ -466,31 +466,58 @@ default_end = df.index.max().date()
 start_date = st.date_input("Startdatum analyse", default_start)
 end_date = st.date_input("Einddatum analyse", default_end)
 
+# --- Signaal selectie en voorbereiding ---
+
+advies_col = "Advies"
+
+# ❗ Altijd eerst alle signalen selecteren (onafhankelijk van signaalkeuze)
+df_signalen = df_period[df_period[advies_col].isin(["Kopen", "Verkopen"])].copy()
+
+# ✅ Zorg dat df_signalen een kolom 'Close' heeft
+close_col = [col for col in df_signalen.columns if str(col).startswith("Close")]
+if close_col:
+    df_signalen = df_signalen.rename(columns={close_col[0]: "Close"})
+else:
+    st.error("❗ Geen kolom gevonden die begint met 'Close' in df_signalen.")
+    df_signalen = pd.DataFrame()  # Leeg maken voor zekerheid
+
+# 🔍 Pas filter toe op basis van gebruikerskeuze
+if signaalkeuze == "Koop":
+    df_signalen = df_signalen[df_signalen[advies_col] == "Kopen"]
+elif signaalkeuze == "Verkoop":
+    df_signalen = df_signalen[df_signalen[advies_col] == "Verkopen"]
+
+# ✅ DEBUG output
+st.write("🔍 DEBUG - Signaalkeuze:", signaalkeuze)
+st.write("🔍 Aantal signalen:", len(df_signalen))
+st.write("🔍 Unieke adviezen:", df_signalen["Advies"].unique() if not df_signalen.empty else [])
+
+
 # 📍 2. Signaalkeuze
-signaalkeuze = st.selectbox(
-    "Welke signalen tellen mee voor SAM-rendement?",
-    options=["Beide", "Koop", "Verkoop"],
-    index=0
-)
+#signaalkeuze = st.selectbox(
+ #   "Welke signalen tellen mee voor SAM-rendement?",
+  #  options=["Beide", "Koop", "Verkoop"],
+ #   index=0
+#)
 
 # 🧽 3. Filter op periode
-df_period = df.loc[
-    (df.index.date >= start_date) & (df.index.date <= end_date)
-].copy()
+#df_period = df.loc[
+ #   (df.index.date >= start_date) & (df.index.date <= end_date)
+#].copy()
 
 # 🔧 Flat multi-index kolommen (indien nodig)
-if isinstance(df_period.columns, pd.MultiIndex):
-    df_period.columns = ["_".join([str(i) for i in col if i]) for col in df_period.columns]
+#if isinstance(df_period.columns, pd.MultiIndex):
+#    df_period.columns = ["_".join([str(i) for i in col if i]) for col in df_period.columns]
 
 # 🔎 Zoek juiste Close-kolom
-close_col = next((col for col in df_period.columns if col.lower().startswith("close")), None)
+#close_col = next((col for col in df_period.columns if col.lower().startswith("close")), None)
 
 # 🔍 Debug
-st.write("✅ DEBUG: df_period shape:", df_period.shape)
+#st.write("✅ DEBUG: df_period shape:", df_period.shape)
 #st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
-st.write("✅ DEBUG: Gekozen kolom voor 'Close':", close_col)
-st.write("✅ DEBUG: Eerste rijen df_period:")
-st.dataframe(df_period.head(20))
+#st.write("✅ DEBUG: Gekozen kolom voor 'Close':", close_col)
+#st.write("✅ DEBUG: Eerste rijen df_period:")
+s#t.dataframe(df_period.head(20))
 
 # ⛑️ Verwerk 'Close'-data
 df_valid = pd.Series([], dtype=float)
