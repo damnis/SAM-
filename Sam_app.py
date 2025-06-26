@@ -592,9 +592,9 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
                 entry_type = None
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
-    #return sam_rendement, trades
+    return sam_rendement, trades
     # ➕ RETURN alles wat je nodig hebt
-    return sam_rendement, trades, rendementen
+    #return sam_rendement, trades, rendementen
 
     # 🐛 DEBUG: Trades printen als tabel
     if trades:
