@@ -529,9 +529,7 @@ elif signaalkeuze == "Verkoop":
 #    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
  #   "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
 #}, index=pd.date_range("2025-01-01", periods=11))
-
-
-close_col = "Close"
+#close_col = "Close"
 
 # ðŸ§  6. SAM-berekening
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
