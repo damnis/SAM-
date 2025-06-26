@@ -543,11 +543,11 @@ def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
 # 🎯 Tickerlijst opnieuw afleiden na flatten
 alle_tickers = [col.split("_")[1] for col in df.columns if col.startswith("Close_")]
 
-    # 📌 Dynamische kolomnamen op basis van ticker
-    close_col = f"Close_{ticker}"
-    advies_col = "Advies"
-    sam_pct_col = "SAM-%"
-    markt_pct_col = "Markt-%"
+# 📌 Dynamische kolomnamen op basis van ticker
+close_col = f"Close_{ticker}"
+advies_col = "Advies"
+sam_pct_col = "SAM-%"
+markt_pct_col = "Markt-%"
 
     # 🧼 Zet kolommen naar numeriek (voor zekerheid)
     for col in [close_col, sam_pct_col, markt_pct_col]:
