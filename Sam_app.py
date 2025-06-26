@@ -564,10 +564,10 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
             continue
 
     if entry_type is None:
-    if mapped_type == "Beide" or advies == mapped_type:
-        entry_type = advies
-        entry_price = close
-        entry_date = datum
+        if mapped_type == "Beide" or advies == mapped_type:
+            entry_type = advies
+            entry_price = close
+            entry_date = datum
 else:
     if advies != entry_type:
         # Sluit trade (alleen als type overeenkomt met filter)
