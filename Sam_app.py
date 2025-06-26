@@ -625,8 +625,8 @@ else:
 #st.dataframe(pd.DataFrame(trades))
 
 # Debug: toon rendementenlijst
-st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
-st.write("DEBUG: Rendementenlijst:", rendementen)
+#st.write("DEBUG: Aantal rendementen (trades):", len(rendementen))
+#st.write("DEBUG: Rendementenlijst:", rendementen)
 
 sam_rendement, geldig_signalen = bereken_sam_rendement(df_signalen, signaalkeuze)
     
