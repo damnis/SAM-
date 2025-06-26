@@ -483,15 +483,16 @@ df_period = df_period.loc[:, ~df_period.columns.duplicated()]
 #df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
 #df_period = df_period.dropna(subset=["Close"])
 if "Close" in df_period.columns and not df_period["Close"].empty:
+    
 #    df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
 #    df_period = df_period.dropna(subset=["Close"])
 # Controleer of df_period niet leeg is en kolom 'Close' geldig is
-if (
-    isinstance(df_period, pd.DataFrame)
-    and not df_period.empty
-    and "Close" in df_period.columns
-    and isinstance(df_period["Close"], pd.Series)
-):
+    if (
+        isinstance(df_period, pd.DataFrame)
+        and not df_period.empty
+        and "Close" in df_period.columns
+        and isinstance(df_period["Close"], pd.Series)
+        ):
     df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
     df_period = df_period.dropna(subset=["Close"])
 else:
