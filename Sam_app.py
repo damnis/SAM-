@@ -558,7 +558,6 @@ def bereken_sam_rendement(df_signalen, signaal_type):
         close = row["Close"]
 
         if entry_price is None:
-            # Start nieuwe trade als het type overeenkomt met de keuze of met "Beide"
             if (signaal_type == "Koop" and advies == "Kopen") or \
                (signaal_type == "Verkoop" and advies == "Verkopen") or \
                (signaal_type == "Beide" and advies in ["Kopen", "Verkopen"]):
@@ -566,15 +565,12 @@ def bereken_sam_rendement(df_signalen, signaal_type):
                 entry_type = advies
                 entry_date = date
         else:
-            # Sluit de bestaande trade als:
-            # - Tegenadvies komt
-            # - Of als opnieuw hetzelfde advies komt (dwing trade afsluiting en nieuwe start)
             sluit_trade = False
             if (entry_type == "Kopen" and advies == "Verkopen") or \
                (entry_type == "Verkopen" and advies == "Kopen"):
                 sluit_trade = True
             elif advies == entry_type:
-                sluit_trade = True  # Forceer sluiten bij herhaling
+                sluit_trade = True
 
             if sluit_trade:
                 if signaal_type == "Beide" or signaal_type == entry_type:
@@ -591,7 +587,6 @@ def bereken_sam_rendement(df_signalen, signaal_type):
                         "Exit price": close,
                         "Rendement %": round(rendement, 2)
                     })
-                # Start eventueel direct nieuwe trade als advies hetzelfde is
                 if advies == entry_type:
                     entry_price = close
                     entry_date = date
@@ -601,7 +596,9 @@ def bereken_sam_rendement(df_signalen, signaal_type):
                     entry_date = None
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
-    return sam_rendement, trades
+
+    # ➕ RETURN alles wat je nodig hebt
+    return sam_rendement, trades, rendementen
 
     # 🐛 DEBUG: Trades printen als tabel
     if trades:
