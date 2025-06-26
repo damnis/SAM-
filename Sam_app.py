@@ -367,7 +367,7 @@ st.subheader("Laatste signalen en rendement")
 kolommen = ["Close", "Advies", "SAM", "Trend", "Markt-%", "SAM-%"]
 #tabel = df[kolommen].dropna().tail(30).round(3).copy()
 tabel = df[kolommen].dropna().copy()
-tabel = tabel.sort_index(ascending=False).head(100)
+tabel = tabel.sort_index(ascending=False).head(20)
 
 # Datumkolom aanmaken vanuit index
 if not isinstance(tabel.index, pd.DatetimeIndex):
@@ -540,10 +540,10 @@ st.dataframe(df_signalen[["Advies", "Close"]].head(6))
 
 # TEST: handmatig test-signalen invoegen
 # Deze override vervangt df_signalen tijdelijk
-df_signalen = pd.DataFrame({
-    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
-    "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
-}, index=pd.date_range("2025-01-01", periods=11))
+#df_signalen = pd.DataFrame({
+#    "Advies": ["Kopen", "Kopen", "Verkopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Verkopen", "Kopen", "Kopen", "Verkopen"],
+#    "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
+#}, index=pd.date_range("2025-01-01", periods=11))
 
 # --- SAM-rendement berekening ---
 # --- SAM-rendement berekening ---
