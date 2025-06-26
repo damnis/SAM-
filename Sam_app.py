@@ -537,7 +537,7 @@ else:  # Beide
 #st.dataframe(df_signalen[["Advies", "Close"]].head(10))
 st.write("Aantal signalen in df_signalen:", len(df_signalen))
 st.dataframe(df_signalen[["Advies", "Close"]].head(6))
-
+st.write("Unieke waarden in Advies:", df_signalen["Advies"].unique())
 # TEST: handmatig test-signalen invoegen
 # Deze override vervangt df_signalen tijdelijk
 #df_signalen = pd.DataFrame({
