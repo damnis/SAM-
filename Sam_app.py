@@ -539,7 +539,6 @@ elif signaalkeuze == "Verkoop":
 
 # 🧠 6. SAM-berekening
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
-def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     rendementen = []
     trades = []
     entry_price = None
