@@ -608,7 +608,7 @@ for _, row in df_period.iterrows():
                 vorige_signaal = advies
 
 sam_rendement = sum(rendementen)
-    return markt_rendement, sam_rendement, rendementen
+return markt_rendement, sam_rendement, rendementen
 
 
 # 🚀 6. Berekening uitvoeren
