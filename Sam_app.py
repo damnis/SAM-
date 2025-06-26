@@ -549,66 +549,66 @@ advies_col = "Advies"
 sam_pct_col = "SAM-%"
 markt_pct_col = "Markt-%"
 
-    # 🧼 Zet kolommen naar numeriek (voor zekerheid)
-    for col in [close_col, sam_pct_col, markt_pct_col]:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
+# 🧼 Zet kolommen naar numeriek (voor zekerheid)
+for col in [close_col, sam_pct_col, markt_pct_col]:
+    if col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
-    # 🗓️ Filter op periode
-    df_period = df[(df["Date"] >= startdatum) & (df["Date"] <= einddatum)].copy()
+# 🗓️ Filter op periode
+df_period = df[(df["Date"] >= startdatum) & (df["Date"] <= einddatum)].copy()
 
-    if df_period.empty:
-        return None, None, []
+if df_period.empty:
+    return None, None, []
 
-    # 📈 Markt (Buy & Hold) rendement
-    eerste_close = df_period.iloc[0][close_col]
-    laatste_close = df_period.iloc[-1][close_col]
-    markt_rendement = ((laatste_close - eerste_close) / eerste_close) * 100
+# 📈 Markt (Buy & Hold) rendement
+eerste_close = df_period.iloc[0][close_col]
+laatste_close = df_period.iloc[-1][close_col]
+markt_rendement = ((laatste_close - eerste_close) / eerste_close) * 100
 
-    # 📊 SAM-rendement berekening
-    rendementen = []
-    actief = False
-    entry = None
-    vorige_signaal = None
+# 📊 SAM-rendement berekening
+rendementen = []
+actief = False
+entry = None
+vorige_signaal = None
 
-    for _, row in df_period.iterrows():
-        advies = row[advies_col]
-        prijs = row[close_col]
+for _, row in df_period.iterrows():
+    advies = row[advies_col]
+    prijs = row[close_col]
 
-        if signalen_optie == "Koop":
-            if advies == "Kopen" and not actief:
+    if signalen_optie == "Koop":
+        if advies == "Kopen" and not actief:
+            entry = prijs
+            actief = True
+            vorige_signaal = "Kopen"
+        elif advies == "Verkopen" and actief and vorige_signaal == "Kopen":
+            rendementen.append((prijs - entry) / entry * 100)
+            actief = False
+
+    elif signalen_optie == "Verkoop":
+        if advies == "Verkopen" and not actief:
+            entry = prijs
+            actief = True
+            vorige_signaal = "Verkopen"
+        elif advies == "Kopen" and actief and vorige_signaal == "Verkopen":
+            rendementen.append((entry - prijs) / entry * 100)
+            actief = False
+
+    elif signalen_optie == "Beide":
+        if advies in ["Kopen", "Verkopen"]:
+            if not actief:
                 entry = prijs
                 actief = True
-                vorige_signaal = "Kopen"
-            elif advies == "Verkopen" and actief and vorige_signaal == "Kopen":
-                rendementen.append((prijs - entry) / entry * 100)
-                actief = False
-
-        elif signalen_optie == "Verkoop":
-            if advies == "Verkopen" and not actief:
+                vorige_signaal = advies
+            elif actief and advies != vorige_signaal:
+                if vorige_signaal == "Kopen":
+                    rendementen.append((prijs - entry) / entry * 100)
+                else:
+                    rendementen.append((entry - prijs) / entry * 100)
                 entry = prijs
-                actief = True
-                vorige_signaal = "Verkopen"
-            elif advies == "Kopen" and actief and vorige_signaal == "Verkopen":
-                rendementen.append((entry - prijs) / entry * 100)
-                actief = False
+                vorige_signaal = advies
 
-        elif signalen_optie == "Beide":
-            if advies in ["Kopen", "Verkopen"]:
-                if not actief:
-                    entry = prijs
-                    actief = True
-                    vorige_signaal = advies
-                elif actief and advies != vorige_signaal:
-                    if vorige_signaal == "Kopen":
-                        rendementen.append((prijs - entry) / entry * 100)
-                    else:
-                        rendementen.append((entry - prijs) / entry * 100)
-                    entry = prijs
-                    vorige_signaal = advies
-
-    sam_rendement = sum(rendementen)
-    return markt_rendement, sam_rendement, rendementen
+sam_rendement = sum(rendementen)
+return markt_rendement, sam_rendement, rendementen
 
 
 # 🚀 6. Berekening uitvoeren
