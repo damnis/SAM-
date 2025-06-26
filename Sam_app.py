@@ -486,11 +486,11 @@ if isinstance(df_period.columns, pd.MultiIndex):
 close_col = next((col for col in df_period.columns if col.lower().startswith("close")), None)
 
 # ðŸ” Debug
-st.write("âœ… DEBUG: df_period shape:", df_period.shape)
+#st.write("âœ… DEBUG: df_period shape:", df_period.shape)
 #st.write("âœ… DEBUG: Columns in df_period:", df_period.columns.tolist())
-st.write("âœ… DEBUG: Gekozen kolom voor 'Close':", close_col)
-st.write("âœ… DEBUG: Eerste rijen df_period:")
-st.dataframe(df_period.head(20))
+#st.write("âœ… DEBUG: Gekozen kolom voor 'Close':", close_col)
+#st.write("âœ… DEBUG: Eerste rijen df_period:")
+#st.dataframe(df_period.head(20))
 
 # â›‘ï¸ Verwerk 'Close'-data
 df_valid = pd.Series([], dtype=float)
@@ -503,7 +503,7 @@ else:
     st.warning("â— Geen geldige 'Close'-kolom gevonden in de data.")
     df_period = pd.DataFrame(columns=df.columns)
 
-st.write("âœ… DEBUG: Lengte df_valid:", len(df_valid))
+#st.write("âœ… DEBUG: Lengte df_valid:", len(df_valid))
 #st.write("âœ… DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
 
 # ðŸ“Š 4. Marktrendement
@@ -596,11 +596,11 @@ else:
     col2.metric("ðŸ“ˆ SAM-rendement", "n.v.t.")
 
 # ðŸ§ª Debug
-st.write("ðŸ” DEBUG - Signaalkeuze:", signaalkeuze)
-st.write("ðŸ” Aantal signalen:", len(df_signalen))
-st.write("ðŸ” Unieke adviezen:", df_signalen[advies_col].unique())
+#st.write("ðŸ” DEBUG - Signaalkeuze:", signaalkeuze)
+#st.write("ðŸ” Aantal signalen:", len(df_signalen))
+#st.write("ðŸ” Unieke adviezen:", df_signalen[advies_col].unique())
 st.write("ðŸ” Aantal trades:", len(trades))
-st.write("ðŸ” Rendementenlijst:", rendementen)
+#st.write("ðŸ” Rendementenlijst:", rendementen)
 st.dataframe(pd.DataFrame(trades))
 
 
