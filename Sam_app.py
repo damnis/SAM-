@@ -498,13 +498,22 @@ st.write("✅ DEBUG: Eerste rijen df_period:")
 st.dataframe(df_period.head(20))
 
 # 💡 Zorg dat Close numeriek is
-# 🛠️ Fix MultiIndex: kies kolom exact uit df_period
+# 🔍 Zoek de juiste 'Close'-kolom
 if isinstance(df_period.columns, pd.MultiIndex):
-    close_col = [col for col in df_period.columns if col[0] == "Close"]
-    if close_col:
-        df_period["Close"] = df_period[close_col[0]]
+    # Kies de kolom waarvan het eerste element 'Close' is
+    close_cols = [col for col in df_period.columns if col[0] == "Close"]
+    if close_cols:
+        df_period["Close"] = df_period[close_cols[0]]
     else:
-        st.error("❗ Geen geldige 'Close'-kolom gevonden.")
+        st.error("❗ Geen kolom gevonden die begint met 'Close' in df_period.")
+        st.stop()
+else:
+    # Enkelvoudige kolomnamen
+    close_cols = [col for col in df_period.columns if str(col).startswith("Close")]
+    if close_cols:
+        df_period["Close"] = df_period[close_cols[0]]
+    else:
+        st.error("❗ Geen kolom gevonden die begint met 'Close' in df_period (enkelvoudige structuur).")
         st.stop()
         
 df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
