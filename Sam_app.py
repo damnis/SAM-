@@ -591,7 +591,8 @@ def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
     sam_rendement = sum(rendementen)
 
     return markt_rendement, sam_rendement, rendementen
- markt_rendement, sam_rendement, rendementen = vergelijk_rendement(
+
+markt_rendement, sam_rendement, rendementen = vergelijk_rendement(
     df=df_signalen,
     startdatum=gekozen_startdatum,
     einddatum=gekozen_einddatum,
