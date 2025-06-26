@@ -619,7 +619,6 @@ def bereken_sam_rendement(df_signalen, signaal_type):
     return sam_rendement, len(rendementen)
     sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
-#st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
 if isinstance(sam_rendement, (int, float)):
     st.write("📈 SAM-rendement:", f"{sam_rendement:.2f}%")
 else:
