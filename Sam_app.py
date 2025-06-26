@@ -463,8 +463,13 @@ end_date = st.date_input("Einddatum analyse", default_end)
 
 # --- Signaalkeuze ---
 signaalkeuze = st.selectbox(
-    "Welke signalen tellen mee voor SAM-rendement?", ["Koop", "Verkoop", "Beide"]
+    "Welke signalen tellen mee voor SAM-rendement?",
+    options=["Beide", "Koop", "Verkoop"],
+    index=0
 )
+#signaalkeuze = st.selectbox(
+#    "Welke signalen tellen mee voor SAM-rendement?", ["Koop", "Verkoop", "Beide"]
+#)
 
 # --- Filter op periode ---
 df_period = df.copy()
