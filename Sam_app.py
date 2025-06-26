@@ -485,38 +485,7 @@ if not df_period.empty:
         if koers_start != 0.0:
             marktrendement = ((koers_eind - koers_start) / koers_start) * 100
         
-#    st.write("Startdatum gekozen:", start_date)
-#    st.write("Einddatum gekozen:", end_date)
-#    st.write("Beschikbare data in df_period:", df_period.index.min(), "t/m", df_period.index.max())
-#    st.write("Aantal regels in df_period:", len(df_period))
-#    st.write("Eerste koers (Close):", df_period["Close"].iloc[0] if not df_period.empty else "n.v.t.")
-#    st.write("Laatste koers (Close):", df_period["Close"].iloc[-1] if not df_period.empty else "n.v.t.")
-#    st.write("Eerste koers (Close):", koers_start)
-#    st.write("Laatste koers (Close):", koers_eind)
-    #if not df_period.empty and df_period["Close"].notna().all():
-#    close_notna = df_period["Close"].notna().all()
-#if not df_period.empty and close_notna:
-#    koers_start = df_period["Close"].iloc[0]
-#    koers_eind = df_period["Close"].iloc[-1]
-#    marktrendement = ((koers_eind - koers_start) / koers_start) * 100
-#else:
-#    marktrendement = None
-#    try:
-#        koers_start = df_period["Close"].iloc[0]
-#        koers_eind = df_period["Close"].iloc[-1]
- #       marktrendement = ((koers_eind - koers_start) / koers_start) * 100
- #   except Exception:
-#        marktrendement = None
-#    else:
-#        st.warning("Geen geldige koersdata beschikbaar voor marktrendement.")
-#    try:
-#        koers_start = df_period["Close"].iloc[0]
-#        koers_eind = df_period["Close"].iloc[-1]
-#        marktrendement = ((koers_eind - koers_start) / koers_start) * 100
-#    except Exception:
-#        marktrendement = None
-
-# # Verwijder dubbele kolommen in df_period
+#    kolommen in df_period
 df_period = df_period.loc[:, ~df_period.columns.duplicated()]
 # --- SAM-signalen selecteren en filteren ---
 df_signalen = df_period[df_period["Advies"].notna()].copy()
@@ -646,7 +615,10 @@ st.dataframe(pd.DataFrame(trades))
 # 🔍 Debug-output
 st.write("🔍 DEBUG: Aantal trades:", len(trades))
 st.write("🔍 DEBUG: Rendementenlijst:", rendementen)
-
+# --- Debug: controleer signaaldata ---
+st.write("Unieke waarden in kolom 'Advies':", df_signalen["Advies"].unique())
+st.write("Aantal regels in df_signalen:", len(df_signalen))
+st.dataframe(df_signalen.head(10))
 # --- Resultaten tonen ---
 st.subheader("📈 Vergelijking van rendementen")
 col1, col2 = st.columns(2)
