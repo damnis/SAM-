@@ -502,7 +502,7 @@ st.write("📋 DEBUG: Kolomnamen in df_period:")
 st.write(df_period.columns.tolist())
 
 # 🔢 Zorg dat 'Close' kolom numeriek is
-df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
+#df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
 df_period = df_period.dropna(subset=["Close"])
 df_valid = df_period["Close"].dropna()
 st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
