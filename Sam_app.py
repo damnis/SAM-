@@ -487,7 +487,7 @@ close_col = next((col for col in df_period.columns if col.lower().startswith("cl
 
 # 🔍 Debug
 st.write("✅ DEBUG: df_period shape:", df_period.shape)
-st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
+#st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
 st.write("✅ DEBUG: Gekozen kolom voor 'Close':", close_col)
 st.write("✅ DEBUG: Eerste rijen df_period:")
 st.dataframe(df_period.head(20))
