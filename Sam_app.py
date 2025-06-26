@@ -507,18 +507,8 @@ st.write(df_period.columns.tolist())
 #df_valid = df_period["Close"].dropna()
 #st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
 
-# 📊 5. Marktrendement
-marktrendement = None
-if not df_period.empty and df_period["Close"].count() >= 2:
-    koers_start = df_period["Close"].iloc[0]
-    koers_eind = df_period["Close"].iloc[-1]
-    if koers_start != 0.0:
-        marktrendement = ((koers_eind - koers_start) / koers_start) * 100
+# 🧠 5. SAM Backtest & Marktvergelijk
 
-# ✂️ 6. Filter op geldige adviezen (zonder op type te filteren)
-df_signalen = df_period[df_period["Advies"].isin(["Kopen", "Verkopen"])].copy()
-
-# 🧠 7. Berekening SAM-rendement
 # 🧮 Functie: Vergelijk SAM-rendement met markt (Buy & Hold)
 def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
     # 👉 Flatten eventueel MultiIndex kolommen
@@ -530,7 +520,7 @@ def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
     sam_pct_col = "SAM-%"
     markt_pct_col = "Markt-%"
 
-    # 🧼 Naar numeriek (alleen als kolommen bestaan)
+    # 🧼 Zet kolommen naar numeriek (voor zekerheid)
     for col in [close_col, sam_pct_col, markt_pct_col]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
@@ -539,20 +529,20 @@ def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
     df_period = df[(df["Date"] >= startdatum) & (df["Date"] <= einddatum)].copy()
 
     if df_period.empty:
-        return "⚠️ Geen data in de opgegeven periode.", None, None
+        return None, None, []
 
     # 📈 Markt (Buy & Hold) rendement
     eerste_close = df_period.iloc[0][close_col]
     laatste_close = df_period.iloc[-1][close_col]
     markt_rendement = ((laatste_close - eerste_close) / eerste_close) * 100
 
-    # 📊 SAM-rendement berekening op basis van signalen
+    # 📊 SAM-rendement berekening
     rendementen = []
     actief = False
     entry = None
     vorige_signaal = None
 
-    for index, row in df_period.iterrows():
+    for _, row in df_period.iterrows():
         advies = row[advies_col]
         prijs = row[close_col]
 
@@ -589,39 +579,37 @@ def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
                     vorige_signaal = advies
 
     sam_rendement = sum(rendementen)
-
     return markt_rendement, sam_rendement, rendementen
 
+
+# 🚀 6. Berekening uitvoeren
 markt_rendement, sam_rendement, rendementen = vergelijk_rendement(
-    df=df_signalen,
+    df=df,  # Gebruik hier het volledige DataFrame met alle kolommen
     startdatum=gekozen_startdatum,
     einddatum=gekozen_einddatum,
     ticker=selected_ticker,
     signalen_optie=signaalkeuze
- )   
-#sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
+)
 
-# 📈 8. Resultaten
+# 📈 7. Resultaten tonen
 col1, col2 = st.columns(2)
 
-if isinstance(marktrendement, (int, float)):
-    col1.metric("Marktrendement (Buy & Hold)", f"{marktrendement:+.2f}%")
+if isinstance(markt_rendement, (int, float)):
+    col1.metric("📊 Marktrendement (Buy & Hold)", f"{markt_rendement:+.2f}%")
 else:
-    col1.metric("Marktrendement (Buy & Hold)", "n.v.t.")
+    col1.metric("📊 Marktrendement (Buy & Hold)", "n.v.t.")
 
 if isinstance(sam_rendement, (int, float)):
-    col2.metric("📈 SAM-rendement", f"{sam_rendement:+.2f}%")
-    st.caption(f"Aantal afgeronde trades: **{len(trades)}** binnen deze periode.")
+    col2.metric("🤖 SAM-rendement", f"{sam_rendement:+.2f}%")
+    st.caption(f"Aantal afgeronde trades: **{len(rendementen)}** binnen deze periode.")
 else:
-    col2.metric("📈 SAM-rendement", "n.v.t.")
+    col2.metric("🤖 SAM-rendement", "n.v.t.")
 
-# 🧪 DEBUG
+# 🧪 8. DEBUG info (optioneel)
 st.write("🔍 DEBUG - Signaalkeuze:", signaalkeuze)
-st.write("🔍 Aantal signalen:", len(df_signalen))
-st.write("🔍 Unieke adviezen:", df_signalen["Advies"].unique())
-st.write("🔍 Aantal trades:", len(trades))
+st.write("🔍 Aantal trades:", len(rendementen))
 st.write("🔍 Rendementenlijst:", rendementen)
-st.dataframe(pd.DataFrame(trades))
+st.dataframe(pd.DataFrame(rendementen, columns=["% Rendement"]))
 
 
 
