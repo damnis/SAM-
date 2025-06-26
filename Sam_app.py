@@ -479,14 +479,19 @@ df_period = df.loc[
 ].copy()
 
 # 🔍 Detecteer juiste Close-kolom
-close_cols = [col for col in df_period.columns if str(col).startswith("Close")]
+# 🔍 Detecteer juiste Close-kolom (ook bij MultiIndex)
+if isinstance(df_period.columns, pd.MultiIndex):
+    close_cols = [col for col in df_period.columns if col[0] == "Close"]
+else:
+    close_cols = [col for col in df_period.columns if str(col).startswith("Close")]
+
 if close_cols:
     df_period = df_period.rename(columns={close_cols[0]: "Close"})
     st.write("✅ DEBUG: Gekozen kolom voor 'Close':", close_cols[0])
 else:
     st.error("❗ Geen kolom gevonden die begint met 'Close'")
     st.stop()
-
+    
 # 📊 DEBUG
 st.write("✅ DEBUG: df_period shape:", df_period.shape)
 st.write("✅ DEBUG: Eerste rijen df_period:")
