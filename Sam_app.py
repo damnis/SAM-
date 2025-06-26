@@ -447,7 +447,7 @@ html += "</tbody></table>"
 #Weergave in Streamlit
 st.markdown(html, unsafe_allow_html=True)
 
-#--- Toevoeging: Backtestfunctie ---
+##--- Toevoeging: Backtestfunctie ---
 
 from datetime import date
 import pandas as pd
@@ -478,52 +478,39 @@ df_period = df.loc[
     (df.index.date >= start_date) & (df.index.date <= end_date)
 ].copy()
 
-# --- Check inhoud df_period ---
+# 🧠 Detecteer juiste kolomnamen bij MultiIndex
+if isinstance(df_period.columns, pd.MultiIndex):
+    flat_columns = ["_".join([str(level) for level in col if str(level) != ""]) for col in df_period.columns]
+    df_period.columns = flat_columns
+
+# --- Debug ---
 st.write("✅ DEBUG: df_period shape:", df_period.shape)
 st.write("✅ DEBUG: Columns in df_period:", df_period.columns.tolist())
 st.write("✅ DEBUG: Eerste rijen df_period:")
 st.dataframe(df_period.head())
 
-# --- Ensure Close is numeric ---
-df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
+# 🔍 Controleer op geldige koersdata
+if "Close" in df_period.columns:
+    df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
+    df_valid = df_period["Close"].dropna()
+else:
+    df_valid = pd.Series([], dtype=float)
 
-# --- Check valid close data ---
-df_valid = df_period["Close"].dropna()
 st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
 st.write("✅ DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
 
-# 🧹 Opschonen kolommen en check types
-df_period = df_period.loc[:, ~df_period.columns.duplicated()]
-#df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
-#df_period = df_period.dropna(subset=["Close"])
-if "Close" in df_period.columns and not df_period["Close"].empty:
-    
-#    df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
-#    df_period = df_period.dropna(subset=["Close"])
-# Controleer of df_period niet leeg is en kolom 'Close' geldig is
-    if (
-        isinstance(df_period, pd.DataFrame)
-        and not df_period.empty
-        and "Close" in df_period.columns
-        and isinstance(df_period["Close"], pd.Series)
-        ):
-        df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
-        df_period = df_period.dropna(subset=["Close"])
-    else:
-        st.warning("❗ Geen geldige koersdata gevonden binnen de gekozen periode.")
-        df_period = pd.DataFrame(columns=df.columns)  # lege fallback
-#else:
-#    df_period["Close"] = pd.Series(dtype=float)  # lege kolom met float-type
+# 🧹 Opschonen kolommen en rows zonder Close
+df_period = df_period.dropna(subset=["Close"])
 
 # 📊 4. Marktrendement
 marktrendement = None
-if not df_period.empty and df_period["Close"].count() >= 2:
-    koers_start = df_period["Close"].iloc[0]
-    koers_eind = df_period["Close"].iloc[-1]
+if not df_period.empty and len(df_valid) >= 2:
+    koers_start = df_valid.iloc[0]
+    koers_eind = df_valid.iloc[-1]
     if koers_start != 0.0:
         marktrendement = ((koers_eind - koers_start) / koers_start) * 100
 
-# ✂️ 5. Filter op geldige adviezen
+# ✂️ 5. Signalen selecteren
 df_signalen = df_period[df_period["Advies"].isin(["Kopen", "Verkopen"])].copy()
 
 if signaalkeuze == "Koop":
@@ -537,7 +524,7 @@ elif signaalkeuze == "Verkoop":
 #    "Close": [100, 105, 104, 102, 98, 100, 105, 104, 102, 98, 95]
 #}, index=pd.date_range("2025-01-01", periods=11))
 
-# 🧠 6. SAM-berekening
+# 🧠 6. SAM-rendement berekening
 def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
     rendementen = []
     trades = []
@@ -602,13 +589,17 @@ if isinstance(sam_rendement, (int, float)):
 else:
     col2.metric("📈 SAM-rendement", "n.v.t.")
 
-# 🧪 Debug (optioneel zichtbaar maken via checkbox?)
+# 🧪 Debug
 st.write("🔍 DEBUG - Signaalkeuze:", signaalkeuze)
 st.write("🔍 Aantal signalen:", len(df_signalen))
 st.write("🔍 Unieke adviezen:", df_signalen["Advies"].unique())
 st.write("🔍 Aantal trades:", len(trades))
 st.write("🔍 Rendementenlijst:", rendementen)
 st.dataframe(pd.DataFrame(trades))
+
+
+
+
 
 
 
