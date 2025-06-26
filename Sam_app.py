@@ -534,7 +534,14 @@ signaalkeuze = st.radio(
 # 🧮 5.b Functie: Vergelijk SAM-rendement met markt (Buy & Hold)
 def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
     # 👉 Flatten eventueel MultiIndex kolommen
+  #  df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
+    #df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
+    # 🧼 Kolomnamen flat maken (1x doen na aanmaak df)
+if isinstance(df.columns, pd.MultiIndex):
     df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
+
+# 🎯 Tickerlijst opnieuw afleiden na flatten
+alle_tickers = [col.split("_")[1] for col in df.columns if col.startswith("Close_")]
 
     # 📌 Dynamische kolomnamen op basis van ticker
     close_col = f"Close_{ticker}"
