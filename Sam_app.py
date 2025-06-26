@@ -504,7 +504,7 @@ else:
     df_period = pd.DataFrame(columns=df.columns)
 
 st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
-st.write("✅ DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
+#st.write("✅ DEBUG: Eerste 5 waarden in df_valid:", df_valid.head())
 
 # 📊 4. Marktrendement
 marktrendement = None
