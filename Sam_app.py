@@ -498,23 +498,14 @@ st.write("✅ DEBUG: Eerste rijen df_period:")
 st.dataframe(df_period.head(20))
 
 # 💡 Zorg dat Close numeriek is
-# 🔍 Zoek de juiste 'Close'-kolom
-if isinstance(df_period.columns, pd.MultiIndex):
-    # Kies de kolom waarvan het eerste element 'Close' is
-    close_cols = [col for col in df_period.columns if col[0] == "Close"]
-    if close_cols:
-        df_period["Close"] = df_period[close_cols[0]]
-    else:
-        st.error("❗ Geen kolom gevonden die begint met 'Close' in df_period.")
-        st.stop()
+# 🔍 Zorg voor een correcte 'Close'-kolom
+close_col_candidates = [col for col in df_period.columns if str(col).startswith("Close")]
+if close_col_candidates:
+    # Kies de eerste geldige Close-kolom en zet die om naar een Series met naam "Close"
+    df_period["Close"] = df_period[close_col_candidates[0]].squeeze()
 else:
-    # Enkelvoudige kolomnamen
-    close_cols = [col for col in df_period.columns if str(col).startswith("Close")]
-    if close_cols:
-        df_period["Close"] = df_period[close_cols[0]]
-    else:
-        st.error("❗ Geen kolom gevonden die begint met 'Close' in df_period (enkelvoudige structuur).")
-        st.stop()
+    st.error("❗ Geen kolom gevonden die begint met 'Close' in df_period.")
+    st.stop()
         
 df_period["Close"] = pd.to_numeric(df_period["Close"], errors="coerce")
 df_period = df_period.dropna(subset=["Close"])
