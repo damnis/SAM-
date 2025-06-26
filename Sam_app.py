@@ -467,9 +467,6 @@ signaalkeuze = st.selectbox(
     options=["Beide", "Koop", "Verkoop"],
     index=0
 )
-#signaalkeuze = st.selectbox(
-#    "Welke signalen tellen mee voor SAM-rendement?", ["Koop", "Verkoop", "Beide"]
-#)
 
 # --- Filter op periode ---
 df_period = df.copy()
@@ -566,38 +563,41 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
         if not isinstance(advies, str) or advies not in ["Kopen", "Verkopen"]:
             continue
 
-        if entry_type is None:
-            if mapped_type == "Beide" or advies == mapped_type:
-                entry_type = advies
-                entry_price = close
-                entry_date = datum
+    if entry_type is None:
+    if mapped_type == "Beide" or advies == mapped_type:
+        entry_type = advies
+        entry_price = close
+        entry_date = datum
+else:
+    if advies != entry_type:
+        # Sluit trade (alleen als type overeenkomt met filter)
+        if mapped_type == "Beide" or entry_type == mapped_type:
+            if entry_type == "Kopen":
+                rendement = (close - entry_price) / entry_price * 100
+            else:
+                rendement = (entry_price - close) / entry_price * 100
+
+            rendementen.append(rendement)
+            trades.append({
+                "Type": entry_type,
+                "Open datum": entry_date.strftime("%d-%m-%Y"),
+                "Open prijs": entry_price,
+                "Sluit datum": datum.strftime("%d-%m-%Y"),
+                "Sluit prijs": close,
+                "Rendement (%)": round(rendement, 2)
+            })
+
+        # Altijd nieuwe entry starten als het advies past
+        if mapped_type == "Beide" or advies == mapped_type:
+            entry_type = advies
+            entry_price = close
+            entry_date = datum
         else:
-            if advies != entry_type and (mapped_type == "Beide" or entry_type == mapped_type):
-                # Trade sluiten
-                if entry_type == "Kopen":
-                    rendement = (close - entry_price) / entry_price * 100
-                else:
-                    rendement = (entry_price - close) / entry_price * 100
+            entry_type = None
+            entry_price = None
+            entry_date = None
 
-                rendementen.append(rendement)
-                trades.append({
-                    "Type": entry_type,
-                    "Open datum": entry_date.strftime("%d-%m-%Y"),
-                    "Open prijs": entry_price,
-                    "Sluit datum": datum.strftime("%d-%m-%Y"),
-                    "Sluit prijs": close,
-                    "Rendement (%)": round(rendement, 2)
-                })
-
-                # Nieuwe entry?
-                if mapped_type == "Beide" or advies == mapped_type:
-                    entry_type = advies
-                    entry_price = close
-                    entry_date = datum
-                else:
-                    entry_type = None
-                    entry_price = None
-                    entry_date = None
+    
 
     sam_rendement = sum(rendementen) if rendementen else 0.0
     return sam_rendement, trades, rendementen
