@@ -454,15 +454,18 @@ import streamlit as st
 df = df.copy()
 df.index = pd.to_datetime(df.index)
 
-#  1. Datumkeuze
+# 📅 1. Datumkeuze
 st.subheader("Vergelijk Marktrendement en SAM-rendement")
 
-default_start = df.index.min().date()
+# ➕ Aangepaste startdatum: 1 januari van het huidige jaar
+current_year = date.today().year
+default_start = date(current_year, 1, 1)
+
+# Einde = laatste datum in de dataset
 default_end = df.index.max().date()
 
 start_date = st.date_input("Startdatum analyse", default_start)
 end_date = st.date_input("Einddatum analyse", default_end)
-
 # 2. Signaalkeuze
 signaalkeuze = "Beide"
 #signaalkeuze = st.selectbox(
