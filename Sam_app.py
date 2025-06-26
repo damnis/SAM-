@@ -507,19 +507,31 @@ st.write(df_period.columns.tolist())
 #df_valid = df_period["Close"].dropna()
 #st.write("✅ DEBUG: Lengte df_valid:", len(df_valid))
 
-# 🧠 5. SAM Backtest & Marktvergelijk
-gekozen_startdatum = st.date_input("Startdatum analyse", value=df["Date"].min().date())
-gekozen_einddatum = st.date_input("Einddatum analyse", value=df["Date"].max().date())
+# 🧠 5.a SAM Backtest & Marktvergelijk
+# 📌 Selectie: Ticker en periode
+alle_tickers = [col[1] for col in df.columns if isinstance(col, tuple) and col[0] == "Close"]
+selected_ticker = st.selectbox("Selecteer een ticker:", sorted(alle_tickers))
 
-signaalkeuze = st.selectbox(
+# 📅 Periodekeuze (gebaseerd op data in df)
+beschikbare_data = pd.to_datetime(df["Date"])
+min_datum = beschikbare_data.min().date()
+max_datum = beschikbare_data.max().date()
+
+gekozen_startdatum = st.date_input("Startdatum analyse", value=min_datum, min_value=min_datum, max_value=max_datum)
+gekozen_einddatum = st.date_input("Einddatum analyse", value=max_datum, min_value=min_datum, max_value=max_datum)
+
+if gekozen_startdatum > gekozen_einddatum:
+    st.error("Startdatum mag niet later zijn dan de einddatum.")
+
+# ⚙️ Signaalopties
+signaalkeuze = st.radio(
     "Welke signalen tellen mee voor SAM-rendement?",
     options=["Koop", "Verkoop", "Beide"],
-    index=2  # standaard: Beide
+    index=2,  # standaard 'Beide'
+    horizontal=True
 )
 
-selected_ticker = ticker  # of gebruik jouw variabele met de gekozen tickernaam
-
-# 🧮 Functie: Vergelijk SAM-rendement met markt (Buy & Hold)
+# 🧮 5.b Functie: Vergelijk SAM-rendement met markt (Buy & Hold)
 def vergelijk_rendement(df, startdatum, einddatum, ticker, signalen_optie):
     # 👉 Flatten eventueel MultiIndex kolommen
     df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
