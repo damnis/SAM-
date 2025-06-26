@@ -568,14 +568,15 @@ def bereken_sam_rendement(df_signalen, signaal_type="Beide"):
             entry_type = advies
             entry_price = close
             entry_date = datum
-else:
-    if advies != entry_type:
+        else:
+            if advies != entry_type:
+                
         # Sluit trade (alleen als type overeenkomt met filter)
-        if mapped_type == "Beide" or entry_type == mapped_type:
-            if entry_type == "Kopen":
-                rendement = (close - entry_price) / entry_price * 100
-            else:
-                rendement = (entry_price - close) / entry_price * 100
+                if mapped_type == "Beide" or entry_type == mapped_type:
+                    if entry_type == "Kopen":
+                        rendement = (close - entry_price) / entry_price * 100
+                    else:
+                        rendement = (entry_price - close) / entry_price * 100
 
             rendementen.append(rendement)
             trades.append({
