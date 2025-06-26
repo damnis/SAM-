@@ -535,7 +535,7 @@ st.write("🔎 DEBUG - Aantal signalen in df_signalen:", len(df_signalen))
 st.write("🔎 DEBUG - Unieke waarden in Advies:", df_signalen["Advies"].unique())
 
 # --- SAM-rendement berekenen ---
-sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
+#sam_rendement, trades, rendementen = bereken_sam_rendement(df_signalen, signaalkeuze)
 
 # 📈 Toon SAM-resultaten
 if isinstance(sam_rendement, (int, float)):
