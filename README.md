@@ -1,2 +1,1 @@
-# SAM-
-SAM indicator 
+# SAM-app-v1.2
